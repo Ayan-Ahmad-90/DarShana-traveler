@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, RefreshCw, MapPin, Loader2 } from 'lucide-react';
+import { Camera, Upload, RefreshCw, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 
@@ -10,7 +10,7 @@ import jsPDF from 'jspdf';
 
 
 // Mock payment: always success after short delay
-async function makePayment(amount: number): Promise<void> {
+async function makePayment(_amount: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 1500));
 }
 
@@ -635,7 +635,7 @@ const DESTINATIONS: Destination[] = [
         // Manual multi-step form flow preserved
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-stone-100">
           <div className="flex justify-center gap-2 mb-6">
-            {STEPS.slice(0,-1).map((s, i) => (
+            {STEPS.slice(0,-1).map((_, i) => (
               <div key={i} className={`w-3 h-3 rounded-full ${step===i?'bg-teal-500':'bg-gray-300'}`}></div>
             ))}
           </div>

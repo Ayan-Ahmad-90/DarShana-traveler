@@ -12,6 +12,7 @@ import Festivals from "./pages/Festivals";
 import Sustainable from "./pages/Sustainable";
 import Assistant from "./pages/Assistant";
 import Register from "./pages/Register";
+// import SignIn from "./pages/SignIn";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -39,14 +40,15 @@ const App: React.FC = () => {
         {/* Page Content */}
         <main className="flex-grow pt-20 sm:pt-24">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/mood" element={<MoodAnalyzer />} />
-            <Route path="/travelhub" element={<TravelHub />} /> {/* ⭐ Fixed */}
-            <Route path="/festivals" element={<Festivals />} />
-            <Route path="/sustainable" element={<Sustainable />} />
-            <Route path="/assistant" element={<Assistant />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
+  <Route path="/" element={<Home />} />
+  <Route path="/mood" element={<MoodAnalyzer />} />
+  <Route path="/travelhub" element={<TravelHub />} />
+  <Route path="/festivals" element={<Festivals />} />
+  <Route path="/sustainable" element={<Sustainable />} />
+  <Route path="/assistant" element={<Assistant />} />
+  <Route path="/register" element={<Register />} />
+  {/* <Route path="/signin" element={<SignIn />} />   */}
+</Routes>
         </main>
 
         {/* Footer */}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plane, Train, Ship, Bike, Car, Search, MapPin, Rocket } from "lucide-react";
 
 const TravelHub = () => {
@@ -13,7 +13,7 @@ const TravelHub = () => {
     { id: "bike", label: "Bike & Scooty Rentals", icon: Bike },
   ];
 
-  const bookingAPI = {
+  const bookingAPI: Record<string, string> = {
     flight: "https://api.flightbooking.com/v1/search",
     train: "https://indianrail.gov/api/search",
     cruise: "https://globalcruise.com/api/find",
