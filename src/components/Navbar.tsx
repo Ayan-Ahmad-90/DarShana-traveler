@@ -21,9 +21,9 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-stone-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-stone-100 m-0 p-0">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 m-0 p-0">
+        <div className="flex justify-between items-center h-16 m-0 p-0">
           
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold font-serif flex items-center">

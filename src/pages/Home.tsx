@@ -43,9 +43,9 @@ const services = [
 
 const Home: React.FC = () => {
   return (
-    <div className="flex flex-col pt-16">
+    <div className="flex flex-col m-0 p-0">
       {/* Hero Section */}
-      <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
+      <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden m-0 p-0 mt-16">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 hover:scale-105"
           style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80")' }}
