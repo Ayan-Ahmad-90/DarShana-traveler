@@ -555,7 +555,7 @@ const NextMonthHighlight = ({ festivalsData }: { festivalsData: FestivalDataType
 };
 
 // --- Live Location Marker ---
-function LiveLocationMarker({ setShareUrl }: { setShareUrl: (url: string) => void }) {
+function LiveLocationMarker() {
   const map = useMap();
   const [pos, setPos] = useState<[number, number] | null>(null);
 
@@ -563,9 +563,8 @@ function LiveLocationMarker({ setShareUrl }: { setShareUrl: (url: string) => voi
     navigator.geolocation.getCurrentPosition(({ coords }) => {
       setPos([coords.latitude, coords.longitude]);
       map.flyTo([coords.latitude, coords.longitude], 10);
-      setShareUrl(`${window.location.origin}?lat=${coords.latitude}&lng=${coords.longitude}`);
     });
-  }, [map, setShareUrl]);
+  }, [map]);
 
   if (!pos) return null;
   return (
@@ -587,7 +586,6 @@ const Festivals = () => {
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
   const [showLiveLocation, setShowLiveLocation] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
   const mapRef = useRef<L.Map>(null);
 
   // Create cards for all types
@@ -648,11 +646,36 @@ const Festivals = () => {
         >
           <Share2 size={16} /> Live Location
         </button>
-        {shareUrl && (
-          <a href={shareUrl} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline ml-2 text-sm">
-            Share My Location
-          </a>
-        )}
+        <button
+          onClick={async () => {
+            navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+              const shareUrl = `${window.location.origin}?lat=${coords.latitude}&lng=${coords.longitude}`;
+              
+              if (navigator.share) {
+                try {
+                  await navigator.share({
+                    title: 'My Travel Location - DarShana',
+                    text: `Check out my current location on DarShana Travel Explorer! 📍`,
+                    url: shareUrl
+                  });
+                } catch (err) {
+                  if (err instanceof Error && err.name !== 'AbortError') {
+                    // Fallback: Copy to clipboard
+                    navigator.clipboard.writeText(shareUrl);
+                    alert('📍 Location link copied! Share it with friends.');
+                  }
+                }
+              } else {
+                // Fallback for browsers without Web Share API
+                navigator.clipboard.writeText(shareUrl);
+                alert('📍 Location link copied! Share it with friends.');
+              }
+            });
+          }}
+          className="px-4 py-2 rounded-lg font-bold bg-orange-600 text-white border border-orange-600 text-sm hover:bg-orange-700 transition"
+        >
+          <Share2 size={16} /> Share Location
+        </button>
       </div>
       <div className="text-center mb-8">
         <h1 className="text-4xl font-serif font-bold text-stone-800 mb-4">🇮🇳 Indian Festival Explorer 🇮🇳</h1>
@@ -788,7 +811,7 @@ const Festivals = () => {
             {selectedCard && selectedCard.lat && selectedCard.lng && (
               <FlyToLocation position={[selectedCard.lat, selectedCard.lng]} />
             )}
-            {showLiveLocation && <LiveLocationMarker setShareUrl={setShareUrl} />}
+            {showLiveLocation && <LiveLocationMarker />}
           </MapContainer>
           <div className="p-4 bg-stone-100 border-t border-stone-200 flex justify-between items-center">
             <div className="flex items-center gap-3 text-stone-600">
