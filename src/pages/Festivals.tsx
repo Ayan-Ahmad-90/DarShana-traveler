@@ -23,7 +23,7 @@ const festivalsData = [
         month: "October/November",
         location: "Pan-India",
         desc: "The festival of lights, celebrating the victory of light over darkness and good over evil. Associated with Goddess Lakshmi and Lord Rama's return.",
-        img: "https://placehold.co/500x300/f8c050/ffffff?text=Diwali+Lights",
+        img: "https://images.pexels.com/photos/1580085/pexels-photo-1580085.jpeg",
         lat: 20.5937,
         lng: 78.9629
     },
@@ -34,7 +34,7 @@ const festivalsData = [
         month: "March",
         location: "Pan-India, especially North India",
         desc: "The festival of colors, signifying the arrival of spring and the triumph of good over evil (Holika Dahan). People play with dry and wet colors.",
-        img: "https://placehold.co/500x300/ff69b4/ffffff?text=Holi+Colors",
+        img: "https://images.pexels.com/photos/15856547/pexels-photo-15856547.jpeg",
         lat: 28.6139,
         lng: 77.209
     },
@@ -45,7 +45,7 @@ const festivalsData = [
         month: "September/October",
         location: "Kolkata, West Bengal",
         desc: "Celebration of Goddess Durga's victory over the buffalo demon Mahishasura. Marked by grand Pandal installations and idol immersion.",
-        img: "https://placehold.co/500x300/800080/ffffff?text=Durga+Pooja+Pandal",
+        img: "https://images.pexels.com/photos/7750148/pexels-photo-7750148.jpeg",
         lat: 22.5726,
         lng: 88.3639
     },
@@ -56,7 +56,7 @@ const festivalsData = [
         month: "November",
         location: "Pushkar, Rajasthan",
         desc: "A vibrant five-day livestock fair featuring camel trading, cultural performances, music, and competitions near the Pushkar Lake.",
-        img: "https://placehold.co/500x300/ffa500/000000?text=Pushkar+Fair",
+        img: "https://images.pexels.com/photos/1707965/pexels-photo-1707965.jpeg",
         lat: 26.4907,
         lng: 74.5539
     },
@@ -67,7 +67,7 @@ const festivalsData = [
         month: "August/September",
         location: "Kerala",
         desc: "Harvest festival marked by elaborate flower carpets (Pookalam), the grand Onam Sadhya feast, and spectacular snake boat races (Vallamkali).",
-        img: "https://placehold.co/500x300/4CAF50/ffffff?text=Onam+Pookalam",
+        img: "https://t4.ftcdn.net/jpg/16/53/15/17/240_F_1653151764_e1jXwVTun9tDX7T86V3mUkSsocNrfF9f.jpg",
         lat: 10.8505,
         lng: 76.2711
     },
@@ -78,7 +78,7 @@ const festivalsData = [
         month: "August/September",
         location: "Mumbai, Maharashtra, Karnataka",
         desc: "A 10-day celebration of the birth of Lord Ganesha, marked by the installation of large idols and a final grand immersion ceremony (Visarjan).",
-        img: "https://placehold.co/500x300/9932CC/ffffff?text=Ganesh+Idol",
+        img: "https://images.pexels.com/photos/2939023/pexels-photo-2939023.jpeg",
         lat: 19.076,
         lng: 72.8777
     },
@@ -89,7 +89,7 @@ const festivalsData = [
         month: "Variable (Lunar)",
         location: "Pan-India",
         desc: "The 'Festival of Breaking the Fast' marks the end of Ramadan. Celebrated with congregational prayers, feasting, and the giving of charity (Zakat al-Fitr).",
-        img: "https://placehold.co/500x300/228B22/ffffff?text=Eid+Celebration",
+        img: "https://images.pexels.com/photos/12049052/pexels-photo-12049052.jpeg",
         lat: 28.7041,
         lng: 77.1025
     },
@@ -100,7 +100,7 @@ const festivalsData = [
         month: "December",
         location: "Goa, Mumbai, Northeast India",
         desc: "Celebration of the birth of Jesus Christ. Marked by midnight mass, carol singing, decorated Christmas trees, and gift-giving.",
-        img: "https://placehold.co/500x300/D22B2B/ffffff?text=Christmas+Tree",
+        img: "https://images.pexels.com/photos/3149896/pexels-photo-3149896.jpeg",
         lat: 15.2993,
         lng: 74.124
     },
@@ -111,7 +111,7 @@ const festivalsData = [
         month: "October/November",
         location: "Punjab, Pan-India",
         desc: "Celebration of the birth of the Sikh Gurus. Marked by processions (Nagar Kirtan) and reading of the Guru Granth Sahib.",
-        img: "https://placehold.co/500x300/3CB371/ffffff?text=Gurpurab+Nagar+Kirtan",
+        img: "https://www.goldentempleamritsar.org/high-resolution-images/famous-temples/golden-temple/Gurpurab.jpg",
         lat: 30.7333,
         lng: 76.7794
     },
@@ -122,7 +122,7 @@ const festivalsData = [
         month: "January",
         location: "Tamil Nadu",
         desc: "A four-day harvest festival dedicated to the Sun God (Surya). The second day is the main day, where rice is boiled until it spills over.",
-        img: "https://placehold.co/500x300/FFD700/000000?text=Pongal+Dish",
+        img: "https://images.pexels.com/photos/28820191/pexels-photo-28820191.jpeg",
         lat: 13.0827,
         lng: 80.2707
     },
@@ -133,7 +133,7 @@ const festivalsData = [
         month: "September/October",
         location: "Gujarat, Maharashtra",
         desc: "A nine-night festival worshipping Goddess Durga. Famous for the traditional folk dances Garba and Dandiya Raas, especially in Gujarat.",
-        img: "https://placehold.co/500x300/4682B4/ffffff?text=Garba+Dance",
+        img: "https://images.pexels.com/photos/9930818/pexels-photo-9930818.jpeg",
         lat: 23.0225,
         lng: 72.5714
     },
@@ -144,7 +144,7 @@ const festivalsData = [
         month: "Variable (Cycle)",
         location: "Allahabad, Haridwar, Ujjain, Nashik",
         desc: "One of the largest peaceful gatherings in the world, held once every three years on a rotating basis at four river-bank pilgrimage sites.",
-        img: "https://placehold.co/500x300/87CEEB/000000?text=Kumbh+Mela+Snan",
+        img: "https://images.pexels.com/photos/30218192/pexels-photo-30218192.jpeg",
         lat: 25.4358,
         lng: 81.8463
     },
@@ -155,7 +155,7 @@ const festivalsData = [
         month: "June/July",
         location: "Puri, Odisha",
         desc: "The annual chariot festival of Lord Jagannath, his brother Balabhadra, and sister Subhadra. The deities are carried in massive, decorated chariots.",
-        img: "https://placehold.co/500x300/CD5C5C/ffffff?text=Rath+Yatra+Puri",
+        img: "https://images.pexels.com/photos/27170152/pexels-photo-27170152.jpeg",
         lat: 19.8142,
         lng: 85.831
     },
@@ -166,7 +166,7 @@ const festivalsData = [
         month: "December",
         location: "Nagaland",
         desc: "A week-long annual festival showcasing the rich cultural heritage and traditions of the 16 Naga tribes with folk dances, sports, and crafts.",
-        img: "https://placehold.co/500x300/90EE90/000000?text=Hornbill+Dance",
+        img: "https://images.pexels.com/photos/32656681/pexels-photo-32656681.jpeg",
         lat: 26.1824,
         lng: 94.5714
     },
@@ -177,7 +177,7 @@ const festivalsData = [
         month: "Variable (Lunar)",
         location: "Pan-India",
         desc: "The 'Festival of Sacrifice,' honoring Prophet Ibrahim's willingness to sacrifice his son. It involves animal sacrifice and distribution of meat.",
-        img: "https://placehold.co/500x300/A52A2A/ffffff?text=Eid+al-Adha",
+        img: "https://images.pexels.com/photos/34123513/pexels-photo-34123513.jpeg",
         lat: 24.5,
         lng: 79.0
     },
@@ -191,7 +191,7 @@ const culturalHighlights = [
     name: "Classical Dance Forms (शास्त्रीय नृत्य)",
     aspect: "Performing Arts",
     description: "Includes Bharatanatyam, Kathak, Kathakali, Odissi, Manipuri, Mohiniyattam, and Kuchipudi, each telling stories through intricate mudras and expressions.",
-    img: "https://placehold.co/500x300/fddc9a/362c2c?text=Classical+Dance",
+    img: "https://www.india-a2z.com/images/dance4.jpg",
     lat: 13.0802,
     lng: 80.2838
   },
@@ -199,7 +199,7 @@ const culturalHighlights = [
     name: "Yoga and Ayurveda (योग और आयुर्वेद)",
     aspect: "Wellness & Philosophy",
     description: "Ancient Indian systems for health and well-being. Yoga focuses on physical, mental, and spiritual practices, while Ayurveda is a traditional medicine system.",
-    img: "https://placehold.co/500x300/aed581/452e00?text=Yoga+Ayurveda",
+    img: "https://www.kairali.com/pic/ayurveda-teachers.jpg",
     lat: 30.3165,
     lng: 78.0322
   },
@@ -207,7 +207,7 @@ const culturalHighlights = [
     name: "Indian Cuisine (भारतीय व्यंजन)",
     aspect: "Gastronomy",
     description: "Known for its vast regional diversity—from North Indian curries and bread to South Indian idli/dosa, Bengali fish, and Goan vindaloo. Focuses on spices and balance of six tastes.",
-    img: "https://placehold.co/500x300/ff9800/ffffff?text=Indian+Cuisine",
+    img: "https://www.drishtiias.com/images/blogs/1651313Blog.jpg",
     lat: 28.6139,
     lng: 77.209
   },
@@ -215,7 +215,7 @@ const culturalHighlights = [
     name: "Bollywood & Regional Cinema (सिनेमा)",
     aspect: "Mass Media & Arts",
     description: "The world's largest film industry, headquartered in Mumbai, influencing music, fashion, and social narratives globally. Includes vibrant regional cinemas like Tamil, Telugu, and Bengali.",
-    img: "https://placehold.co/500x300/ff0266/fff8e1?text=Bollywood+Cinema",
+    img: "",
     lat: 19.076,
     lng: 72.8777
   },
@@ -223,7 +223,7 @@ const culturalHighlights = [
     name: "Traditional Textiles & Sari (वस्त्र और साड़ी)",
     aspect: "Fashion & Craft",
     description: "India's rich textile heritage features handloom fabrics like Silk (Banarasi, Kanjivaram), Cotton (Khadi), and intricate works like Pashmina shawls and bandhani dying.",
-    img: "https://placehold.co/500x300/fffde7/5c4037?text=Textiles+Sari",
+    img: "https://www.treebo.com/blog/wp-content/uploads/2023/04/header-1.jpg",
     lat: 25.3176,
     lng: 82.9739
   },
@@ -231,7 +231,7 @@ const culturalHighlights = [
     name: "Kathputli (कठपुतली) & Puppetry",
     aspect: "Folk Arts",
     description: "Traditional string puppetry, most prominent in Rajasthan, used for storytelling and conveying social messages through intricate wooden dolls.",
-    img: "https://placehold.co/500x300/ffe082/3e2723?text=Kathputli+Puppet",
+    img: "https://as2.ftcdn.net/v2/jpg/06/54/65/01/1000_F_654650175_uwZWhUZnsg2YRni51rcm87Wz5ZOjjw99.jpg",
     lat: 26.9124,
     lng: 75.7873
   },
@@ -239,7 +239,7 @@ const culturalHighlights = [
     name: "Hindustani & Carnatic Music (शास्त्रीय संगीत)",
     aspect: "Music",
     description: "The two main branches of Indian classical music. Hindustani (North India) focuses on improvisational Ragas, while Carnatic (South India) is based on composed Kriti songs.",
-    img: "https://placehold.co/500x300/90caf9/23275e?text=Indian+Music",
+    img: "https://th-i.thgim.com/public/incoming/jmt9yr/article69154713.ece/alternates/FREE_1200/2501_28_12_2024_10_22_33_1_DSC_3265.JPEG",
     lat: 22.5726,
     lng: 88.3639
   },
@@ -247,7 +247,7 @@ const culturalHighlights = [
     name: "Kalarippayattu (कलरीपयट्टु)",
     aspect: "Martial Arts",
     description: "One of the oldest surviving martial arts in the world, originating in Kerala. Involves strikes, kicks, weapon training, and healing methods.",
-    img: "https://placehold.co/500x300/4caf50/fff8e1?text=Kalarippayattu",
+    img: "https://t4.ftcdn.net/jpg/08/77/30/95/240_F_877309584_1UYj1Y27iyb7ifQx9DUaKqevjy5kFdC7.jpg",
     lat: 10.8505,
     lng: 76.2711
   },
@@ -255,7 +255,7 @@ const culturalHighlights = [
     name: "Tribal Art Forms (जनजातीय कला)",
     aspect: "Visual Arts",
     description: "Includes distinct styles like Warli painting (Maharashtra), Gond art (Madhya Pradesh), and Madhubani painting (Bihar), reflecting tribal life and myths.",
-    img: "https://placehold.co/500x300/e0e0e0/232323?text=Tribal+Art",
+    img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbnU6N0dJ7rg82MLgVZD5RJfBQGnrqbVxEzQ&s",
     lat: 20.9042,
     lng: 74.7749
   },
@@ -263,7 +263,7 @@ const culturalHighlights = [
     name: "Miniature Painting (लघु चित्रकला)",
     aspect: "Visual Arts",
     description: "Detailed, colorful paintings developed under Mughal, Rajput, and Pahari royal courts, depicting epics, portraits, and courtly life on small scale.",
-    img: "https://placehold.co/500x300/fffde7/346a02?text=Miniature+Painting",
+    img: "https://t3.ftcdn.net/jpg/14/97/84/14/240_F_1497841456_hjqQRp5Nl3EWK8ZZwrWaLdnSc11wmYzv.jpg",
     lat: 26.9124,
     lng: 75.7873
   },
@@ -276,7 +276,7 @@ const historicalPlaces = [
     era: "Mughal Empire",
     location: "Agra, Uttar Pradesh",
     description: "An iconic white marble mausoleum commissioned by Emperor Shah Jahan in memory of his wife Mumtaz Mahal (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/f9fafb/747779?text=Taj+Mahal",
+    img: "https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg",
     lat: 27.1751,
     lng: 78.0421
   },
@@ -286,7 +286,7 @@ const historicalPlaces = [
     era: "Mughal Empire",
     location: "Delhi",
     description: "A historic fort in Old Delhi that served as the main residence of the Mughal Emperors for nearly 200 years. The Prime Minister addresses the nation here on Independence Day (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/c8e6c9/273437?text=Red+Fort",
+    img: "https://images.pexels.com/photos/33597243/pexels-photo-33597243.jpeg",
     lat: 28.6562,
     lng: 77.241
   },
@@ -296,7 +296,7 @@ const historicalPlaces = [
     era: "Delhi Sultanate",
     location: "Delhi",
     description: "A 73-meter tall minaret and complex, the tallest brick minaret in the world, started by Qutub-ud-din Aibak (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/b39ddb/333449?text=Qutub+Minar",
+    img: "https://images.pexels.com/photos/30254905/pexels-photo-30254905.jpeg",
     lat: 28.5244,
     lng: 77.1855
   },
@@ -306,7 +306,7 @@ const historicalPlaces = [
     era: "Mughal Empire",
     location: "Delhi",
     description: "The tomb of the Mughal Emperor Humayun, often considered the first garden-tomb on the Indian subcontinent (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/ffe0b2/3e2723?text=Humayun's+Tomb",
+    img: "https://images.pexels.com/photos/11750406/pexels-photo-11750406.jpeg",
     lat: 28.5933,
     lng: 77.2507
   },
@@ -316,7 +316,7 @@ const historicalPlaces = [
     era: "Mughal Empire",
     location: "Near Agra, Uttar Pradesh",
     description: "A city founded by Mughal Emperor Akbar, which served as the capital from 1571 to 1585, now perfectly preserved in red sandstone (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/e1bee7/241f34?text=Fatehpur+Sikri",
+    img: "https://images.pexels.com/photos/6176676/pexels-photo-6176676.jpeg",
     lat: 27.0936,
     lng: 77.6611
   },
@@ -326,7 +326,7 @@ const historicalPlaces = [
     era: "Mughal Empire",
     location: "Agra, Uttar Pradesh",
     description: "The primary residence of the emperors of the Mughal Dynasty until 1638. A massive red sandstone fortress (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/afbcaa/fff8e1?text=Agra+Fort",
+    img: "https://images.pexels.com/photos/19195952/pexels-photo-19195952.jpeg",
     lat: 27.1795,
     lng: 78.0211
   },
@@ -336,7 +336,7 @@ const historicalPlaces = [
     era: "Vijayanagara Empire",
     location: "Hampi, Karnataka",
     description: "The ruins of the magnificent capital city of the Vijayanagara Empire, featuring stunning temples and stone chariots (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/ffe082/463629?text=Hampi",
+    img: "https://images.pexels.com/photos/30830312/pexels-photo-30830312.jpeg",
     lat: 15.335,
     lng: 76.4629
   },
@@ -346,7 +346,7 @@ const historicalPlaces = [
     era: "Chandela Dynasty",
     location: "Khajuraho, Madhya Pradesh",
     description: "A group of Hindu and Jain temples famous for their intricate and erotic sculptures (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/d1c4e9/fff8e1?text=Khajuraho",
+    img: "https://images.pexels.com/photos/20545471/pexels-photo-20545471.jpeg",
     lat: 24.8318,
     lng: 79.9386
   },
@@ -356,7 +356,7 @@ const historicalPlaces = [
     era: "Satavahana & Vakataka Dynasties",
     location: "Maharashtra",
     description: "Rock-cut Buddhist cave monuments featuring beautifully preserved paintings and sculptures depicting the Jataka tales (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/ffe082/a17937?text=Ajanta+Caves",
+    img: "https://images.pexels.com/photos/4882665/pexels-photo-4882665.jpeg",
     lat: 20.5534,
     lng: 75.7033
   },
@@ -366,7 +366,7 @@ const historicalPlaces = [
     era: "Rashtrakuta Dynasty",
     location: "Maharashtra",
     description: "One of the largest rock-cut monastery-temple cave complexes in the world, featuring Buddhist, Hindu, and Jain monuments (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/ffcdd2/19052c?text=Ellora+Caves",
+    img: "https://media.gettyimages.com/id/1337887772/photo/ajanta-and-ellora.jpg?s=612x612&w=0&k=20&c=31ffxf39PZ-DZQazVGfs08PjUztJBrQa0zwsOhrnwJ8=",
     lat: 20.0268,
     lng: 75.1786
   },
@@ -376,7 +376,7 @@ const historicalPlaces = [
     era: "Mauryan Empire",
     location: "Sanchi, Madhya Pradesh",
     description: "The oldest stone structure in India, commissioned by Emperor Ashoka, famous for its grand stupa and ornamental gateways (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/fffde7/806600?text=Sanchi+Stupa",
+    img: "https://images.pexels.com/photos/33266890/pexels-photo-33266890.jpeg",
     lat: 23.4793,
     lng: 77.7391
   },
@@ -386,7 +386,7 @@ const historicalPlaces = [
     era: "Eastern Ganga Dynasty",
     location: "Konark, Odisha",
     description: "Dedicated to the Sun God Surya, this temple is designed as a colossal chariot with twelve pairs of intricately carved stone wheels (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/ffe082/3e2723?text=Konark+Sun+Temple",
+    img: "https://images.pexels.com/photos/6040175/pexels-photo-6040175.jpeg",
     lat: 19.8876,
     lng: 86.0945
   },
@@ -396,7 +396,7 @@ const historicalPlaces = [
     era: "Pandyan/Nayak Dynasties",
     location: "Madurai, Tamil Nadu",
     description: "A historic Hindu temple with 14 magnificent Gopurams (gate towers) covered with thousands of mythological figures.",
-    img: "https://placehold.co/500x300/ffe0b2/44492c?text=Meenakshi+Temple",
+    img: "https://images.pexels.com/photos/23914402/pexels-photo-23914402.jpeg",
     lat: 9.9195,
     lng: 78.1191
   },
@@ -406,7 +406,7 @@ const historicalPlaces = [
     era: "British Raj",
     location: "Kolkata, West Bengal",
     description: "A large marble building constructed between 1906 and 1921, dedicated to the memory of Queen Victoria.",
-    img: "https://placehold.co/500x300/fffde7/00122c?text=Victoria+Memorial",
+    img: "https://images.pexels.com/photos/16565204/pexels-photo-16565204.jpeg",
     lat: 22.5448,
     lng: 88.3426
   },
@@ -416,7 +416,7 @@ const historicalPlaces = [
     era: "British Raj",
     location: "Mumbai, Maharashtra",
     description: "An iconic arch monument built to commemorate the landing of King-Emperor George V and Queen-Empress Mary at Apollo Bunder in 1911.",
-    img: "https://placehold.co/500x300/fbe9e7/4c4c4c?text=Gateway+of+India",
+    img: "https://images.pexels.com/photos/15528027/pexels-photo-15528027.jpeg",
     lat: 18.9217,
     lng: 72.8347
   },
@@ -426,7 +426,7 @@ const historicalPlaces = [
     era: "Modern History",
     location: "Amritsar, Punjab",
     description: "A garden of national importance marking the site of the 1919 massacre by British forces.",
-    img: "https://placehold.co/500x300/ffcdd2/573940?text=Jallianwala+Bagh",
+    img: "https://s7ap1.scene7.com/is/image/incredibleindia/jallianwala-bagh-amritsar-punjab-1-attr-hero?qlt=82&ts=1726662275638",
     lat: 31.6202,
     lng: 74.8797
   },
@@ -436,7 +436,7 @@ const historicalPlaces = [
     era: "Qutb Shahi Dynasty",
     location: "Hyderabad, Telangana",
     description: "A monument and mosque built in 1591, known as the 'Arc de Triomphe of the East', and the city's global icon.",
-    img: "https://placehold.co/500x300/cfd8dc/3b4249?text=Charminar",
+    img: "https://images.pexels.com/photos/5615112/pexels-photo-5615112.jpeg",
     lat: 17.3616,
     lng: 78.4747
   },
@@ -446,7 +446,7 @@ const historicalPlaces = [
     era: "Kakatiya/Qutb Shahi Dynasties",
     location: "Hyderabad, Telangana",
     description: "A magnificent fort, originally a mud fort, famous for its acoustics and being the source of world-renowned diamonds like the Koh-i-Noor.",
-    img: "https://placehold.co/500x300/d7ccc8/221e1f?text=Golconda+Fort",
+    img: "https://images.pexels.com/photos/29221923/pexels-photo-29221923.jpeg",
     lat: 17.3833,
     lng: 78.4011
   },
@@ -456,7 +456,7 @@ const historicalPlaces = [
     era: "Kachhwaha Dynasty",
     location: "Jaipur, Rajasthan",
     description: "A beautiful fort built of red sandstone and marble, known for its artistic Hindu style elements (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/fffde7/2c1a00?text=Amer+Fort",
+    img: "https://images.pexels.com/photos/33106473/pexels-photo-33106473.jpeg",
     lat: 26.9855,
     lng: 75.8507
   },
@@ -466,7 +466,7 @@ const historicalPlaces = [
     era: "Mewar Kingdom",
     location: "Chittorgarh, Rajasthan",
     description: "The largest fort in India and a UNESCO World Heritage Site, famed for its association with Rajput history, courage, and sacrifice.",
-    img: "https://placehold.co/500x300/dedfeb/25232f?text=Chittorgarh+Fort",
+    img: "https://images.pexels.com/photos/32760057/pexels-photo-32760057.jpeg",
     lat: 24.8896,
     lng: 74.6472
   },
@@ -476,7 +476,7 @@ const historicalPlaces = [
     era: "Gupta/Pala Empires",
     location: "Bihar",
     description: "The ruins of an ancient Buddhist monastic university, a major center of learning from the 5th to 13th centuries (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/f9fafb/3b3333?text=Nalanda+Ruins",
+    img: "https://images.pexels.com/photos/10818318/pexels-photo-10818318.jpeg",
     lat: 25.1357,
     lng: 85.443
   },
@@ -486,7 +486,7 @@ const historicalPlaces = [
     era: "Pallava Dynasty",
     location: "Mahabalipuram, Tamil Nadu",
     description: "A structural temple complex built with blocks of granite, overlooking the Bay of Bengal (UNESCO World Heritage Site).",
-    img: "https://placehold.co/500x300/b3e5fc/1c2331?text=Shore+Temple",
+    img: "https://images.pexels.com/photos/32399048/pexels-photo-32399048.jpeg",
     lat: 12.6176,
     lng: 80.1994
   },

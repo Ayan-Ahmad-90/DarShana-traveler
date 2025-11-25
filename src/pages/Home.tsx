@@ -13,14 +13,14 @@ const destinations = [
   {
     id: '2',
     name: 'Varanasi Ghats',
-    img: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    img: 'https://wallpaperaccess.com/full/4459823.jpg',
     desc: 'The spiritual capital of India on the banks of the Ganges.',
     rating: 4.8
   },
   {
     id: '3',
     name: 'Kerala Backwaters',
-    img: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    img: 'https://img.freepik.com/premium-photo/boat-with-hut-water-with-palm-trees-background_1028782-348284.jpg',
     desc: 'Serene waterways lined with lush palms and houseboats.',
     rating: 4.9
   },
