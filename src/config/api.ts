@@ -14,9 +14,14 @@ export const getBackendUrl = (): string => {
 
   // Use different backend URLs based on environment
   if (productionOrigins.includes(hostname)) {
-    // Production: Use the deployed backend URL
-    // You'll need to set a VITE_BACKEND_URL environment variable or deploy the backend
-    return import.meta.env.VITE_BACKEND_URL || 'https://darshana-backend.onrender.com';
+    // Production: Use environment variable for deployed backend
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    if (!backendUrl) {
+      console.warn('⚠️ VITE_BACKEND_URL not configured. Backend communication will fail.');
+      console.warn('Set VITE_BACKEND_URL in .env.production to your deployed backend URL');
+      console.warn('Example: https://your-backend.onrender.com or https://your-backend.railway.app');
+    }
+    return backendUrl || '';
   }
 
   // Development: Use localhost
