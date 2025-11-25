@@ -43,7 +43,7 @@ const services = [
 
 const Home: React.FC = () => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col pt-16">
       {/* Hero Section */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
         <div 
