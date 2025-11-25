@@ -1,22 +1,52 @@
 import React, { useState } from 'react';
-import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift } from 'lucide-react';
-import { getSustainableRouteOptions } from '../services/geminiService';
+import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift, AlertCircle } from 'lucide-react';
 
 const Sustainable: React.FC = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [loading, setLoading] = useState(false);
   const [routeData, setRouteData] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handlePlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!from || !to) return;
+    if (!from || !to) {
+      setError('Please enter both origin and destination');
+      return;
+    }
+    
+    if (from.toLowerCase() === to.toLowerCase()) {
+      setError('Origin and destination cannot be the same');
+      return;
+    }
+
     setLoading(true);
+    setError(null);
+    setRouteData(null);
+
     try {
-      const data = await getSustainableRouteOptions(from, to);
-      setRouteData(data);
-    } catch (error) {
-      console.error(error);
+      // Call backend API
+      const response = await fetch('http://localhost:5000/api/routes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ from, to }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setRouteData(data.data);
+      } else {
+        setError(data.error || 'Failed to calculate routes');
+      }
+    } catch (err) {
+      console.error('Route calculation error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to calculate routes. Make sure the backend server is running on port 5000.');
     } finally {
       setLoading(false);
     }
@@ -71,18 +101,41 @@ const Sustainable: React.FC = () => {
           <button 
             type="submit"
             disabled={loading}
-            className="bg-teal-700 hover:bg-teal-800 text-white px-8 py-3 rounded-lg font-semibold transition shadow-md w-full md:w-auto flex items-center justify-center gap-2 h-[50px]"
+            className="bg-teal-700 hover:bg-teal-800 disabled:bg-stone-400 text-white px-8 py-3 rounded-lg font-semibold transition shadow-md w-full md:w-auto flex items-center justify-center gap-2 h-[50px]"
           >
-            {loading ? <Loader2 className="animate-spin" /> : 'Calculate Impact'}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : 'Calculate Impact'}
           </button>
         </form>
       </div>
 
-      {/* Results */}
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <AlertCircle className="text-red-600 mt-0.5 flex-shrink-0" size={20} />
+          <div>
+            <h3 className="font-semibold text-red-800">Error</h3>
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Results Header */}
+      {routeData && routeData.options && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-stone-800 mb-2">
+            Routes from {routeData.from} to {routeData.to}
+          </h2>
+          <p className="text-stone-600">
+            Distance: <span className="font-semibold">{routeData.distance} km</span>
+          </p>
+        </div>
+      )}
+
+      {/* Results Grid */}
       {routeData && routeData.options && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {routeData.options.map((opt: any, idx: number) => (
-            <div key={idx} className={`relative bg-white p-6 rounded-xl shadow-sm border-2 transition hover:shadow-md ${opt.greenScore >= 8 ? 'border-teal-500' : 'border-transparent'}`}>
+            <div key={idx} className={`relative bg-white p-6 rounded-xl shadow-sm border-2 transition hover:shadow-md ${opt.greenScore >= 8 ? 'border-teal-500' : 'border-stone-200'}`}>
               {opt.greenScore >= 8 && (
                 <div className="absolute top-0 right-0 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg flex items-center gap-1">
                   <Leaf size={12} /> Eco Choice
@@ -95,7 +148,7 @@ const Sustainable: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-stone-800">{opt.mode}</h3>
-                  <p className="text-xs text-stone-500">{opt.time} • approx. ₹{opt.cost}</p>
+                  <p className="text-xs text-stone-500">{opt.time} • ₹{Math.round(opt.cost)}</p>
                 </div>
               </div>
 
@@ -103,32 +156,47 @@ const Sustainable: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4 bg-stone-50 p-4 rounded-lg">
                 <div>
-                    <span className="block text-xs text-stone-500 mb-1">Emissions</span>
+                    <span className="block text-xs text-stone-500 mb-1">CO₂ Emissions</span>
                     <span className={`font-bold text-lg ${opt.co2 < 50 ? 'text-teal-600' : 'text-orange-600'}`}>
-                        {opt.co2} <span className="text-xs text-stone-500 font-normal">kg CO₂</span>
+                        {Math.round(opt.co2)} <span className="text-xs text-stone-500 font-normal">kg</span>
                     </span>
                 </div>
                 <div className="text-right">
                      <span className="block text-xs text-stone-500 mb-1">Reward Points</span>
                      <span className="font-bold text-lg text-orange-600 flex items-center justify-end gap-1">
-                         <Gift size={16} /> {opt.rewards || 0}
+                         <Gift size={16} /> {Math.round(opt.rewards)}
                      </span>
                 </div>
                 <div className="col-span-2 pt-2 border-t border-stone-200 flex justify-between items-center">
                     <span className="text-xs text-stone-500">Sustainability Score</span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                          <div className="w-24 h-2 bg-stone-200 rounded-full overflow-hidden">
                              <div 
                                 className={`h-full rounded-full ${opt.greenScore >= 7 ? 'bg-teal-500' : opt.greenScore >= 4 ? 'bg-yellow-500' : 'bg-red-500'}`} 
-                                style={{ width: `${opt.greenScore * 10}%` }}
+                                style={{ width: `${(opt.greenScore / 10) * 100}%` }}
                              ></div>
                          </div>
-                         <span className="font-bold text-stone-800 text-sm">{opt.greenScore}/10</span>
+                         <span className="font-bold text-stone-800 text-sm">{opt.greenScore.toFixed(1)}/10</span>
                     </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="animate-spin text-teal-600 mb-4" size={40} />
+          <p className="text-stone-600 font-semibold">Calculating sustainable routes...</p>
+        </div>
+      )}
+
+      {/* No Results Message */}
+      {!loading && !routeData && !error && from && to && (
+        <div className="text-center py-12">
+          <p className="text-stone-500">Enter locations and click "Calculate Impact" to see available routes</p>
         </div>
       )}
     </div>
