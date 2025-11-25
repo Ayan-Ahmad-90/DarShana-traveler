@@ -47,7 +47,12 @@ const Sustainable: React.FC = () => {
       }
     } catch (err) {
       console.error('Route calculation error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to calculate routes. Make sure the backend server is running on port 5000.');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to calculate routes';
+      const isProductionError = window.location.hostname.includes('vercel.app');
+      const helpText = isProductionError 
+        ? ' Backend server needs to be deployed. Check DEPLOYMENT.md for setup instructions.'
+        : ' Make sure the backend server is running on port 5000.';
+      setError(errorMsg + helpText);
     } finally {
       setLoading(false);
     }
