@@ -24,8 +24,9 @@ export const getBackendUrl = (): string => {
     return backendUrl || '';
   }
 
-  // Development: Use localhost
-  return 'http://localhost:5000';
+  // Development: Use environment variable or default to localhost:3000
+  const devUrl = import.meta.env.VITE_BACKEND_URL;
+  return devUrl || 'http://localhost:3000';
 };
 
 export const API_BASE_URL = getBackendUrl();
