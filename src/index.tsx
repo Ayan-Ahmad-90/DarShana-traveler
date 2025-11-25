@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css'; // Import global styles
 import './i18n'; // Initialize i18n before rendering
 import App from './App';
 
