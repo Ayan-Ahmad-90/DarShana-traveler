@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift, AlertCircle } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 const Sustainable: React.FC = () => {
   const [from, setFrom] = useState('');
@@ -26,7 +27,7 @@ const Sustainable: React.FC = () => {
 
     try {
       // Call backend API
-      const response = await fetch('http://localhost:5000/api/routes', {
+      const response = await fetch(API_ENDPOINTS.ROUTES, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

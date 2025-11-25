@@ -22,8 +22,8 @@ export const env = {
   // Logging
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   
-  // CORS
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  // CORS - Accept both localhost for dev and Vercel domains for production
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,https://dar-shana-traveler-seven.vercel.app,https://darshana-traveler.vercel.app',
   
   // Feature flags
   ENABLE_EXTERNAL_APIS: process.env.ENABLE_EXTERNAL_APIS === 'true',
