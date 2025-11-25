@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift, AlertCircle } from 'lucide-react';
+import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift, AlertCircle, ArrowRightLeft } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
 
 const Sustainable: React.FC = () => {
@@ -8,6 +8,12 @@ const Sustainable: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [routeData, setRouteData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleSwap = () => {
+    const temp = from;
+    setFrom(to);
+    setTo(temp);
+  };
 
   const handlePlan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +97,18 @@ const Sustainable: React.FC = () => {
               className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition"
             />
           </div>
-          <div className="hidden md:block pb-4 text-stone-400">
-            <ArrowRight />
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSwap}
+              className="bg-stone-100 hover:bg-teal-100 text-stone-600 hover:text-teal-700 p-3 rounded-full transition border border-stone-200 hover:border-teal-300"
+              title="Swap origin and destination"
+            >
+              <ArrowRightLeft size={20} />
+            </button>
+            <span className="hidden md:block text-stone-400">
+              <ArrowRight size={16} />
+            </span>
           </div>
           <div className="flex-1 w-full">
             <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Destination</label>
