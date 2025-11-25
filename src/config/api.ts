@@ -4,29 +4,28 @@
  */
 
 export const getBackendUrl = (): string => {
-  // Production Vercel domains
-  const productionOrigins = [
-    'dar-shana-traveler-seven.vercel.app',
-    'darshana-traveler.vercel.app',
-  ];
+  // Check if we're in production
+  const isProduction = typeof window !== 'undefined' && 
+    (window.location.hostname.includes('vercel.app') || 
+     window.location.hostname.includes('herokuapp.com') ||
+     window.location.hostname.includes('railway.app') ||
+     window.location.hostname.includes('onrender.com'));
 
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  // Try to get backend URL from environment
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  // Use different backend URLs based on environment
-  if (productionOrigins.includes(hostname)) {
-    // Production: Use environment variable for deployed backend
-    const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    if (!backendUrl) {
-      console.warn('⚠️ VITE_BACKEND_URL not configured. Backend communication will fail.');
-      console.warn('Set VITE_BACKEND_URL in .env.production to your deployed backend URL');
-      console.warn('Example: https://your-backend.onrender.com or https://your-backend.railway.app');
+  if (isProduction) {
+    if (backendUrl && backendUrl.trim()) {
+      return backendUrl;
     }
-    return backendUrl || '';
+    console.error('❌ VITE_BACKEND_URL not configured for production!');
+    console.error('Please set VITE_BACKEND_URL in Vercel environment variables');
+    console.error('Example value: https://darshana-backend.onrender.com');
+    return '';
   }
 
-  // Development: Use environment variable or default to localhost:3000
-  const devUrl = import.meta.env.VITE_BACKEND_URL;
-  return devUrl || 'http://localhost:3000';
+  // Development: Use localhost or env variable
+  return backendUrl || 'http://localhost:3000';
 };
 
 export const API_BASE_URL = getBackendUrl();
