@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Leaf, Plane, Train, Bus, Car, Loader2, ArrowRight, Gift, AlertCircle, ArrowRightLeft } from 'lucide-react';
+import { Leaf, Plane, Train, Bus, Car, Loader2, Gift, AlertCircle, ArrowRightLeft } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
 
 const Sustainable: React.FC = () => {
@@ -106,9 +106,6 @@ const Sustainable: React.FC = () => {
             >
               <ArrowRightLeft size={20} />
             </button>
-            <span className="hidden md:block text-stone-400">
-              <ArrowRight size={16} />
-            </span>
           </div>
           <div className="flex-1 w-full">
             <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Destination</label>
