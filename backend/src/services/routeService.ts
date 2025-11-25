@@ -107,6 +107,11 @@ export const generateRouteOptions = async (
       roadDistance = result?.distance || 100; // Default 100 km if calculation fails
     }
     
+    // Ensure minimum realistic distance
+    if (roadDistance < 5) {
+      roadDistance = 5; // At least 5 km for nearby locations
+    }
+    
     logger.info(`📍 Generating routes for ${from} → ${to} (${roadDistance} km)`);
     
     const options: RouteOption[] = [];
@@ -131,7 +136,7 @@ export const generateRouteOptions = async (
       });
     }
     
-    // 2. Train
+    // 2. Train (for distances > 200 km and major routes)
     if (roadDistance > 200) {
       const trainDistance = await getTrainDistance(from, to);
       const emissions = calculateEmissions('train', trainDistance);
@@ -151,7 +156,7 @@ export const generateRouteOptions = async (
       });
     }
     
-    // 3. Bus
+    // 3. Bus (available for all distances)
     const busEmissions = calculateEmissions('bus', roadDistance, 40); // Assume 40 passengers
     const busGreenScore = calculateSustainabilityScore('bus', busEmissions);
     const busTime = estimateTravelTime('bus', roadDistance);
@@ -202,8 +207,11 @@ export const generateRouteOptions = async (
       description: generateDescription('electric-car', roadDistance, evTime),
     });
     
-    // 6. Metro (for short distances or metro cities)
-    if (roadDistance < 150) {
+    // 6. Metro (for short distances in metro cities: Delhi, Mumbai, Bangalore, etc.)
+    const metroAvailableCities = ['delhi', 'new delhi', 'mumbai', 'bangalore', 'hyderabad', 'kolkata', 'pune', 'ahmedabad', 'chennai'];
+    const isInMetroCity = metroAvailableCities.some(city => from.toLowerCase().includes(city) || to.toLowerCase().includes(city));
+    
+    if (roadDistance < 150 && isInMetroCity) {
       const metroEmissions = calculateEmissions('metro', roadDistance, 100); // Assume full train
       const metroGreenScore = calculateSustainabilityScore('metro', metroEmissions);
       const metroTime = estimateTravelTime('metro', roadDistance);
@@ -221,7 +229,7 @@ export const generateRouteOptions = async (
       });
     }
     
-    // 7. Bike
+    // 7. Bike (for short distances < 100 km)
     if (roadDistance < 100) {
       const bikeEmissions = calculateEmissions('bike', roadDistance);
       const bikeGreenScore = calculateSustainabilityScore('bike', bikeEmissions);
@@ -240,7 +248,7 @@ export const generateRouteOptions = async (
       });
     }
     
-    // 8. Cab
+    // 8. Cab (available for all distances)
     const cabEmissions = calculateEmissions('cab', roadDistance);
     const cabGreenScore = calculateSustainabilityScore('cab', cabEmissions);
     const cabTime = estimateTravelTime('cab', roadDistance);
@@ -257,8 +265,13 @@ export const generateRouteOptions = async (
       description: generateDescription('cab', roadDistance, cabTime),
     });
     
-    // Sort by sustainability score (best first)
+    // Sort by sustainability score (best first) - Mark best option
     options.sort((a, b) => b.greenScore - a.greenScore);
+    
+    // Mark the most eco-friendly option
+    if (options.length > 0) {
+      options[0].description = `🌱 Eco Choice: ${options[0].description}`;
+    }
     
     logger.info(`✅ Generated ${options.length} route options`);
     return options;
