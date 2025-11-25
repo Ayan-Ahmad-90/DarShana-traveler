@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Leaf, Smile, Bot, Calendar, Plane } from "lucide-react";
+import { Menu, X, Leaf, Smile, Bot, Calendar, Plane, MoreVertical } from "lucide-react";
+import RightSidebar from "./RightSidebar";
+import { useRightSidebar } from "../hooks/useRightSidebar";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isOpen: sidebarIsOpen, openSidebar, closeSidebar } = useRightSidebar();
   const location = useLocation();
 
   const navLinks = [
@@ -48,13 +51,24 @@ const Navbar: React.FC = () => {
               );
             })}
 
-            {/* CTA */}
-            <Link
-              to="/register"
-              className="ml-4 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-full text-sm font-medium transition shadow hover:scale-105"
-            >
-              Book Trip
-            </Link>
+            {/* CTA + Kebab Menu */}
+            <div className="ml-4 flex items-center gap-3">
+              <Link
+                to="/register"
+                className="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-full text-sm font-medium transition shadow hover:scale-105"
+              >
+                Book Trip
+              </Link>
+              
+              {/* Kebab Menu (3-dot) */}
+              <button
+                onClick={openSidebar}
+                className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg transition hover:text-orange-600"
+                title="More options"
+              >
+                <MoreVertical size={22} />
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -101,6 +115,9 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Right Sidebar Drawer */}
+      <RightSidebar isOpen={sidebarIsOpen} onClose={closeSidebar} />
     </nav>
   );
 };
