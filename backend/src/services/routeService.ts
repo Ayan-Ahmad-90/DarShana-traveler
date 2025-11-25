@@ -7,10 +7,10 @@ import {
   calculateEmissions,
   calculateSustainabilityScore,
   calculateEmissionComparison,
-} from './emissions.js';
-import { calculateRewardPoints } from './rewards.js';
-import { getRoadDistance, getFlightDistance, getTrainDistance } from './routing.js';
-import logger from './logger.js';
+} from '../utils/emissions.js';
+import { calculateRewardPoints } from '../utils/rewards.js';
+import { getRoadDistance, getFlightDistance, getTrainDistance } from '../utils/routing.js';
+import logger from '../utils/logger.js';
 
 export interface RouteOption {
   mode: string;
@@ -96,15 +96,15 @@ const generateDescription = (mode: string, distance: number, time: string): stri
 export const generateRouteOptions = async (
   from: string,
   to: string,
-  distance?: number
+  distance?: number,
 ): Promise<RouteOption[]> => {
   try {
-    let roadDistance = distance;
+    let roadDistance: number = distance || 0;
     
     // Get distance if not provided
     if (!roadDistance) {
       const result = await getRoadDistance(from, to);
-      roadDistance = result.distance;
+      roadDistance = result?.distance || 100; // Default 100 km if calculation fails
     }
     
     logger.info(`📍 Generating routes for ${from} → ${to} (${roadDistance} km)`);

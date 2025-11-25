@@ -153,11 +153,11 @@ export const getStats = async (req: Request, res: Response) => {
     let totalEmissionsSaved = 0;
     let totalDistancePlanned = 0;
     
-    allRoutes.forEach(route => {
+    allRoutes.forEach((route: any) => {
       totalDistancePlanned += route.distance;
       if (route.options.length > 0) {
-        const maxEmissions = Math.max(...route.options.map(o => o.co2));
-        const minEmissions = Math.min(...route.options.map(o => o.co2));
+        const maxEmissions = Math.max(...route.options.map((o: any) => o.co2));
+        const minEmissions = Math.min(...route.options.map((o: any) => o.co2));
         totalEmissionsSaved += (maxEmissions - minEmissions) * (route.distance / 100);
       }
     });

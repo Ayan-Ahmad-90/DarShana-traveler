@@ -16,13 +16,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
-app.use((req, res, next) => {
+app.use((req: any, res: any, next: any) => {
   logger.info(`${req.method} ${req.path}`);
   next();
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: any, res: any) => {
   res.status(200).json({
     status: 'ok',
     service: 'darshana-green-routes',
@@ -34,7 +34,7 @@ app.get('/health', (req, res) => {
 app.use('/api/routes', routeRoutes);
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: any, res: any) => {
   logger.warn(`404 Not Found: ${req.method} ${req.path}`);
   res.status(404).json({
     success: false,
