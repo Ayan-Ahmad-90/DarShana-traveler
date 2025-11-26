@@ -54,11 +54,17 @@ const Sustainable: React.FC = () => {
     } catch (err) {
       console.error('Route calculation error:', err);
       const errorMsg = err instanceof Error ? err.message : 'Failed to calculate routes';
-      const isProductionError = window.location.hostname.includes('vercel.app');
-      const helpText = isProductionError 
-        ? ' Backend server needs to be deployed. Check DEPLOYMENT.md for setup instructions.'
-        : ' Make sure the backend server is running on port 5000.';
-      setError(errorMsg + helpText);
+      
+      // Check if it's a connection refused error
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Connection refused')) {
+        setError('⚠️ Backend server is not running. Please check: 1) Backend is started on port 3000, 2) MongoDB connection is configured, 3) API endpoint is accessible.');
+      } else {
+        const isProductionError = window.location.hostname.includes('vercel.app');
+        const helpText = isProductionError 
+          ? ' Backend server needs to be deployed. Check DEPLOYMENT.md for setup instructions.'
+          : ' Make sure the backend server is running and MongoDB is connected.';
+        setError(errorMsg + helpText);
+      }
     } finally {
       setLoading(false);
     }
