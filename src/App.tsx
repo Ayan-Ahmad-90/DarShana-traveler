@@ -1,6 +1,7 @@
 import React from "react";
 import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -12,7 +13,15 @@ import Festivals from "./pages/Festivals";
 import Sustainable from "./pages/Sustainable";
 import Assistant from "./pages/Assistant";
 import Register from "./pages/Register";
-// import SignIn from "./pages/SignIn";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+import MyTrips from "./pages/MyTrips";
+import FestivalAlerts from "./pages/FestivalAlerts";
+import LanguageSelector from "./pages/LanguageSelector";
+import TripPlannerWithSuggestions from "./pages/TripPlannerWithSuggestions";
+import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
+import LocalGuideDashboard from "./pages/LocalGuideDashboard";
+import GuideListing from "./pages/GuideListing";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -28,34 +37,43 @@ const ScrollToTop: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <ScrollToTop />
+    <AuthProvider>
+      <HashRouter>
+        <ScrollToTop />
 
-      {/* Page Wrapper */}
-      <div className="min-h-screen flex flex-col bg-stone-50 text-gray-900 font-sans">
+        {/* Page Wrapper */}
+        <div className="min-h-screen flex flex-col bg-stone-50 text-gray-900 font-sans">
 
-        {/* Navbar */}
-        <Navbar />
+          {/* Navbar */}
+          <Navbar />
 
-        {/* Page Content */}
-        <main className="flex-grow pt-20 sm:pt-24">
+          {/* Page Content */}
+          <main className="flex-grow pt-20 sm:pt-24">
           <Routes>
-  <Route path="/" element={<Home />} />
-  <Route path="/mood" element={<MoodAnalyzer />} />
-  <Route path="/travelhub" element={<TravelHub />} />
-  <Route path="/festivals" element={<Festivals />} />
-  <Route path="/sustainable" element={<Sustainable />} />
-  <Route path="/assistant" element={<Assistant />} />
-  <Route path="/register" element={<Register />} />
-  {/* <Route path="/signin" element={<SignIn />} />   */}
-</Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/mood" element={<MoodAnalyzer />} />
+            <Route path="/travelhub" element={<TravelHub />} />
+            <Route path="/festivals" element={<Festivals />} />
+            <Route path="/sustainable" element={<Sustainable />} />
+            <Route path="/assistant" element={<Assistant />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/my-trips" element={<MyTrips />} />
+            <Route path="/festival-alerts" element={<FestivalAlerts />} />
+            <Route path="/language" element={<LanguageSelector />} />
+            <Route path="/trip-planner" element={<TripPlannerWithSuggestions />} />
+            <Route path="/rewards" element={<EcoRewardsDashboard />} />
+            <Route path="/become-guide" element={<LocalGuideDashboard />} />
+            <Route path="/guides" element={<GuideListing />} />
+          </Routes>
         </main>
-
         {/* Footer */}
         <Footer />
 
       </div>
     </HashRouter>
+    </AuthProvider>
   );
 };
 
