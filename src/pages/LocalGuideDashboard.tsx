@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Phone, Mail, AlertCircle, Loader, Save } from 'lucide-react';
+import { MapPin, Phone, Mail, AlertCircle, Loader, Save, DollarSign, MessageSquare, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface GuideProfile {
@@ -380,22 +380,44 @@ const LocalGuideDashboard = () => {
           </form>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <p className="text-gray-600 text-sm">Rating</p>
-                <p className="text-3xl font-bold text-yellow-500">{guideProfile.rating.toFixed(1)} ⭐</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg shadow-lg p-6 border-l-4 border-yellow-500">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Rating</p>
+                    <p className="text-3xl font-bold text-yellow-600 mt-2">{guideProfile.rating.toFixed(1)}</p>
+                  </div>
+                  <span className="text-2xl">⭐</span>
+                </div>
               </div>
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <p className="text-gray-600 text-sm">Reviews</p>
-                <p className="text-3xl font-bold text-blue-600">{guideProfile.totalReviews}</p>
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg shadow-lg p-6 border-l-4 border-blue-500">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Reviews</p>
+                    <p className="text-3xl font-bold text-blue-600 mt-2">{guideProfile.totalReviews}</p>
+                  </div>
+                  <MessageSquare size={24} className="text-blue-400" />
+                </div>
               </div>
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <p className="text-gray-600 text-sm">Price/Day</p>
-                <p className="text-3xl font-bold text-green-600">${guideProfile.pricePerDay}</p>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-lg p-6 border-l-4 border-green-500">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Price/Day</p>
+                    <p className="text-3xl font-bold text-green-600 mt-2">${guideProfile.pricePerDay}</p>
+                  </div>
+                  <DollarSign size={24} className="text-green-400" />
+                </div>
               </div>
-              <div className="bg-white rounded-lg shadow-lg p-6">
-                <p className="text-gray-600 text-sm">Status</p>
-                <p className="text-2xl font-bold text-green-600">{guideProfile.verified ? '✓ Verified' : 'Pending'}</p>
+              <div className={`bg-gradient-to-br ${guideProfile.verified ? 'from-green-50 to-teal-50' : 'from-gray-50 to-slate-50'} rounded-lg shadow-lg p-6 border-l-4 ${guideProfile.verified ? 'border-green-500' : 'border-gray-500'}`}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-gray-600 text-sm font-medium">Status</p>
+                    <p className={`text-2xl font-bold mt-2 ${guideProfile.verified ? 'text-green-600' : 'text-gray-600'}`}>
+                      {guideProfile.verified ? '✓ Verified' : 'Pending'}
+                    </p>
+                  </div>
+                  <CheckCircle size={24} className={guideProfile.verified ? 'text-green-400' : 'text-gray-400'} />
+                </div>
               </div>
             </div>
 

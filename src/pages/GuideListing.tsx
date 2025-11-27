@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin, Star, Loader, AlertCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 import GuideCard from '../components/GuideCard';
 
 interface Guide {
@@ -18,24 +17,24 @@ interface Guide {
 }
 
 const GuideListing = () => {
-  const { isAuthenticated } = useAuth();
   const [guides, setGuides] = useState<Guide[]>([]);
   const [filteredGuides, setFilteredGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
+  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [sortBy, setSortBy] = useState<'rating' | 'price' | 'reviews'>('rating');
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchGuides();
-    }
-  }, [isAuthenticated]);
+    fetchGuides();
+  }, []);
 
   useEffect(() => {
     filterGuides();
-  }, [guides, searchLocation, selectedSpecialization]);
+  }, [guides, searchLocation, selectedSpecialization, maxPrice, minRating, sortBy]);
 
   const fetchGuides = async () => {
     try {
@@ -71,12 +70,23 @@ const GuideListing = () => {
       );
     }
 
+    // Price filter
+    filtered = filtered.filter(guide => guide.pricePerDay <= maxPrice);
+
+    // Rating filter
+    filtered = filtered.filter(guide => guide.rating >= minRating);
+
+    // Sorting
+    if (sortBy === 'rating') {
+      filtered.sort((a, b) => b.rating - a.rating);
+    } else if (sortBy === 'price') {
+      filtered.sort((a, b) => a.pricePerDay - b.pricePerDay);
+    } else if (sortBy === 'reviews') {
+      filtered.sort((a, b) => b.totalReviews - a.totalReviews);
+    }
+
     setFilteredGuides(filtered);
   };
-
-  if (!isAuthenticated) {
-    return <div className="text-center py-12">Please login to browse guides</div>;
-  }
 
   const specializations = ['historical', 'adventure', 'cultural', 'nature', 'religious', 'food', 'other'];
 
@@ -94,7 +104,7 @@ const GuideListing = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Search by Location</label>
               <div className="relative">
@@ -124,10 +134,42 @@ const GuideListing = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Results</label>
-              <div className="px-4 py-2 bg-gray-100 rounded-lg">
-                <p className="text-lg font-semibold text-gray-900">{filteredGuides.length} guides found</p>
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Max Price ($/day)</label>
+              <input
+                type="number"
+                value={maxPrice}
+                min={0}
+                max={10000}
+                onChange={e => setMaxPrice(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Min Rating</label>
+              <input
+                type="number"
+                value={minRating}
+                min={0}
+                max={5}
+                step={0.1}
+                onChange={e => setMinRating(Number(e.target.value))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4 mt-4">
+            <label className="block text-sm font-medium text-gray-700">Sort By:</label>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as 'rating' | 'price' | 'reviews')}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="rating">Rating</option>
+              <option value="price">Price</option>
+              <option value="reviews">Reviews</option>
+            </select>
+            <div className="px-4 py-2 bg-gray-100 rounded-lg ml-auto">
+              <p className="text-lg font-semibold text-gray-900">{filteredGuides.length} guides found</p>
             </div>
           </div>
         </div>
@@ -218,12 +260,20 @@ const GuideListing = () => {
                   </div>
                 </div>
 
-                <button
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-colors"
-                  onClick={() => setSelectedGuide(null)}
-                >
-                  Book This Guide
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                    onClick={() => setSelectedGuide(null)}
+                  >
+                    Book This Guide
+                  </button>
+                  <button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                    onClick={() => alert('Contact feature coming soon!')}
+                  >
+                    Contact Guide
+                  </button>
+                </div>
               </div>
             </div>
           </div>

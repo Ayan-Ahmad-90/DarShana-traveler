@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import LocalGuide from '../models/LocalGuide';
 import GuideInteraction from '../models/GuideInteraction';
+import GuideMessage from '../models/GuideMessage';
 import { AuthRequest } from '../middleware/auth';
 
 export class GuideController {
@@ -203,6 +204,44 @@ export class GuideController {
         count: interactions.length,
         interactions
       });
+    } catch (err: any) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  // Send a message to a guide
+  static async sendMessageToGuide(req: AuthRequest, res: Response) {
+    try {
+      const { guideId, message } = req.body;
+      if (!guideId || !message) {
+        return res.status(400).json({ success: false, message: 'Guide ID and message required' });
+      }
+      const newMessage = await GuideMessage.create({
+        senderId: req.userId,
+        receiverId: guideId,
+        message,
+        sentAt: new Date()
+      });
+      res.status(201).json({ success: true, message: 'Message sent', data: newMessage });
+    } catch (err: any) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  }
+
+  // Get message thread between user and guide
+  static async getMessageThread(req: AuthRequest, res: Response) {
+    try {
+      const { guideId } = req.params;
+      if (!guideId) {
+        return res.status(400).json({ success: false, message: 'Guide ID required' });
+      }
+      const thread = await GuideMessage.find({
+        $or: [
+          { senderId: req.userId, receiverId: guideId },
+          { senderId: guideId, receiverId: req.userId }
+        ]
+      }).sort({ sentAt: 1 });
+      res.status(200).json({ success: true, thread });
     } catch (err: any) {
       res.status(500).json({ success: false, message: err.message });
     }

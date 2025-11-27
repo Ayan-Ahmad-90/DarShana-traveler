@@ -4,6 +4,7 @@ import { connectDatabase } from './config/database.js';
 import { env } from './config/environment.js';
 import logger from './utils/logger.js';
 import routeRoutes from './routes/routes.js';
+import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.get('/health', (req: any, res: any) => {
 
 // API Routes
 app.use('/api/routes', routeRoutes);
+app.use('/api/mood-analyze', moodAnalyzerRoutes);
 
 // 404 handler
 app.use((req: any, res: any) => {

@@ -55,7 +55,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
     { label: 'Festival Alerts', icon: Bell, color: 'text-red-600', onClick: () => { navigate('/festival-alerts'); onClose(); } },
     { label: 'Language', icon: Globe, color: 'text-green-600', onClick: () => { navigate('/language'); onClose(); } },
     { label: 'Local Guides', icon: Users, color: 'text-purple-600', onClick: () => { navigate('/guides'); onClose(); } },
-    { label: 'Become a Guide', icon: Users, color: 'text-indigo-600', onClick: () => { navigate('/become-guide'); onClose(); } },
+    { label: 'Guide portal', icon: Users, color: 'text-indigo-600', onClick: () => { navigate('/become-guide'); onClose(); } },
   ];
 
   return (
