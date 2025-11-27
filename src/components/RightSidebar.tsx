@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, User, Luggage, Bell, Globe, LogOut, AlertCircle } from 'lucide-react';
+import { X, User, Luggage, Bell, Globe, LogOut, AlertCircle, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -54,6 +54,8 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
     { label: 'My Trips', icon: Luggage, color: 'text-orange-600', onClick: () => { navigate('/my-trips'); onClose(); } },
     { label: 'Festival Alerts', icon: Bell, color: 'text-red-600', onClick: () => { navigate('/festival-alerts'); onClose(); } },
     { label: 'Language', icon: Globe, color: 'text-green-600', onClick: () => { navigate('/language'); onClose(); } },
+    { label: 'Local Guides', icon: Users, color: 'text-purple-600', onClick: () => { navigate('/guides'); onClose(); } },
+    { label: 'Become a Guide', icon: Users, color: 'text-indigo-600', onClick: () => { navigate('/become-guide'); onClose(); } },
   ];
 
   return (
