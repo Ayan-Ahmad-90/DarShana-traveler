@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trip, TransportType, TravelerDetail } from '../types';
+import type { TransportType, TravelerDetail } from '../../types';
 import { MapPin, Users, CreditCard, CheckCircle } from 'lucide-react';
 
 const TripBooking: React.FC = () => {
@@ -21,7 +21,6 @@ const TripBooking: React.FC = () => {
     endDate: '',
     totalCost: 0,
   });
-  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | 'failed'>('pending');
 
   const destinations = [
     { id: '1', name: 'Goa', country: 'India', cost: 25000 },
@@ -108,7 +107,7 @@ const TripBooking: React.FC = () => {
 
   const handleProcessPayment = async () => {
     // Simulate payment processing
-    setPaymentStatus('completed');
+    // Payment logic here
   };
 
   return (

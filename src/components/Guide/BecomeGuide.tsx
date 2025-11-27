@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   MapPin,
-  Star,
-  Users,
   DollarSign,
   FileText,
   Check,
@@ -14,7 +12,7 @@ import {
   Globe,
   Award,
 } from 'lucide-react';
-import { GuideRegistration } from '../../types';
+import type { GuideRegistration } from '../../types';
 
 const BecomeGuide: React.FC = () => {
   const navigate = useNavigate();
@@ -196,10 +194,11 @@ const BecomeGuide: React.FC = () => {
   ) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData((prev) => ({
+      setFormData((prev: Partial<GuideRegistration>) => ({
         ...prev,
         documents: {
-          ...prev.documents,
+          idProof: prev.documents?.idProof || '',
+          backgroundCheck: prev.documents?.backgroundCheck || '',
           [field]: file,
         },
       }));

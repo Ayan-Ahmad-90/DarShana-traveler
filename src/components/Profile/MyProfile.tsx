@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, Trip, Destination } from '../types';
+import type { UserProfile } from '../../types';
 import { Edit2, Plus, Calendar, MapPin } from 'lucide-react';
 
 const MyProfile: React.FC = () => {
@@ -185,7 +185,7 @@ const MyProfile: React.FC = () => {
 
           {profile.upcomingTrips.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.upcomingTrips.map((trip) => (
+              {profile.upcomingTrips.map((trip: any) => (
                 <div key={trip.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="font-semibold text-gray-800 text-lg">
@@ -225,7 +225,7 @@ const MyProfile: React.FC = () => {
 
           {profile.pastTrips.length > 0 ? (
             <div className="space-y-3">
-              {profile.pastTrips.map((trip) => (
+              {profile.pastTrips.map((trip: any) => (
                 <div key={trip.id} className="flex items-center justify-between border border-gray-200 rounded-lg p-4">
                   <div>
                     <h3 className="font-semibold text-gray-800">{trip.destination.name}</h3>
@@ -256,7 +256,7 @@ const MyProfile: React.FC = () => {
 
           {profile.savedDestinations.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.savedDestinations.map((destination) => (
+              {profile.savedDestinations.map((destination: any) => (
                 <div key={destination.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition">
                   <img
                     src={destination.image}

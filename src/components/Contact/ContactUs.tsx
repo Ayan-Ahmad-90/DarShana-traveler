@@ -1,10 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import emailjs from '@emailjs/browser';
-import { ContactMessage } from '../types';
+import React, { useState } from 'react';
+import type { ContactMessage } from '../../types';
 import { Phone, Mail, MapPin, Send } from 'lucide-react';
-
-// Initialize EmailJS with your public key
-emailjs.init(process.env.REACT_APP_EMAILJS_PUBLIC_KEY || '');
 
 const ContactUs: React.FC = () => {
   const [formData, setFormData] = useState<ContactMessage>({
@@ -13,6 +9,7 @@ const ContactUs: React.FC = () => {
     email: '',
     phone: '',
     message: '',
+    status: 'pending',
   });
 
   const [loading, setLoading] = useState(false);
@@ -77,22 +74,7 @@ const ContactUs: React.FC = () => {
 
     setLoading(true);
     try {
-      // Send email via EmailJS
-      await emailjs.send(
-        process.env.REACT_APP_EMAILJS_SERVICE_ID || '',
-        process.env.REACT_APP_EMAILJS_TEMPLATE_ID || 'template_ysa4wpb',
-        {
-          to_email: process.env.REACT_APP_ADMIN_EMAIL || 'admin@darshanatravel.com',
-          subject: formData.subject,
-          from_name: formData.fullName,
-          from_email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
-          timestamp: new Date().toLocaleString(),
-        }
-      );
-
-      // Also save to your backend
+      // Save to your backend
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -109,6 +91,7 @@ const ContactUs: React.FC = () => {
           email: '',
           phone: '',
           message: '',
+          status: 'pending',
         });
 
         // Reset submitted message after 5 seconds

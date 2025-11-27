@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SignUpData } from '../types';
+import type { SignUpData } from '../../types';
 
 const SignUp: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const SignUp: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev: SignUpData) => ({
       ...prev,
       [name]: value,
     }));

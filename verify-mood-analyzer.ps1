@@ -67,7 +67,6 @@ $docFiles = @(
 foreach ($file in $docFiles) {
     $fullPath = Join-Path -Path (Get-Location) -ChildPath $file
     if (Test-Path $fullPath) {
-        $lines = (Get-Content $fullPath | Measure-Object -Line).Lines
         $size = (Get-Item $fullPath).Length / 1KB
         Write-Host "✓ $file (${size}KB)" -ForegroundColor Green
     } else {

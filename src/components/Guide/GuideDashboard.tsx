@@ -12,7 +12,7 @@ import {
   Edit,
   LogOut,
 } from 'lucide-react';
-import { GuideRequest, LocalGuide, GuideStats } from '../../types';
+import type { GuideRequest, LocalGuide, GuideStats } from '../../types';
 
 const GuideDashboard: React.FC = () => {
   const [guide, setGuide] = useState<LocalGuide | null>(null);

@@ -13,7 +13,7 @@ import {
   Clock,
   Star,
 } from 'lucide-react';
-import { LocalGuide, GuideRequest } from '../../types';
+import type { LocalGuide } from '../../types';
 
 interface RequestDetailState {
   guide: LocalGuide;
