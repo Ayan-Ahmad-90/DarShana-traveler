@@ -37,6 +37,7 @@ const YatraShayak = () => {
         <button
           onClick={() => setIsOpen(true)}
           className="bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 transition transform hover:scale-110"
+          aria-label="Open AI Assistant"
         >
           <MessageCircle size={28} />
         </button>

@@ -13,9 +13,9 @@ const Footer: React.FC = () => {
             Discover the soul of India through AI-powered experiences. From the Himalayas to the Indian Ocean, find your perfect journey.
           </p>
           <div className="flex space-x-4">
-            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer"><Facebook size={20} /></a>
-            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer"><Twitter size={20} /></a>
-            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer"><Instagram size={20} /></a>
+            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={20} /></a>
+            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><Twitter size={20} /></a>
+            <a href="#" className="hover:text-orange-500 transition" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><Instagram size={20} /></a>
           </div>
         </div>
 

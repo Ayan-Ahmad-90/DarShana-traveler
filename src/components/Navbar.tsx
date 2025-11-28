@@ -75,6 +75,7 @@ const Navbar: React.FC = () => {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="md:hidden p-2 text-gray-700 hover:text-orange-600"
+            aria-label="Toggle menu"
           >
             {isOpen ? <X size={26} /> : <Menu size={26} />}
           </button>

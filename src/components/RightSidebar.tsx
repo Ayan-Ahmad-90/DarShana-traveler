@@ -80,6 +80,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             className="p-2 hover:bg-stone-100 rounded-lg transition text-stone-600 hover:text-stone-800"
+            aria-label="Close menu"
           >
             <X size={22} />
           </button>

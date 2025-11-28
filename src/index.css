@@ -111,3 +111,38 @@ button:focus-visible {
     backdrop-filter: blur(8px);
   }
 }
+
+/* ----------------------------------------
+   Specific Compatibility Fixes
+----------------------------------------- */
+
+/* Fix for Leaflet SVG user-select */
+.leaflet-overlay-pane svg {
+  user-select: none;
+}
+
+/* Fix for text-size-adjust */
+html,
+:host {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Fix for backdrop-filter in Tailwind utilities */
+.backdrop-blur-md {
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
+/* Fix for Leaflet zoom in Firefox */
+.leaflet-oldie .leaflet-popup-content-wrapper {
+  zoom: 1;
+}
+
+/* Fix for Leaflet user-drag */
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
