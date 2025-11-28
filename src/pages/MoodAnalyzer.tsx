@@ -247,37 +247,55 @@ const MoodAnalyzer: React.FC = () => {
       setFaceCount(detectedCount);
 
       // Send to backend for emotion analysis
-      const moodResponse = await analyzeMoodWithImage(image);
+      try {
+        console.log('📤 Calling backend API at http://localhost:3001/api/mood-analyze');
+        const moodResponse = await analyzeMoodWithImage(image);
 
-      if (moodResponse.error) {
-        setDetectionError(moodResponse.error);
-        setLoading(false);
-        return;
+        if (moodResponse.error) {
+          setDetectionError(moodResponse.error);
+          setLoading(false);
+          return;
+        }
+
+        // Filter destinations based on mood
+        const recommendations = filterDestinationsByMood(moodResponse);
+
+        if (recommendations.length === 0) {
+          setDetectionError('Could not find matching destinations. Please try again.');
+          setLoading(false);
+          return;
+        }
+
+        // Build result
+        const aiResult: AIAnalysisResult = {
+          detectedMood: moodResponse.detectedMood,
+          confidence: moodResponse.confidence,
+          emotions: moodResponse.emotions,
+          reasoning: moodResponse.reasoning,
+          energyLevel: moodResponse.energyLevel,
+          socialScore: moodResponse.socialScore,
+          adventureScore: moodResponse.adventureScore,
+          recommendations,
+        };
+
+        setResult(aiResult);
+        setSelectedDestinationIdx(0);
+        setAIStep(1);
+      } catch (apiError) {
+        const errorMsg = apiError instanceof Error ? apiError.message : 'Unknown error';
+        console.error('❌ Backend API error:', errorMsg);
+        
+        if (errorMsg.includes('Failed to fetch')) {
+          setDetectionError(
+            'Cannot connect to backend. Make sure the server is running on port 3001.\n' +
+            'Run: cd backend && npm run dev'
+          );
+        } else if (errorMsg.includes('HTTP')) {
+          setDetectionError(`Backend returned error: ${errorMsg}`);
+        } else {
+          setDetectionError(`Analysis failed: ${errorMsg}`);
+        }
       }
-
-      // Filter destinations based on mood
-      const recommendations = filterDestinationsByMood(moodResponse);
-
-      if (recommendations.length === 0) {
-        setDetectionError('Could not find matching destinations. Please try again.');
-        setLoading(false);
-        return;
-      }
-
-      // Build result
-      const aiResult: AIAnalysisResult = {
-        detectedMood: moodResponse.detectedMood,
-        confidence: moodResponse.confidence,
-        emotions: moodResponse.emotions,
-        reasoning: moodResponse.reasoning,
-        energyLevel: moodResponse.energyLevel,
-        socialScore: moodResponse.socialScore,
-        adventureScore: moodResponse.adventureScore,
-        recommendations,
-      };
-
-      setResult(aiResult);
-      setSelectedDestinationIdx(0);
       setSelectedFAQIndex(0);
       setAIStep(1);
     } catch (error) {

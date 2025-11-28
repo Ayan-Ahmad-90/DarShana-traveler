@@ -5,7 +5,7 @@ dotenv.config();
 export const env = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5000', 10),
+  PORT: parseInt(process.env.PORT || '3001', 10),
   
   // Database
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/darshana-travel',
