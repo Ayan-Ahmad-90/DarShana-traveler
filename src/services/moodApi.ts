@@ -8,7 +8,7 @@
 
 import type { MoodAnalyzeRequest, MoodAnalyzeResponse } from '../types/moodAnalyzer';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 const MOOD_ANALYZE_ENDPOINT = '/api/mood-analyze';
 
 /**
