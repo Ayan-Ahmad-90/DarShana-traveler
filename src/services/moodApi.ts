@@ -8,7 +8,8 @@
 
 import type { MoodAnalyzeRequest, MoodAnalyzeResponse } from '../types/moodAnalyzer';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Use the same port as the backend (5000) or the environment variable
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 const MOOD_ANALYZE_ENDPOINT = '/api/mood-analyze';
 
 /**
