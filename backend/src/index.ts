@@ -33,12 +33,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging middleware
 app.use((req: any, res: any, next: any) => {
+  console.log(`\n📨 ${req.method} ${req.path}`);
   logger.info(`${req.method} ${req.path}`);
   next();
 });
 
 // Health check endpoint
 app.get('/health', (req: any, res: any) => {
+  console.log('✅ Health check requested');
   res.status(200).json({
     status: 'ok',
     service: 'darshana-green-routes',
@@ -47,8 +49,12 @@ app.get('/health', (req: any, res: any) => {
 });
 
 // API Routes
+console.log('\n🔌 Mounting API routes...');
 app.use('/api/routes', routeRoutes);
+console.log('✅ Mounted: /api/routes');
+
 app.use('/api/mood-analyze', moodAnalyzerRoutes);
+console.log('✅ Mounted: /api/mood-analyze');
 
 // 404 handler
 app.use((req: any, res: any) => {
