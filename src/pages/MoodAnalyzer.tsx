@@ -149,7 +149,7 @@ const MoodAnalyzer: React.FC = () => {
   // Initialize face detection models on mount
   useEffect(() => {
     faceDetection.loadModels();
-  }, []);
+  }, [faceDetection]);
 
   // Handlers for AI flow
   const startCamera = async () => {
@@ -208,10 +208,19 @@ const MoodAnalyzer: React.FC = () => {
     setDetectionError(null);
 
     try {
-      // First, detect faces locally
+      // First ensure models are loaded
+      if (!faceDetection.modelsLoaded) {
+        console.log('Models not loaded yet, loading...');
+        await faceDetection.loadModels();
+        // Wait a bit for models to fully load
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      // Detect faces locally
       // faceDetection.analyzeImage expects an HTMLImageElement | HTMLVideoElement,
       // so build an Image element from the data URL and wait for it to load.
       const imgEl = new Image();
+      imgEl.crossOrigin = 'anonymous';
       imgEl.src = image;
       try {
         await new Promise<void>((resolve, reject) => {

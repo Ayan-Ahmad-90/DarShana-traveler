@@ -166,35 +166,32 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
    * - Returns an aggregated AIAnalysisResult or null on failure.
    */
   const analyzeImage = useCallback(async (image: HTMLImageElement | HTMLVideoElement): Promise<AnalysisResult | null> => {
-    if (!loadOnceRef.current && !modelsLoaded) {
-      try {
+    try {
+      // Ensure models are loaded before trying to detect
+      if (!modelsLoaded) {
+        console.log('Models not loaded, loading now...');
         await loadModels();
-      } catch (_) {
-        // loadModels already set an error message
+      }
+
+      if (!modelsLoaded) {
+        // Still not loaded after attempt
+        setError('Models failed to load. Please refresh the page.');
         return null;
       }
-    }
 
-    if (!loadOnceRef.current && !modelsLoaded) {
-      // Still not loaded; bail out
-      setError('Models are not loaded');
-      return null;
-    }
-
-    if (error) return null;
-
-    try {
-      // Detect faces with expressions (CPU backend prevents WebGL context loss)
+      // Detect faces with expressions
+      console.log('Detecting faces...');
       const detections = await faceapi
         .detectAllFaces(image)
         .withFaceLandmarks()
         .withFaceExpressions();
 
       if (!detections || detections.length === 0) {
-        setError('No face detected.');
+        setError('No face detected. Please try another image or angle.');
         return null;
       }
 
+      console.log(`Detected ${detections.length} face(s)`);
       const faces = detections.map(toDetectedFace);
 
       // Aggregate emotions across detected faces (mean)

@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export const generateTripSuggestions = async (preferences) => {
+exports.generateTripSuggestions = async (preferences) => {
   const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
   const prompt = `
@@ -43,7 +43,7 @@ export const generateTripSuggestions = async (preferences) => {
   }
 };
 
-export const analyzeMood = async (emotions) => {
+exports.analyzeMood = async (emotions) => {
   const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
   
   const prompt = `
