@@ -131,8 +131,6 @@ const MoodAnalyzer: React.FC = () => {
   const imagePreviewRef = useRef<HTMLImageElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [cameraStatus, setCameraStatus] = useState<'idle' | 'starting' | 'ready' | 'error'>('idle');
-  const [cameraError, setCameraError] = useState<string | null>(null);
   const [aiStep, setAIStep] = useState<number>(0); // 0: input, 1: recommendations shown
   const [isPayingAI, setIsPayingAI] = useState(false);
   const [paidAI, setPaidAI] = useState(false);
@@ -161,13 +159,10 @@ const MoodAnalyzer: React.FC = () => {
       videoRef.current.srcObject = null;
     }
     setIsCameraOpen(false);
-    setCameraStatus('idle');
   }, []);
 
   const initCamera = useCallback(async () => {
-    setCameraError(null);
     setDetectionError(null);
-    setCameraStatus('starting');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
@@ -190,7 +185,6 @@ const MoodAnalyzer: React.FC = () => {
       }
 
       setIsCameraOpen(true);
-      setCameraStatus('ready');
     } catch (err) {
       console.error('Camera error:', err);
       let errorMsg = 'Unable to access camera. Please allow permission.';
@@ -205,8 +199,7 @@ const MoodAnalyzer: React.FC = () => {
       } else if (err instanceof Error) {
         errorMsg = err.message;
       }
-      setCameraError(errorMsg);
-      setCameraStatus('error');
+      setDetectionError(errorMsg);
       setIsCameraOpen(false);
     }
   }, []);
@@ -251,8 +244,6 @@ const MoodAnalyzer: React.FC = () => {
         imagePreviewRef.current = null;
         setImage(reader.result as string);
         setDetectionError(null);
-        setCameraError(null);
-        setCameraStatus('idle');
       };
       reader.readAsDataURL(file);
     }
@@ -264,8 +255,6 @@ const MoodAnalyzer: React.FC = () => {
     setDetectionError(null);
     setFaceCount(null);
     imagePreviewRef.current = null;
-    setCameraError(null);
-    setCameraStatus('idle');
   }, []);
 
   const analyzeAI = async () => {
