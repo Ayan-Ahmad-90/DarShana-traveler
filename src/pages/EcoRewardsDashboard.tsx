@@ -43,7 +43,8 @@ const EcoRewardsDashboard = () => {
 
   const fetchRewards = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/rewards/user-rewards', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/rewards/user-rewards`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -63,7 +64,8 @@ const EcoRewardsDashboard = () => {
   const handleLogActivity = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/rewards/log-activity', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/rewards/log-activity`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

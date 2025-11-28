@@ -248,7 +248,7 @@ const MoodAnalyzer: React.FC = () => {
 
       // Send to backend for emotion analysis
       try {
-        console.log('📤 Calling backend API at http://localhost:3001/api/mood-analyze');
+        console.log('📤 Calling backend API: /api/mood-analyze');
         const moodResponse = await analyzeMoodWithImage(image);
 
         if (moodResponse.error) {

@@ -46,8 +46,9 @@ const TripPlannerWithSuggestions = () => {
     setLoading(true);
     setError('');
     try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
       const response = await fetch(
-        `http://localhost:3001/api/suggestions/complete?month=${month}&location=${location}`,
+        `${baseUrl}/api/suggestions/complete?month=${month}&location=${location}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

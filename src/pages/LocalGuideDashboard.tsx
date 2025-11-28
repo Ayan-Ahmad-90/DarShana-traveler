@@ -65,7 +65,8 @@ const LocalGuideDashboard = () => {
 
   const fetchGuideProfile = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-profile', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/guides/my-profile`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -95,7 +96,8 @@ const LocalGuideDashboard = () => {
 
   const fetchInteractions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-interactions', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/guides/my-interactions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -112,7 +114,8 @@ const LocalGuideDashboard = () => {
   const handleRegisterAsGuide = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/guides/register', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/guides/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +138,8 @@ const LocalGuideDashboard = () => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-profile', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/guides/my-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
