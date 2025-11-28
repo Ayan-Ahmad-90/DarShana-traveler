@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Calendar, Utensils, AlertCircle, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getBackendUrl } from '../config/api';
 
 interface Festival {
   _id: string;
@@ -37,6 +38,11 @@ const TripPlannerWithSuggestions = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const resolveBackendUrl = useCallback(() => {
+    const candidate = import.meta.env.VITE_BACKEND_URL?.trim() || getBackendUrl() || 'http://localhost:3001';
+    return candidate.replace(/\/+$/, '');
+  }, []);
+
   const fetchSuggestions = async () => {
     if (!location) {
       setError('Please enter a location');
@@ -46,7 +52,7 @@ const TripPlannerWithSuggestions = () => {
     setLoading(true);
     setError('');
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const baseUrl = resolveBackendUrl();
       const response = await fetch(
         `${baseUrl}/api/suggestions/complete?month=${month}&location=${location}`,
         {

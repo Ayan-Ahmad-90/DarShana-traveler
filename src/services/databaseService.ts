@@ -1,4 +1,12 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+import { getBackendUrl } from '../config/api';
+
+const resolveBackendOrigin = (): string => {
+  const envUrl = import.meta.env.VITE_BACKEND_URL?.trim();
+  const candidate = envUrl || getBackendUrl() || 'http://localhost:3001';
+  return candidate.replace(/\/+$/, '');
+};
+
+const API_BASE_URL = `${resolveBackendOrigin()}/api`;
 
 export async function fetchQuestionsFromDB(category?: string) {
   try {

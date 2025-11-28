@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useFaceDetection } from '../hooks/useFaceDetection';
-import { analyzeMoodWithImage } from '../services/moodApi';
+import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
 import { DESTINATIONS } from '../data/destinations';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
@@ -128,7 +128,11 @@ const MoodAnalyzer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AIAnalysisResult | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imagePreviewRef = useRef<HTMLImageElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraStatus, setCameraStatus] = useState<'idle' | 'starting' | 'ready' | 'error'>('idle');
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const [aiStep, setAIStep] = useState<number>(0); // 0: input, 1: recommendations shown
   const [isPayingAI, setIsPayingAI] = useState(false);
   const [paidAI, setPaidAI] = useState(false);
@@ -146,24 +150,70 @@ const MoodAnalyzer: React.FC = () => {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [isPaying, setIsPaying] = useState(false);
 
-  // Initialize face detection models on mount
-  useEffect(() => {
-    faceDetection.loadModels();
-  }, [faceDetection]);
-
   // Handlers for AI flow
-  const startCamera = async () => {
+  const stopCamera = useCallback(() => {
+    const mediaStream = cameraStreamRef.current || (videoRef.current?.srcObject as MediaStream | null);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+    }
+    cameraStreamRef.current = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOpen(false);
+    setCameraStatus('idle');
+  }, []);
+
+  const initCamera = useCallback(async () => {
+    setCameraError(null);
+    setDetectionError(null);
+    setCameraStatus('starting');
     try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+        audio: false,
+      });
+
+      const videoElement = videoRef.current;
+      if (!videoElement) {
+        stream.getTracks().forEach(track => track.stop());
+        throw new Error('Camera preview not ready. Please retry.');
+      }
+
+      videoElement.srcObject = stream;
+      cameraStreamRef.current = stream;
+
+      if (typeof videoElement.play === 'function') {
+        await videoElement.play().catch(() => {
+          /* Autoplay might require user gesture; ignore to allow manual play */
+        });
+      }
+
       setIsCameraOpen(true);
-      setDetectionError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) videoRef.current.srcObject = stream;
+      setCameraStatus('ready');
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Camera not accessible';
-      setDetectionError(errorMsg);
+      console.error('Camera error:', err);
+      let errorMsg = 'Unable to access camera. Please allow permission.';
+      if (err instanceof DOMException) {
+        if (err.name === 'NotAllowedError') {
+          errorMsg = 'Camera permission blocked. Allow access and retry.';
+        } else if (err.name === 'NotFoundError') {
+          errorMsg = 'No camera device found.';
+        } else if (err.name === 'NotReadableError') {
+          errorMsg = 'Camera is already in use by another application.';
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      }
+      setCameraError(errorMsg);
+      setCameraStatus('error');
       setIsCameraOpen(false);
     }
-  };
+  }, []);
+
+  const startCamera = useCallback(async () => {
+    await initCamera();
+  }, [initCamera]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
@@ -177,13 +227,16 @@ const MoodAnalyzer: React.FC = () => {
     }
   };
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
-      setIsCameraOpen(false);
-    }
-  };
+  // Initialize face detection models on mount and ensure camera stops on unmount
+  useEffect(() => {
+    void faceDetection.loadModels().catch(err => {
+      console.error('Failed to preload face detection models:', err);
+    });
+    return () => {
+      stopCamera();
+      imagePreviewRef.current = null;
+    };
+  }, [faceDetection, stopCamera]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,113 +247,160 @@ const MoodAnalyzer: React.FC = () => {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
+        stopCamera();
+        imagePreviewRef.current = null;
         setImage(reader.result as string);
         setDetectionError(null);
+        setCameraError(null);
+        setCameraStatus('idle');
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const clearCapturedImage = useCallback(() => {
+    setImage(null);
+    setResult(null);
+    setDetectionError(null);
+    setFaceCount(null);
+    imagePreviewRef.current = null;
+    setCameraError(null);
+    setCameraStatus('idle');
+  }, []);
+
   const analyzeAI = async () => {
-    if (!image) return;
+    if (!image) {
+      setDetectionError('Please capture or upload a photo before analysis.');
+      return;
+    }
 
     setLoading(true);
     setDetectionError(null);
 
-    try {
-      // First ensure models are loaded
-      if (!faceDetection.modelsLoaded) {
-        console.log('Models not loaded yet, loading...');
-        await faceDetection.loadModels();
-        // Wait a bit for models to fully load
-        await new Promise(resolve => setTimeout(resolve, 500));
+    const backendEndpoint = getMoodAnalyzerUrl();
+
+    const prepareImageForAnalysis = async (): Promise<HTMLImageElement> => {
+      const previewNode = imagePreviewRef.current;
+
+      if (previewNode) {
+        if (!previewNode.complete || previewNode.naturalWidth === 0) {
+          await new Promise<void>((resolve, reject) => {
+            const node = previewNode;
+            if (!node) {
+              resolve();
+              return;
+            }
+
+            function cleanup() {
+              node.removeEventListener('load', handleLoad);
+              node.removeEventListener('error', handleError);
+            }
+
+            const handleLoad = () => {
+              cleanup();
+              resolve();
+            };
+
+            const handleError = () => {
+              cleanup();
+              reject(new Error('Failed to load image for analysis. Please try another photo.'));
+            };
+
+            node.addEventListener('load', handleLoad);
+            node.addEventListener('error', handleError);
+          });
+        }
+
+        if (previewNode.naturalWidth === 0) {
+          throw new Error('Preview image is empty. Please capture a new photo.');
+        }
+
+        return previewNode;
       }
 
-      // Detect faces locally
-      // faceDetection.analyzeImage expects an HTMLImageElement | HTMLVideoElement,
-      // so build an Image element from the data URL and wait for it to load.
-      const imgEl = new Image();
-      imgEl.crossOrigin = 'anonymous';
-      imgEl.src = image;
+      return await new Promise<HTMLImageElement>((resolve, reject) => {
+        const imgEl = new Image();
+        imgEl.crossOrigin = 'anonymous';
+        imgEl.onload = () => resolve(imgEl);
+        imgEl.onerror = () => reject(new Error('Failed to load image for analysis. Please try another photo.'));
+        imgEl.src = image;
+      });
+    };
+
+    try {
+      if (!faceDetection.modelsLoaded) {
+        console.debug('Face detection models not ready — loading now.');
+        await faceDetection.loadModels();
+        await new Promise(resolve => setTimeout(resolve, 250));
+      }
+
+      let imageNode: HTMLImageElement;
       try {
-        await new Promise<void>((resolve, reject) => {
-          imgEl.onload = () => resolve();
-          imgEl.onerror = () => reject(new Error('Failed to load image for analysis'));
-        });
-      } catch (err) {
-        setDetectionError('Could not load image for analysis. Please try another photo.');
-        setLoading(false);
+        imageNode = await prepareImageForAnalysis();
+      } catch (prepError) {
+        const message = prepError instanceof Error ? prepError.message : 'Could not load image for analysis.';
+        setDetectionError(message);
+        setFaceCount(null);
         return;
       }
 
-      const localAnalysis = await faceDetection.analyzeImage(imgEl);
+      const localAnalysis = await faceDetection.analyzeImage(imageNode);
 
       if (!localAnalysis) {
         setDetectionError(faceDetection.error || 'No face detected. Please try again.');
-        setLoading(false);
+        setFaceCount(null);
         return;
       }
 
-      // Extract face count from the analysis reasoning (hook returns aggregated result)
       const match = localAnalysis.reasoning?.match(/Detected\s+(\d+)\s+face/i);
-      const detectedCount = match ? parseInt(match[1], 10) : 1;
-      setFaceCount(detectedCount);
+      setFaceCount(match ? parseInt(match[1], 10) : 1);
 
-      // Send to backend for emotion analysis
-      try {
-        console.log('📤 Calling backend API: /api/mood-analyze');
-        const moodResponse = await analyzeMoodWithImage(image);
+      const moodResponse = await analyzeMoodWithImage(image);
 
-        if (moodResponse.error) {
-          setDetectionError(moodResponse.error);
-          setLoading(false);
-          return;
-        }
-
-        // Filter destinations based on mood
-        const recommendations = filterDestinationsByMood(moodResponse);
-
-        if (recommendations.length === 0) {
-          setDetectionError('Could not find matching destinations. Please try again.');
-          setLoading(false);
-          return;
-        }
-
-        // Build result
-        const aiResult: AIAnalysisResult = {
-          detectedMood: moodResponse.detectedMood,
-          confidence: moodResponse.confidence,
-          emotions: moodResponse.emotions,
-          reasoning: moodResponse.reasoning,
-          energyLevel: moodResponse.energyLevel,
-          socialScore: moodResponse.socialScore,
-          adventureScore: moodResponse.adventureScore,
-          recommendations,
-        };
-
-        setResult(aiResult);
-        setSelectedDestinationIdx(0);
-        setAIStep(1);
-      } catch (apiError) {
-        const errorMsg = apiError instanceof Error ? apiError.message : 'Unknown error';
-        console.error('❌ Backend API error:', errorMsg);
-        
-        if (errorMsg.includes('Failed to fetch')) {
-          setDetectionError(
-            'Cannot connect to backend. Make sure the server is running on port 3001.\n' +
-            'Run: cd backend && npm run dev'
-          );
-        } else if (errorMsg.includes('HTTP')) {
-          setDetectionError(`Backend returned error: ${errorMsg}`);
-        } else {
-          setDetectionError(`Analysis failed: ${errorMsg}`);
-        }
+      if (moodResponse.error) {
+        setDetectionError(moodResponse.error);
+        return;
       }
+
+      const recommendations = filterDestinationsByMood({
+        ...moodResponse,
+        recommendedKeys: moodResponse.recommendedKeys ?? [],
+      });
+
+      if (recommendations.length === 0) {
+        setDetectionError('Could not find matching destinations. Please try again.');
+        return;
+      }
+
+      const aiResult: AIAnalysisResult = {
+        detectedMood: moodResponse.detectedMood,
+        confidence: moodResponse.confidence,
+        emotions: moodResponse.emotions,
+        reasoning: moodResponse.reasoning,
+        energyLevel: moodResponse.energyLevel,
+        socialScore: moodResponse.socialScore,
+        adventureScore: moodResponse.adventureScore,
+        recommendations,
+      };
+
+      setResult(aiResult);
+      setSelectedDestinationIdx(0);
       setSelectedFAQIndex(0);
       setAIStep(1);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Analysis failed';
-      setDetectionError(errorMsg);
+      const message = error instanceof Error ? error.message : 'Analysis failed';
+      console.error('❌ Mood analysis failed:', error);
+
+      if (/Failed to reach mood analyzer service/i.test(message) || message.includes('Failed to fetch')) {
+        setDetectionError(
+          `Cannot connect to backend at ${backendEndpoint}. Make sure the server is running on port 3001.\n` +
+          'Run: cd backend && npm run dev'
+        );
+      } else if (message.startsWith('HTTP')) {
+        setDetectionError(`Backend returned error: ${message}`);
+      } else {
+        setDetectionError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -384,9 +484,9 @@ const MoodAnalyzer: React.FC = () => {
           onClick={() => {
             setMode('ai');
             setAIStep(0);
-            setImage(null);
-            setResult(null);
-            setDetectionError(null);
+            clearCapturedImage();
+            setPaidAI(false);
+            setIsPayingAI(false);
           }}
         >
           <Camera size={18} className="inline mr-2" /> AI Mood Analyzer
@@ -456,9 +556,12 @@ const MoodAnalyzer: React.FC = () => {
 
               {image && (
                 <div className="relative h-64 rounded-xl overflow-hidden bg-stone-100">
-                  <img src={image} alt="Captured" className="w-full h-full object-cover" />
+                  <img ref={imagePreviewRef} src={image} alt="Captured" className="w-full h-full object-cover" />
                   <button 
-                    onClick={() => { setImage(null); setResult(null); setDetectionError(null); setFaceCount(null); }}
+                    onClick={() => {
+                      clearCapturedImage();
+                      setAIStep(0);
+                    }}
                     aria-label="Retake photo"
                     className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
                   >
@@ -604,9 +707,10 @@ const MoodAnalyzer: React.FC = () => {
                   className="flex-1 px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
                   onClick={() => {
                     setAIStep(0);
-                    setImage(null);
-                    setResult(null);
-                    setFaceCount(null);
+                    clearCapturedImage();
+                    setPaidAI(false);
+                    setSelectedDestinationIdx(0);
+                    setSelectedFAQIndex(0);
                   }}
                 >
                   Try Different Expression
@@ -663,9 +767,10 @@ const MoodAnalyzer: React.FC = () => {
                   onClick={() => {
                     setAIStep(0);
                     setPaidAI(false);
-                    setImage(null);
-                    setResult(null);
-                    setFaceCount(null);
+                    clearCapturedImage();
+                    setSelectedDestinationIdx(0);
+                    setSelectedFAQIndex(0);
+                    setIsPayingAI(false);
                   }}
                 >
                   Plan Another Trip

@@ -1,145 +1,105 @@
 /**
  * Mood Analyzer API Client
  * Handles communication with backend /api/mood-analyze endpoint
- *
- * Backend: http://localhost:3001/api/mood-analyze
- * Environment: VITE_API_URL (optional override)
- *
- * Usage:
- * const result = await analyzeMoodWithImage(base64ImageData);
  */
 
+import { getBackendUrl } from '../config/api';
 import type { MoodAnalyzeRequest, MoodAnalyzeResponse } from '../types/moodAnalyzer';
 
-// Determine API base URL: env var > localhost:3001
-const getAPIBaseURL = (): string => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl && envUrl.trim()) {
-    console.log('Using API URL from environment:', envUrl);
-    return envUrl;
-  }
-  console.log('Using default API URL: http://localhost:3001');
-  return 'http://localhost:3001';
-};
-
-const API_BASE_URL = getAPIBaseURL();
+const DEFAULT_BACKEND_URL = 'http://localhost:3001';
 const MOOD_ANALYZE_ENDPOINT = '/api/mood-analyze';
 
-/**
- * Send image to backend for mood analysis
- * @param imageData Base64 encoded image data
- * @returns Mood analysis result with emotion scores and recommendations
- * @throws Error if API request fails
- */
-export async function analyzeMoodWithImage(imageData: string): Promise<MoodAnalyzeResponse> {
-  const url = `${API_BASE_URL}${MOOD_ANALYZE_ENDPOINT}`;
-  
-  try {
-    console.log('📤 Sending mood analysis request to:', url);
+const normalizeBaseUrl = (value: string): string => value.replace(/\/+$/, '');
 
-    const request: MoodAnalyzeRequest = {
-      imageData,
-    };
+const resolveBackendOrigin = (): string => {
+  const candidates = [
+    import.meta.env.VITE_BACKEND_URL?.trim(),
+    getBackendUrl(),
+    DEFAULT_BACKEND_URL,
+  ].filter((candidate): candidate is string => Boolean(candidate && candidate.trim()));
+
+  const origin = candidates[0] ?? DEFAULT_BACKEND_URL;
+  return normalizeBaseUrl(origin);
+};
+
+const buildEndpointUrl = (): string => `${resolveBackendOrigin()}${MOOD_ANALYZE_ENDPOINT}`;
+
+const parseJsonSafely = async (response: Response): Promise<any> => {
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('❌ Failed to parse JSON from mood analyzer response:', error);
+    return null;
+  }
+};
+
+const throwForErrorResponse = (response: Response, body: any): never => {
+  const statusMessage = `HTTP ${response.status}: ${response.statusText}`;
+  const errorMessage = body?.error || body?.message || statusMessage;
+  console.error('❌ Mood analyzer API error:', errorMessage);
+  throw new Error(errorMessage);
+};
+
+async function postMoodAnalysis(payload: { imageData?: string; imageUrl?: string }): Promise<MoodAnalyzeResponse> {
+  const url = buildEndpointUrl();
+
+  if (!payload.imageData && !payload.imageUrl) {
+    throw new Error('Image data is required for mood analysis.');
+  }
+
+  const requestBody: MoodAnalyzeRequest = {
+    ...(payload.imageData ? { imageData: payload.imageData } : {}),
+    ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+  };
+
+  try {
+    console.debug('📨 Calling mood analyzer endpoint:', url);
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify(requestBody),
     });
 
-    // Handle non-OK responses
+    const data = await parseJsonSafely(response);
+
     if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // JSON parsing failed, use default error
-      }
-      
-      console.error('❌ API Error:', errorMessage);
-      throw new Error(errorMessage);
+      throwForErrorResponse(response, data);
     }
 
-    // Parse successful response
-    const result: MoodAnalyzeResponse = await response.json();
-    console.log('✅ Mood analysis successful:', result);
-    return result;
-    
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Log detailed error info for debugging
-    if (errorMsg.includes('Failed to fetch')) {
-      console.error('❌ Network Error: Cannot connect to backend at', url);
-      console.error('   Make sure backend is running: npm run dev');
-    } else {
-      console.error('❌ Mood analysis API error:', errorMsg);
+    if (!data) {
+      console.error('❌ Mood analyzer returned empty response body');
+      throw new Error('Mood analyzer returned an empty response.');
     }
-    
-    throw error;
+
+    console.debug('✅ Mood analyzer response received');
+    return data as MoodAnalyzeResponse;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error('❌ Network error while reaching mood analyzer at', url);
+      throw new Error(`Failed to reach mood analyzer service at ${url}. Is the backend running?`);
+    }
+
+    console.error('❌ Unexpected mood analyzer client error:', error);
+    throw error instanceof Error ? error : new Error('Unknown error during mood analysis request.');
   }
 }
 
-/**
- * Analyze mood with image URL (alternative to base64)
- * @param imageUrl URL of the image
- * @returns Mood analysis result with emotion scores and recommendations
- * @throws Error if API request fails
- */
+export const getMoodAnalyzerUrl = (): string => buildEndpointUrl();
+
+export async function analyzeMoodWithImage(imageData: string): Promise<MoodAnalyzeResponse> {
+  return postMoodAnalysis({ imageData });
+}
+
 export async function analyzeMoodWithURL(imageUrl: string): Promise<MoodAnalyzeResponse> {
-  const url = `${API_BASE_URL}${MOOD_ANALYZE_ENDPOINT}`;
-  
-  try {
-    console.log('📤 Sending mood analysis request (URL) to:', url);
-
-    const request: MoodAnalyzeRequest = {
-      imageData: '',
-      imageUrl,
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    });
-
-    // Handle non-OK responses
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-      
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.error || errorMessage;
-      } catch (e) {
-        // JSON parsing failed, use default error
-      }
-      
-      console.error('❌ API Error:', errorMessage);
-      throw new Error(errorMessage);
-    }
-
-    // Parse successful response
-    const result: MoodAnalyzeResponse = await response.json();
-    console.log('✅ Mood analysis successful:', result);
-    return result;
-    
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Log detailed error info for debugging
-    if (errorMsg.includes('Failed to fetch')) {
-      console.error('❌ Network Error: Cannot connect to backend at', url);
-      console.error('   Make sure backend is running: npm run dev');
-    } else {
-      console.error('❌ Mood analysis API error:', errorMsg);
-    }
-    
-    throw error;
-  }
+  return postMoodAnalysis({ imageUrl });
 }

@@ -8,21 +8,22 @@ import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
 
 const app = express();
 
-// Enable CORS - Allow all origins for production
-const corsOptions = {
-  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    // Allow all origins in production
-    callback(null, true);
+const allowedOrigins = env.CORS_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean);
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    logger.warn(`🚫 Blocked CORS origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-  exposedHeaders: ['Content-Type', 'X-Total-Count'],
-  maxAge: 86400,
-  preflightContinue: false,
-  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -84,7 +85,8 @@ const startServer = async () => {
     app.listen(env.PORT, () => {
       logger.info(`🚀 Green Routes Server running on port ${env.PORT}`);
       logger.info(`📍 Environment: ${env.NODE_ENV}`);
-      logger.info(`🌐 CORS Origin: ${env.CORS_ORIGIN}`);
+      logger.info(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
+      logger.info(`🧠 Mood Analyzer Endpoint: http://localhost:${env.PORT}/api/mood-analyze`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
