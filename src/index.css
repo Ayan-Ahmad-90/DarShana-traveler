@@ -86,3 +86,28 @@ button:focus-visible {
   outline: 3px solid #6366f1;
   outline-offset: 3px;
 }
+
+/* ----------------------------------------
+   Cross-browser Compatibility Helpers
+----------------------------------------- */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.text-size-adjust-auto {
+  -webkit-text-size-adjust: auto;
+  -moz-text-size-adjust: auto;
+  -ms-text-size-adjust: auto;
+  text-size-adjust: auto;
+}
+
+/* Ensure backdrop-filter works across supported browsers */
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+  .backdrop-blur-fix {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}

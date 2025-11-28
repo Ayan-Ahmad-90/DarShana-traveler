@@ -22,6 +22,9 @@ import TripPlannerWithSuggestions from "./pages/TripPlannerWithSuggestions";
 import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
 import LocalGuideDashboard from "./pages/LocalGuideDashboard";
 import GuideListing from "./pages/GuideListing";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import YatraShayak from "./components/YatraShayak";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -58,6 +61,8 @@ const App: React.FC = () => {
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/my-trips" element={<MyTrips />} />
             <Route path="/festival-alerts" element={<FestivalAlerts />} />
@@ -70,6 +75,7 @@ const App: React.FC = () => {
         </main>
         {/* Footer */}
         <Footer />
+        <YatraShayak />
 
       </div>
     </HashRouter>

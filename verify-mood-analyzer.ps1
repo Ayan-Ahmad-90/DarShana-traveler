@@ -129,8 +129,8 @@ $backendIndexPath = Join-Path -Path (Get-Location) -ChildPath "backend/src/index
 $backendServerPath = Join-Path -Path (Get-Location) -ChildPath "backend/server.js"
 
 if ((Test-Path $backendIndexPath) -or (Test-Path $backendServerPath)) {
-    $indexContent = Get-Content -Path $backendIndexPath -Raw 2>/dev/null
-    $serverContent = Get-Content -Path $backendServerPath -Raw 2>/dev/null
+    $indexContent = Get-Content -Path $backendIndexPath -Raw 2>$null
+    $serverContent = Get-Content -Path $backendServerPath -Raw 2>$null
     
     if (($indexContent -match "moodAnalyzer") -or ($serverContent -match "moodAnalyzer")) {
         Write-Host "[OK] moodAnalyzer routes already mounted" -ForegroundColor Green
@@ -152,7 +152,7 @@ $envLocalPath = Join-Path -Path (Get-Location) -ChildPath ".env.local"
 $envPath = Join-Path -Path (Get-Location) -ChildPath ".env"
 
 if ((Test-Path $envLocalPath) -or (Test-Path $envPath)) {
-    $envContent = (Get-Content -Path $envLocalPath -Raw 2>/dev/null) + (Get-Content -Path $envPath -Raw 2>/dev/null)
+    $envContent = (Get-Content -Path $envLocalPath -Raw 2>$null) + (Get-Content -Path $envPath -Raw 2>$null)
     if ($envContent -match "VITE_API_URL") {
         Write-Host "[OK] VITE_API_URL configured" -ForegroundColor Green
     } else {

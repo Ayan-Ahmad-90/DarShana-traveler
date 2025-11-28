@@ -209,15 +209,33 @@ const MoodAnalyzer: React.FC = () => {
 
     try {
       // First, detect faces locally
-      const faces = await faceDetection.analyzeFromImage(image);
+      // faceDetection.analyzeImage expects an HTMLImageElement | HTMLVideoElement,
+      // so build an Image element from the data URL and wait for it to load.
+      const imgEl = new Image();
+      imgEl.src = image;
+      try {
+        await new Promise<void>((resolve, reject) => {
+          imgEl.onload = () => resolve();
+          imgEl.onerror = () => reject(new Error('Failed to load image for analysis'));
+        });
+      } catch (err) {
+        setDetectionError('Could not load image for analysis. Please try another photo.');
+        setLoading(false);
+        return;
+      }
 
-      if (!faces || faces.length === 0) {
+      const localAnalysis = await faceDetection.analyzeImage(imgEl);
+
+      if (!localAnalysis) {
         setDetectionError(faceDetection.error || 'No face detected. Please try again.');
         setLoading(false);
         return;
       }
 
-      setFaceCount(faces.length);
+      // Extract face count from the analysis reasoning (hook returns aggregated result)
+      const match = localAnalysis.reasoning?.match(/Detected\s+(\d+)\s+face/i);
+      const detectedCount = match ? parseInt(match[1], 10) : 1;
+      setFaceCount(detectedCount);
 
       // Send to backend for emotion analysis
       const moodResponse = await analyzeMoodWithImage(image);
@@ -401,6 +419,7 @@ const MoodAnalyzer: React.FC = () => {
                   <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
                   <button 
                     onClick={capturePhoto}
+                    aria-label="Capture photo"
                     className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-3 rounded-full shadow-lg hover:bg-stone-100"
                   >
                     <Camera size={24} />
@@ -413,6 +432,7 @@ const MoodAnalyzer: React.FC = () => {
                   <img src={image} alt="Captured" className="w-full h-full object-cover" />
                   <button 
                     onClick={() => { setImage(null); setResult(null); setDetectionError(null); setFaceCount(null); }}
+                    aria-label="Retake photo"
                     className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
                   >
                     <RefreshCw size={16} />
