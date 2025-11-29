@@ -12,6 +12,7 @@ import {
   Globe,
   Award,
 } from 'lucide-react';
+import { getBackendUrl } from '../../config/api';
 import type { GuideRegistration } from '../../types';
 
 const BecomeGuide: React.FC = () => {
@@ -234,7 +235,7 @@ const BecomeGuide: React.FC = () => {
         }
       });
 
-      const response = await fetch('/api/guides/register', {
+      const response = await fetch(`${getBackendUrl()}/api/guides/register`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -248,12 +249,21 @@ const BecomeGuide: React.FC = () => {
           navigate('/guides');
         }, 2000);
       } else {
-        const error = await response.json();
-        setErrors({ submit: error.message || 'Registration failed' });
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const error = await response.json();
+            setErrors({ submit: error.message || 'Registration failed' });
+          } else {
+            setErrors({ submit: `Registration failed: ${response.statusText}` });
+          }
+        } catch (parseError) {
+          setErrors({ submit: `Registration failed with status ${response.status}` });
+        }
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({ submit: 'An error occurred. Please try again.' });
+      setErrors({ submit: error instanceof Error ? error.message : 'An error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
