@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Users, Leaf, Map, Star, ShieldCheck, CreditCard, Train, Anchor, Mountain,Home as HomeIcon, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import HighlightSlider from '../components/HighlightSlider';
 
 const destinations = [
   {
@@ -44,6 +45,9 @@ const services = [
 const Home: React.FC = () => {
   return (
     <div className="flex flex-col">
+      {/* Highlight Slider */}
+      <HighlightSlider />
+
       {/* Hero Section */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
         <div 

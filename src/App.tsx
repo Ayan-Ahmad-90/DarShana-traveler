@@ -24,6 +24,7 @@ import LocalGuideDashboard from "./pages/LocalGuideDashboard";
 import GuideListing from "./pages/GuideListing";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import UIStyleGuide from "./pages/UIStyleGuide";
 import YatraShayak from "./components/YatraShayak";
 
 // Auto scroll to top when route changes
@@ -71,6 +72,7 @@ const App: React.FC = () => {
             <Route path="/rewards" element={<EcoRewardsDashboard />} />
             <Route path="/become-guide" element={<LocalGuideDashboard />} />
             <Route path="/guides" element={<GuideListing />} />
+            <Route path="/style-guide" element={<UIStyleGuide />} />
           </Routes>
         </main>
         {/* Footer */}
