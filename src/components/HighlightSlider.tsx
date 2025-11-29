@@ -176,9 +176,9 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
       />
 
       {/* Main content container */}
-      <div className="relative z-10 py-6 sm:py-8 px-3 sm:px-6 lg:px-8">
+      <div className="relative z-10 py-3 sm:py-4 px-3 sm:px-6 lg:px-8">
         {/* Header label */}
-        <div className="mb-4 flex items-center gap-2 px-2">
+        <div className="mb-2 flex items-center gap-2 px-2">
           <div className="w-1 h-4 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
           <span className="text-xs font-bold tracking-widest uppercase text-orange-400">
             ✈️ Explore Destinations
@@ -192,7 +192,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 sm:gap-6 lg:gap-8 items-center py-3"
+            className="flex gap-4 sm:gap-6 lg:gap-8 items-center py-1.5"
             style={{
               animation: isPaused
                 ? 'none'
@@ -208,7 +208,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
                 <button
                   key={`${item.id}-${idx}`}
                   onClick={() => handleItemClick(item)}
-                  className="group relative flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 rounded-2xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
+                  className="group relative flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
                   style={{
                     background: gradient,
                     boxShadow: `
@@ -271,7 +271,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
         </div>
 
         {/* Mobile hint */}
-        <div className="text-center text-white/50 text-xs mt-4 sm:hidden">
+        <div className="text-center text-white/50 text-xs mt-2 sm:hidden">
           ← Swipe to explore more →
         </div>
       </div>
@@ -282,7 +282,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-${items.length * 110}px - ${items.length * 16}px));
+            transform: translateX(calc(-${items.length * 85}px - ${items.length * 16}px));
           }
         }
 
@@ -293,7 +293,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
               transform: translateX(0);
             }
             100% {
-              transform: translateX(calc(-${items.length * 90}px - ${items.length * 12}px));
+              transform: translateX(calc(-${items.length * 70}px - ${items.length * 12}px));
             }
           }
         }
