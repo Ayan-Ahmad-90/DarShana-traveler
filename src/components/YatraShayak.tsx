@@ -36,7 +36,7 @@ const YatraShayak = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 transition transform hover:scale-110"
+          className="bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition transform hover:scale-110"
           aria-label="Open AI Assistant"
         >
           <MessageCircle size={28} />
@@ -44,17 +44,17 @@ const YatraShayak = () => {
       )}
 
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col h-[500px] border border-stone-200">
-          <div className="bg-orange-600 text-white p-4 rounded-t-2xl flex justify-between items-center">
+        <div className="bg-neutral-50 rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col h-[500px] border border-neutral-200">
+          <div className="bg-primary-500 text-white p-4 rounded-t-2xl flex justify-between items-center">
             <div className="font-bold flex items-center gap-2">
               <span>🤖</span> Yatra Shayak
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-orange-700 p-1 rounded">
+            <button onClick={() => setIsOpen(false)} className="hover:bg-primary-600 p-1 rounded">
               <X size={20} />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50">
             {history.map((msg, idx) => (
               <div
                 key={idx}
@@ -63,8 +63,8 @@ const YatraShayak = () => {
                 <div
                   className={`max-w-[80%] p-3 rounded-xl text-sm ${
                     msg.type === 'user'
-                      ? 'bg-orange-600 text-white rounded-br-none'
-                      : 'bg-white border border-stone-200 text-stone-800 rounded-bl-none shadow-sm'
+                      ? 'bg-primary-500 text-white rounded-br-none'
+                      : 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-none shadow-sm'
                   }`}
                 >
                   {msg.text}
@@ -73,14 +73,14 @@ const YatraShayak = () => {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-stone-200 p-3 rounded-xl rounded-bl-none shadow-sm">
-                  <Loader2 className="animate-spin text-orange-600" size={16} />
+                <div className="bg-white border border-neutral-200 p-3 rounded-xl rounded-bl-none shadow-sm">
+                  <Loader2 className="animate-spin text-primary-500" size={16} />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="p-3 border-t border-stone-100 bg-white rounded-b-2xl">
+          <div className="p-3 border-t border-neutral-200 bg-white rounded-b-2xl">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -88,12 +88,12 @@ const YatraShayak = () => {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Ask about safety, bookings..."
-                className="flex-1 border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500"
+                className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500"
               />
               <button
                 onClick={sendMessage}
                 disabled={loading}
-                className="bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                className="bg-primary-500 text-white p-2 rounded-lg hover:bg-primary-600 disabled:opacity-50"
               >
                 <Send size={18} />
               </button>

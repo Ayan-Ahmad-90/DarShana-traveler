@@ -10,7 +10,7 @@ export interface HighlightItem {
   badge?: string;
   type: 'destination' | 'festival' | 'season' | 'experience';
   link?: string;
-  color?: 'blue' | 'orange' | 'purple' | 'teal' | 'emerald';
+  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light';
 }
 
 interface HighlightSliderProps {
@@ -28,7 +28,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <MapPin size={20} />,
     type: 'destination',
     link: '/destinations/jaipur',
-    color: 'orange',
+    color: 'blue',
   },
   {
     id: 'kerala',
@@ -38,7 +38,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Wind size={20} />,
     type: 'destination',
     link: '/destinations/kerala',
-    color: 'emerald',
+    color: 'slate',
   },
   {
     id: 'taj-mahal',
@@ -48,7 +48,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Sparkles size={20} />,
     type: 'destination',
     link: '/destinations/agra',
-    color: 'teal',
+    color: 'neutral',
   },
   {
     id: 'diwali',
@@ -58,7 +58,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Calendar size={20} />,
     type: 'festival',
     link: '/festivals/diwali',
-    color: 'orange',
+    color: 'blue',
   },
   {
     id: 'manali',
@@ -68,7 +68,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Mountain size={20} />,
     type: 'destination',
     link: '/destinations/manali',
-    color: 'blue',
+    color: 'accent',
   },
   {
     id: 'goa',
@@ -78,7 +78,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Wind size={20} />,
     type: 'destination',
     link: '/destinations/goa',
-    color: 'teal',
+    color: 'slate',
   },
   {
     id: 'holi',
@@ -88,7 +88,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Calendar size={20} />,
     type: 'festival',
     link: '/festivals/holi',
-    color: 'purple',
+    color: 'neutral',
   },
   {
     id: 'shimla',
@@ -98,7 +98,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Mountain size={20} />,
     type: 'destination',
     link: '/destinations/shimla',
-    color: 'emerald',
+    color: 'light',
   },
   {
     id: 'varanasi',
@@ -108,7 +108,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     icon: <Sparkles size={20} />,
     type: 'destination',
     link: '/destinations/varanasi',
-    color: 'purple',
+    color: 'accent',
   },
 ];
 
@@ -128,21 +128,21 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     }
   };
 
-  // Color mapping for professional travel theme
+  // Professional Light & Dark Color Palette
   const colorGradients: Record<string, string> = {
-    blue: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',
-    orange: 'linear-gradient(135deg, #EA580C 0%, #F97316 100%)',
-    purple: 'linear-gradient(135deg, #6B21A8 0%, #A855F7 100%)',
-    teal: 'linear-gradient(135deg, #0D7377 0%, #14B8A6 100%)',
-    emerald: 'linear-gradient(135deg, #047857 0%, #10B981 100%)',
+    blue: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',      // Professional Blue
+    slate: 'linear-gradient(135deg, #334155 0%, #475569 100%)',     // Professional Slate
+    neutral: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',   // Professional Neutral
+    accent: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',    // Professional Dark
+    light: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',     // Professional Light
   };
 
   const colorShadows: Record<string, string> = {
-    blue: 'rgba(30, 64, 175, 0.4)',
-    orange: 'rgba(234, 88, 12, 0.4)',
-    purple: 'rgba(107, 33, 168, 0.4)',
-    teal: 'rgba(13, 115, 119, 0.4)',
-    emerald: 'rgba(4, 120, 87, 0.4)',
+    blue: 'rgba(30, 64, 175, 0.3)',
+    slate: 'rgba(51, 65, 85, 0.3)',
+    neutral: 'rgba(30, 41, 59, 0.3)',
+    accent: 'rgba(15, 23, 42, 0.3)',
+    light: 'rgba(241, 245, 249, 0.3)',
   };
 
   // Triple items for seamless infinite loop
@@ -153,16 +153,16 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     <div 
       className="w-full relative overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, rgba(20, 30, 60, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%)',
+        background: 'linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.98) 100%)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '2px solid rgba(107, 33, 168, 0.2)',
+        borderBottom: '2px solid rgba(51, 65, 85, 0.15)',
       }}
     >
       {/* Premium gradient overlay background */}
       <div 
-        className="absolute inset-0 opacity-40"
+        className="absolute inset-0 opacity-30"
         style={{
-          background: 'radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1), transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1), transparent 50%)',
+          background: 'radial-gradient(circle at 20% 50%, rgba(30, 64, 175, 0.08), transparent 50%), radial-gradient(circle at 80% 50%, rgba(51, 65, 85, 0.08), transparent 50%)',
           pointerEvents: 'none',
         }}
       />

@@ -66,7 +66,7 @@ const Home: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               to="/mood" 
-              className="bg-orange-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-700 transition shadow-lg flex items-center justify-center gap-2"
+              className="bg-primary-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary-600 transition shadow-lg flex items-center justify-center gap-2"
             >
               Find My Vibe <ArrowRight size={20} />
             </Link>
@@ -81,27 +81,27 @@ const Home: React.FC = () => {
       </div>
 
       {/* Stats Section */}
-      <section className="bg-teal-900 text-white py-16">
+      <section className="bg-primary-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div className="p-4">
-            <Users className="w-8 h-8 mx-auto mb-3 text-teal-300" />
+            <Users className="w-8 h-8 mx-auto mb-3 text-primary-300" />
             <h3 className="text-3xl font-bold">50k+</h3>
-            <p className="text-teal-200 text-sm">Happy Travelers</p>
+            <p className="text-primary-200 text-sm">Happy Travelers</p>
           </div>
           <div className="p-4">
-            <Map className="w-8 h-8 mx-auto mb-3 text-teal-300" />
+            <Map className="w-8 h-8 mx-auto mb-3 text-primary-300" />
             <h3 className="text-3xl font-bold">120+</h3>
-            <p className="text-teal-200 text-sm">Destinations</p>
+            <p className="text-primary-200 text-sm">Destinations</p>
           </div>
           <div className="p-4">
-            <Leaf className="w-8 h-8 mx-auto mb-3 text-teal-300" />
+            <Leaf className="w-8 h-8 mx-auto mb-3 text-primary-300" />
             <h3 className="text-3xl font-bold">2.5T</h3>
-            <p className="text-teal-200 text-sm">CO₂ Offset</p>
+            <p className="text-primary-200 text-sm">CO₂ Offset</p>
           </div>
           <div className="p-4">
-            <Star className="w-8 h-8 mx-auto mb-3 text-teal-300" />
+            <Star className="w-8 h-8 mx-auto mb-3 text-primary-300" />
             <h3 className="text-3xl font-bold">4.9/5</h3>
-            <p className="text-teal-200 text-sm">Satisfaction Rate</p>
+            <p className="text-primary-200 text-sm">Satisfaction Rate</p>
           </div>
         </div>
       </section>
@@ -109,8 +109,8 @@ const Home: React.FC = () => {
       {/* Featured Destinations */}
       <section className="py-20 max-w-7xl mx-auto px-4 w-full">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif font-bold text-stone-800 mb-4">Top Destinations</h2>
-          <div className="w-24 h-1 bg-orange-500 mx-auto rounded-full"></div>
+          <h2 className="text-4xl font-serif font-bold text-primary-800 mb-4">Top Destinations</h2>
+          <div className="w-24 h-1 bg-primary-500 mx-auto rounded-full"></div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -140,22 +140,22 @@ const Home: React.FC = () => {
       </section>
 
       {/* Services Section */}
-      <section className="bg-stone-100 py-20">
+      <section className="bg-primary-50 py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif font-bold text-stone-800 mb-4">Curated Experiences</h2>
-            <p className="text-stone-600">Tailored services for every kind of traveler</p>
+            <h2 className="text-4xl font-serif font-bold text-primary-800 mb-4">Curated Experiences</h2>
+            <p className="text-primary-600">Tailored services for every kind of traveler</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {services.map((service, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-xl shadow-sm border border-stone-200 hover:border-orange-200 transition-colors text-center group flex flex-col items-center">
-                <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mb-6 group-hover:bg-orange-100 transition-colors">
-                  <service.icon className="text-stone-600 group-hover:text-orange-600" size={32} />
+              <div key={idx} className="bg-white p-8 rounded-xl shadow-sm border border-primary-200 hover:border-primary-300 transition-colors text-center group flex flex-col items-center">
+                <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-6 group-hover:bg-primary-100 transition-colors">
+                  <service.icon className="text-primary-600 group-hover:text-primary-700" size={32} />
                 </div>
-                <h3 className="text-lg font-bold text-stone-800 mb-2">{service.title}</h3>
-                <p className="text-stone-500 text-sm mb-6 line-clamp-3">{service.desc}</p>
-                <Link to="/register" className="mt-auto px-4 py-2 border border-stone-300 rounded-full text-sm font-medium hover:bg-stone-800 hover:text-white transition-colors">
+                <h3 className="text-lg font-bold text-primary-800 mb-2">{service.title}</h3>
+                <p className="text-primary-600 text-sm mb-6 line-clamp-3">{service.desc}</p>
+                <Link to="/register" className="mt-auto px-4 py-2 border border-primary-300 rounded-full text-sm font-medium hover:bg-primary-800 hover:text-white transition-colors">
                   Plan my trip
                 </Link>
               </div>
@@ -165,13 +165,13 @@ const Home: React.FC = () => {
       </section>
 
       {/* Payment & Safety */}
-      <section className="py-12 bg-white border-t border-stone-100">
+      <section className="py-12 bg-white border-t border-primary-200">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-4">
-            <ShieldCheck size={40} className="text-teal-600" />
+            <ShieldCheck size={40} className="text-primary-600" />
             <div>
-              <h4 className="font-bold text-stone-800">100% Secure Payments</h4>
-              <p className="text-xs text-stone-500">We use encrypted SSL connections.</p>
+              <h4 className="font-bold text-primary-800">100% Secure Payments</h4>
+              <p className="text-xs text-primary-600">We use encrypted SSL connections.</p>
             </div>
           </div>
           <div className="flex items-center gap-6 opacity-60 grayscale hover:grayscale-0 transition-all">

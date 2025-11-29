@@ -21,14 +21,14 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-stone-100">
+    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-primary-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold font-serif flex items-center">
-            <span className="text-orange-600">Dar</span>
-            <span className="text-teal-700">Shana</span>
+            <span className="text-primary-500">Dar</span>
+            <span className="text-primary-700">Shana</span>
           </Link>
 
           {/* Desktop Menu */}
@@ -41,8 +41,8 @@ const Navbar: React.FC = () => {
                   to={link.path}
                   className={`px-3 py-2 rounded-md text-sm flex items-center gap-2 font-medium transition-all ${
                     isActive(link.path)
-                      ? "text-orange-700 bg-orange-100"
-                      : "text-gray-700 hover:text-orange-600 hover:bg-gray-50"
+                      ? "text-primary-700 bg-primary-100"
+                      : "text-primary-700 hover:text-primary-600 hover:bg-primary-50"
                   }`}
                 >
                   {Icon && <Icon size={18} />}
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
             <div className="ml-4 flex items-center gap-3">
               <Link
                 to="/register"
-                className="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-full text-sm font-medium transition shadow hover:scale-105"
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-full text-sm font-medium transition shadow hover:scale-105"
               >
                 Book Trip
               </Link>
@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
               {/* Kebab Menu (3-dot) */}
               <button
                 onClick={openSidebar}
-                className="p-2 text-stone-600 hover:bg-stone-100 rounded-lg transition hover:text-orange-600"
+                className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition hover:text-primary-700"
                 title="More options"
               >
                 <MoreVertical size={22} />
@@ -84,7 +84,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="md:hidden bg-white border-t border-primary-200">
           <div className="px-4 py-3 space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
@@ -95,8 +95,8 @@ const Navbar: React.FC = () => {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-base transition ${
                     isActive(link.path)
-                      ? "text-orange-700 bg-orange-100"
-                      : "text-gray-700 hover:text-orange-600 hover:bg-gray-50"
+                      ? "text-primary-700 bg-primary-100"
+                      : "text-primary-700 hover:text-primary-600 hover:bg-primary-50"
                   }`}
                 >
                   {Icon && <Icon size={20} />}
@@ -109,7 +109,7 @@ const Navbar: React.FC = () => {
             <Link
               to="/register"
               onClick={() => setIsOpen(false)}
-              className="block text-center bg-teal-700 hover:bg-teal-800 text-white py-3 rounded-full mt-2 shadow-md"
+              className="block text-center bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-full mt-2 shadow-md"
             >
               Book Trip
             </Link>

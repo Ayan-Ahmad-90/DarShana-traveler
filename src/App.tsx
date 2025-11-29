@@ -21,6 +21,7 @@ import LanguageSelector from "./pages/LanguageSelector";
 import TripPlannerWithSuggestions from "./pages/TripPlannerWithSuggestions";
 import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
 import LocalGuideDashboard from "./pages/LocalGuideDashboard";
+import BecomeGuide from "./components/Guide/BecomeGuide";
 import GuideListing from "./pages/GuideListing";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -46,7 +47,7 @@ const App: React.FC = () => {
         <ScrollToTop />
 
         {/* Page Wrapper */}
-        <div className="min-h-screen flex flex-col bg-stone-50 text-gray-900 font-sans">
+        <div className="min-h-screen flex flex-col bg-primary-50 text-primary-900 font-sans">
 
           {/* Navbar */}
           <Navbar />
@@ -70,7 +71,8 @@ const App: React.FC = () => {
             <Route path="/language" element={<LanguageSelector />} />
             <Route path="/trip-planner" element={<TripPlannerWithSuggestions />} />
             <Route path="/rewards" element={<EcoRewardsDashboard />} />
-            <Route path="/become-guide" element={<LocalGuideDashboard />} />
+            <Route path="/become-guide" element={<BecomeGuide />} />
+            <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/guides" element={<GuideListing />} />
             <Route path="/style-guide" element={<UIStyleGuide />} />
           </Routes>
