@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, MapPin, Calendar, Wind, Mountain } from 'lucide-react';
 
 export interface HighlightItem {
   id: string;
   title: string;
   description?: string;
-  icon?: string;
-  type: 'destination' | 'festival' | 'season';
+  icon?: React.ReactNode;
+  badge?: string;
+  type: 'destination' | 'festival' | 'season' | 'experience';
   link?: string;
+  color?: 'blue' | 'orange' | 'purple' | 'teal' | 'emerald';
 }
 
 interface HighlightSliderProps {
@@ -16,71 +18,97 @@ interface HighlightSliderProps {
   onItemClick?: (item: HighlightItem) => void;
 }
 
-// Default highlight data with emoji icons
+// Professional travel & tourism highlight data
 const DEFAULT_ITEMS: HighlightItem[] = [
   {
     id: 'jaipur',
     title: 'Jaipur',
-    description: 'Explore the royal architecture and vibrant markets',
-    icon: '🏰',
+    description: 'Royal Pink City',
+    badge: 'Must Visit',
+    icon: <MapPin size={20} />,
     type: 'destination',
     link: '/destinations/jaipur',
+    color: 'orange',
   },
   {
     id: 'kerala',
     title: 'Kerala',
-    description: 'Backwaters, beaches, and tropical beauty',
-    icon: '🌴',
+    description: 'God\'s Own Country',
+    badge: 'Paradise',
+    icon: <Wind size={20} />,
     type: 'destination',
     link: '/destinations/kerala',
+    color: 'emerald',
   },
   {
     id: 'taj-mahal',
     title: 'Taj Mahal',
-    description: 'UNESCO World Heritage Site in Agra',
-    icon: '💎',
+    description: 'Symbol of Love',
+    badge: 'Heritage',
+    icon: <Sparkles size={20} />,
     type: 'destination',
     link: '/destinations/agra',
+    color: 'teal',
   },
   {
     id: 'diwali',
-    title: 'Diwali',
-    description: 'Festival of Lights - Celebrate with us!',
-    icon: '🎆',
+    title: 'Diwali Festival',
+    description: 'Festival of Lights',
+    badge: 'Nov-Dec',
+    icon: <Calendar size={20} />,
     type: 'festival',
     link: '/festivals/diwali',
-  },
-  {
-    id: 'winter',
-    title: 'Winter',
-    description: 'Best time to visit northern India',
-    icon: '❄️',
-    type: 'season',
-    link: '/destinations',
+    color: 'orange',
   },
   {
     id: 'manali',
     title: 'Manali',
-    description: 'Mountains, trekking, and natural beauty',
-    icon: '⛰️',
+    description: 'Mountain Adventure',
+    badge: 'Popular',
+    icon: <Mountain size={20} />,
     type: 'destination',
     link: '/destinations/manali',
+    color: 'blue',
   },
   {
     id: 'goa',
     title: 'Goa',
-    description: 'Golden beaches and vibrant nightlife',
-    icon: '🏖️',
+    description: 'Beach Escape',
+    badge: 'Relaxation',
+    icon: <Wind size={20} />,
     type: 'destination',
     link: '/destinations/goa',
+    color: 'teal',
   },
   {
     id: 'holi',
-    title: 'Holi',
-    description: 'Festival of Colors - Experience the joy',
-    icon: '🎨',
+    title: 'Holi Festival',
+    description: 'Colors of Joy',
+    badge: 'Mar-Apr',
+    icon: <Calendar size={20} />,
     type: 'festival',
     link: '/festivals/holi',
+    color: 'purple',
+  },
+  {
+    id: 'shimla',
+    title: 'Shimla',
+    description: 'Hill Station Beauty',
+    badge: 'Scenic',
+    icon: <Mountain size={20} />,
+    type: 'destination',
+    link: '/destinations/shimla',
+    color: 'emerald',
+  },
+  {
+    id: 'varanasi',
+    title: 'Varanasi',
+    description: 'Spiritual Journey',
+    badge: 'Sacred',
+    icon: <Sparkles size={20} />,
+    type: 'destination',
+    link: '/destinations/varanasi',
+    color: 'purple',
   },
 ];
 
@@ -100,121 +128,187 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     }
   };
 
+  // Color mapping for professional travel theme
+  const colorGradients: Record<string, string> = {
+    blue: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',
+    orange: 'linear-gradient(135deg, #EA580C 0%, #F97316 100%)',
+    purple: 'linear-gradient(135deg, #6B21A8 0%, #A855F7 100%)',
+    teal: 'linear-gradient(135deg, #0D7377 0%, #14B8A6 100%)',
+    emerald: 'linear-gradient(135deg, #047857 0%, #10B981 100%)',
+  };
+
+  const colorShadows: Record<string, string> = {
+    blue: 'rgba(30, 64, 175, 0.4)',
+    orange: 'rgba(234, 88, 12, 0.4)',
+    purple: 'rgba(107, 33, 168, 0.4)',
+    teal: 'rgba(13, 115, 119, 0.4)',
+    emerald: 'rgba(4, 120, 87, 0.4)',
+  };
+
   // Triple items for seamless infinite loop
   const loopedItems = [...items, ...items, ...items];
-  const animationDuration = items.length * 3;
+  const animationDuration = items.length * 4;
 
   return (
     <div 
       className="w-full relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, rgba(30, 27, 75, 0.95) 0%, rgba(59, 42, 120, 0.95) 50%, rgba(29, 53, 87, 0.95) 100%)',
-        backdropFilter: 'blur(8px)',
+        background: 'linear-gradient(180deg, rgba(20, 30, 60, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '2px solid rgba(107, 33, 168, 0.2)',
       }}
     >
-      {/* Blurred gradient bar background */}
+      {/* Premium gradient overlay background */}
       <div 
-        className="absolute inset-0 blur-3xl opacity-50"
+        className="absolute inset-0 opacity-40"
         style={{
-          background: 'linear-gradient(90deg, #6B21A8 0%, #3B82F6 50%, #6B21A8 100%)',
+          background: 'radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.1), transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.1), transparent 50%)',
+          pointerEvents: 'none',
         }}
       />
 
-      {/* Content container */}
-      <div className="relative z-10 py-5 sm:py-7 px-4 sm:px-6">
+      {/* Animated background elements */}
+      <div 
+        className="absolute top-0 left-0 w-full h-1 opacity-30"
+        style={{
+          background: 'linear-gradient(90deg, transparent, #EA580C, #A855F7, #3B82F6, transparent)',
+        }}
+      />
+
+      {/* Main content container */}
+      <div className="relative z-10 py-6 sm:py-8 px-3 sm:px-6 lg:px-8">
+        {/* Header label */}
+        <div className="mb-4 flex items-center gap-2 px-2">
+          <div className="w-1 h-4 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
+          <span className="text-xs font-bold tracking-widest uppercase text-orange-400">
+            ✈️ Explore Destinations
+          </span>
+        </div>
+
+        {/* Slider container */}
         <div 
-          className="w-full overflow-hidden rounded-2xl px-2"
+          className="w-full overflow-hidden rounded-2xl px-1"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-3 sm:gap-6 items-center py-2"
+            className="flex gap-4 sm:gap-6 lg:gap-8 items-center py-3"
             style={{
               animation: isPaused
                 ? 'none'
-                : `premium-scroll ${animationDuration}s linear infinite`,
+                : `smooth-flow ${animationDuration}s linear infinite`,
               willChange: 'transform',
             }}
           >
-            {loopedItems.map((item, idx) => (
-              <button
-                key={`${item.id}-${idx}`}
-                onClick={() => handleItemClick(item)}
-                className="group relative flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-full whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-transparent"
-                style={{
-                  background: 'linear-gradient(135deg, #6B21A8 0%, #3B82F6 100%)',
-                  boxShadow: '0 8px 32px rgba(107, 33, 168, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
-                }}
-                title={item.description}
-                aria-label={item.description}
-              >
-                {/* Neon glow effect */}
-                <div 
-                  className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            {loopedItems.map((item, idx) => {
+              const gradient = colorGradients[item.color || 'blue'];
+              const shadowColor = colorShadows[item.color || 'blue'];
+
+              return (
+                <button
+                  key={`${item.id}-${idx}`}
+                  onClick={() => handleItemClick(item)}
+                  className="group relative flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3 px-4 sm:px-6 py-4 sm:py-5 rounded-2xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
                   style={{
-                    background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent)',
-                    boxShadow: 'inset 0 0 20px rgba(255, 255, 255, 0.1), 0 0 20px rgba(107, 33, 168, 0.4)',
+                    background: gradient,
+                    boxShadow: `
+                      0 12px 32px ${shadowColor},
+                      inset 0 1px 2px rgba(255, 255, 255, 0.25),
+                      0 0 20px ${shadowColor.replace('0.4', '0.15')}
+                    `,
+                    backdropFilter: 'blur(4px)',
                   }}
-                />
+                  title={item.description}
+                  aria-label={`${item.title} - ${item.description}`}
+                >
+                  {/* Premium glow effect on hover */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{
+                      background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%)',
+                      boxShadow: `inset 0 0 24px rgba(255, 255, 255, 0.15), 0 0 24px ${shadowColor}`,
+                    }}
+                  />
 
-                {/* Icon */}
-                <span className="text-xl sm:text-2xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                  {item.icon || '✨'}
-                </span>
+                  {/* Badge label */}
+                  {item.badge && (
+                    <div className="absolute -top-2 -right-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white/90 border border-white/20">
+                      {item.badge}
+                    </div>
+                  )}
 
-                {/* Title */}
-                <span className="text-xs sm:text-sm font-semibold text-white group-hover:text-orange-200 transition-colors duration-300">
-                  {item.title}
-                </span>
+                  {/* Icon */}
+                  <div className="text-white group-hover:scale-125 transition-transform duration-300 flex-shrink-0 flex items-center justify-center">
+                    {item.icon}
+                  </div>
 
-                {/* Hover indicator */}
-                <Sparkles 
-                  size={14} 
-                  className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0 text-orange-300"
-                />
-              </button>
-            ))}
+                  {/* Title and description */}
+                  <div className="flex flex-col items-start hidden sm:flex">
+                    <span className="text-sm sm:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                      {item.title}
+                    </span>
+                    {item.description && (
+                      <span className="text-xs text-white/70 group-hover:text-white/90 transition-colors duration-300">
+                        {item.description}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Mobile layout - title only */}
+                  <span className="text-xs sm:hidden font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                    {item.title}
+                  </span>
+
+                  {/* Hover sparkle effect */}
+                  <Sparkles 
+                    size={16} 
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0 text-white/80 ml-auto hidden sm:block"
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Mobile guide */}
-        <div className="text-center text-white/60 text-xs mt-3 sm:hidden">
-          Swipe or hover to explore
+        {/* Mobile hint */}
+        <div className="text-center text-white/50 text-xs mt-4 sm:hidden">
+          ← Swipe to explore more →
         </div>
       </div>
 
       <style>{`
-        @keyframes premium-scroll {
+        @keyframes smooth-flow {
           0% {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-${items.length * 100}px - ${items.length * 12}px));
-          }
-        }
-
-        /* Smooth scrolling performance */
-        @supports (animation-timeline: scroll()) {
-          @keyframes premium-scroll-smooth {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(calc(-${items.length * 100}px - ${items.length * 12}px));
-            }
+            transform: translateX(calc(-${items.length * 110}px - ${items.length * 16}px));
           }
         }
 
         /* Mobile responsive animation */
         @media (max-width: 640px) {
-          @keyframes premium-scroll {
+          @keyframes smooth-flow {
             0% {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(calc(-${items.length * 85}px - ${items.length * 8}px));
+              transform: translateX(calc(-${items.length * 90}px - ${items.length * 12}px));
             }
           }
+        }
+
+        /* Smooth GPU-accelerated animation */
+        @supports (animation-timeline: scroll()) {
+          .highlight-slider-container {
+            animation-timeline: view();
+          }
+        }
+
+        /* Prevent jank */
+        * {
+          backface-visibility: hidden;
+          -webkit-font-smoothing: antialiased;
         }
       `}</style>
     </div>
