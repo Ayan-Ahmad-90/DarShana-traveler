@@ -3,11 +3,12 @@
  * Handles guide registration, profile management, and request handling
  */
 
-const express = require('express');
+import express from 'express';
+import guideController from '../controllers/guideRegistrationController.js';
+import auth from '../middleware/auth.js';
+import multer from 'multer';
+
 const router = express.Router();
-const guideController = require('../controllers/guideRegistrationController');
-const auth = require('../middleware/auth');
-const multer = require('multer');
 
 // Configure multer for document uploads
 const storage = multer.diskStorage({
@@ -56,4 +57,4 @@ router.put('/requests/:requestId/complete', auth, guideController.completeTrip);
 // Rating
 router.put('/:guideId/rate', auth, guideController.rateGuide); // Rate guide
 
-module.exports = router;
+export default router;

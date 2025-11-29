@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const safetyResourceSchema = new mongoose.Schema({
   region: {
@@ -19,4 +19,5 @@ const safetyResourceSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model('SafetyResource', safetyResourceSchema);
+export default mongoose.model('SafetyResource', safetyResourceSchema);
+

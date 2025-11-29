@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const festivalReminderSchema = new mongoose.Schema({
   userId: {
@@ -23,4 +23,5 @@ const festivalReminderSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('FestivalReminder', festivalReminderSchema);
+export default mongoose.model('FestivalReminder', festivalReminderSchema);
+

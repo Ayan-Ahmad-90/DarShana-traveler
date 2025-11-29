@@ -9,6 +9,7 @@ import reviewRoutes from './routes/reviews.js';
 import plannerRoutes from './routes/planner.js';
 import safetyRoutes from './routes/safety.js';
 import yatraShayakRoutes from './routes/yatraShayak.js';
+import guideRegistrationRoutes from './routes/guideRegistration.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/planner', plannerRoutes);
 app.use('/api/safety', safetyRoutes);
 app.use('/api/yatra-shayak', yatraShayakRoutes);
+app.use('/api/guides', guideRegistrationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

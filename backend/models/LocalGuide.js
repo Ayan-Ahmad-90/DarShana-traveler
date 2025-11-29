@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const localGuideSchema = new mongoose.Schema({
   name: {
@@ -39,4 +39,4 @@ const localGuideSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('LocalGuide', localGuideSchema);
+export default mongoose.model('LocalGuide', localGuideSchema);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const contactMessageSchema = new mongoose.Schema({
   subject: {
@@ -33,4 +33,5 @@ const contactMessageSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('ContactMessage', contactMessageSchema);
+export default mongoose.model('ContactMessage', contactMessageSchema);
+

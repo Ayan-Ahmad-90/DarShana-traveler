@@ -5,6 +5,7 @@ import { env } from './config/environment.js';
 import logger from './utils/logger.js';
 import routeRoutes from './routes/routes.js';
 import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
+import guideRoutes from './routes/guides.js';
 
 const app = express();
 
@@ -56,6 +57,9 @@ console.log('✅ Mounted: /api/routes');
 
 app.use('/api/mood-analyze', moodAnalyzerRoutes);
 console.log('✅ Mounted: /api/mood-analyze');
+
+app.use('/api/guides', guideRoutes);
+console.log('✅ Mounted: /api/guides');
 
 // 404 handler
 app.use((req: any, res: any) => {

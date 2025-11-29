@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const guideRequestSchema = new mongoose.Schema({
   userId: {
@@ -38,4 +38,4 @@ const guideRequestSchema = new mongoose.Schema({
   resolvedAt: Date,
 });
 
-module.exports = mongoose.model('GuideRequest', guideRequestSchema);
+export default mongoose.model('GuideRequest', guideRequestSchema);
