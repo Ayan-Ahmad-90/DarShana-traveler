@@ -12,6 +12,7 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Mood AI", path: "/mood", icon: Smile },
+    { name: "Trip Planner", path: "/trip-planner-new", icon: Plane },
     { name: "Travel Hub", path: "/travelhub", icon: Plane },  // ✔️ FIXED ROUTE
     { name: "Cultural Odyssey", path: "/festivals", icon: Calendar },
     { name: "Eco Travel", path: "/sustainable", icon: Leaf },

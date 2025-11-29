@@ -12,6 +12,7 @@ import TravelHub from "./pages/TravelHub"; // ✔️ Correct Import
 import Festivals from "./pages/Festivals";
 import Sustainable from "./pages/Sustainable";
 import Assistant from "./pages/Assistant";
+import TripPlanner from "./pages/TripPlanner";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -60,6 +61,7 @@ const App: React.FC = () => {
             <Route path="/travelhub" element={<TravelHub />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
+            <Route path="/trip-planner-new" element={<TripPlanner />} />
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />

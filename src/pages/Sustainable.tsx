@@ -6,13 +6,8 @@ import {
   Bus,
   Car,
   Loader2,
-  Gift,
   AlertCircle,
-  ArrowRightLeft,
   MapPin,
-  Clock3,
-  Sparkles,
-  TrendingUp,
   Bike,
 } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
@@ -296,7 +291,7 @@ const Sustainable: React.FC = () => {
               className="bg-stone-100 hover:bg-teal-100 text-stone-600 hover:text-teal-700 p-3 rounded-full transition border border-stone-200 hover:border-teal-300"
               title="Swap origin and destination"
             >
-              <ArrowRightLeft size={20} />
+              <Car size={20} />
             </button>
           </div>
           <div className="flex-1 w-full relative">
@@ -375,7 +370,7 @@ const Sustainable: React.FC = () => {
             <p className="text-stone-600 flex flex-wrap items-center gap-2 text-sm md:text-base">
               <span className="flex items-center gap-1"><MapPin size={16} /> {formatNumber(routeData.distance)} km</span>
               <span className="hidden md:inline text-stone-400">•</span>
-              <span className="flex items-center gap-1"><Clock3 size={16} /> {formatDuration(routeData.durationMinutes)}</span>
+              <span className="flex items-center gap-1"><Loader2 size={16} /> {formatDuration(routeData.durationMinutes)}</span>
             </p>
           </div>
 
@@ -394,7 +389,7 @@ const Sustainable: React.FC = () => {
 
               <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-start gap-3">
                 <div className="p-2 rounded-full bg-white text-emerald-600">
-                  <TrendingUp size={20} />
+                  <Leaf size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-emerald-900">Emission Savings</p>
@@ -405,7 +400,7 @@ const Sustainable: React.FC = () => {
 
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-start gap-3">
                 <div className="p-2 rounded-full bg-white text-amber-600">
-                  <Sparkles size={20} />
+                  <AlertCircle size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-amber-900">Best Mode</p>
@@ -434,7 +429,7 @@ const Sustainable: React.FC = () => {
             >
               {routeData.summary?.bestMode?.mode?.toLowerCase() === opt.mode.toLowerCase() ? (
                 <div className="absolute top-0 right-0 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg flex items-center gap-1">
-                  <Sparkles size={12} /> Best Mode
+                  <Leaf size={12} /> Best Mode
                 </div>
               ) : opt.greenScore >= 8 ? (
                 <div className="absolute top-0 right-0 bg-teal-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-lg flex items-center gap-1">
@@ -468,7 +463,7 @@ const Sustainable: React.FC = () => {
                 <div className="text-right">
                      <span className="block text-xs text-stone-500 mb-1">Reward Points</span>
                      <span className="font-bold text-lg text-orange-600 flex items-center justify-end gap-1">
-                         <Gift size={16} /> {formatNumber(opt.rewards)}
+                         <Leaf size={16} /> {formatNumber(opt.rewards)}
                      </span>
                 </div>
                 <div className="col-span-2 pt-2 border-t border-stone-200 flex justify-between items-center">
