@@ -26,10 +26,20 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold font-serif flex items-center">
-            <span className="text-primary-500">Dar</span>
-            <span className="text-primary-700">Shana</span>
-          </Link>
+          <Link 
+  to="/" 
+  className="text-3xl font-extrabold font-serif flex items-center gap-1 select-none"
+>
+  {/* Dar (Professional Blue Gradient) */}
+  <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent">
+    Dar
+  </span>
+  {/* Shana (Neon Purple Gradient) */}
+  <span className="bg-gradient-to-r from-purple-500 to-purple-300 bg-clip-text text-transparent">
+    Shana
+  </span>
+</Link>
+
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-2">
