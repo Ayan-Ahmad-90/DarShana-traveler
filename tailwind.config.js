@@ -55,6 +55,18 @@ export default {
           900: '#212121',
         },
       },
+      travelhub: {
+        primary: {
+          DEFAULT: '#06b6d4',
+          600: '#0891b2',
+        },
+        secondary: '#06d6a0',
+        accent: '#fb923c',
+        hero: '#071029',
+        glass: 'rgba(255,255,255,0.06)',
+        surface: '#0f172a',
+        muted: '#94a3b8',
+      },
     },
   },
   plugins: [],

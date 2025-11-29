@@ -12,14 +12,12 @@ import TravelHub from "./pages/TravelHub"; // ✔️ Correct Import
 import Festivals from "./pages/Festivals";
 import Sustainable from "./pages/Sustainable";
 import Assistant from "./pages/Assistant";
-import TripPlanner from "./pages/TripPlanner";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import MyTrips from "./pages/MyTrips";
 import FestivalAlerts from "./pages/FestivalAlerts";
 import LanguageSelector from "./pages/LanguageSelector";
-import TripPlannerWithSuggestions from "./pages/TripPlannerWithSuggestions";
 import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
 import LocalGuideDashboard from "./pages/LocalGuideDashboard";
 import BecomeGuide from "./components/Guide/BecomeGuide";
@@ -61,7 +59,6 @@ const App: React.FC = () => {
             <Route path="/travelhub" element={<TravelHub />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
-            <Route path="/trip-planner-new" element={<TripPlanner />} />
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
@@ -71,7 +68,6 @@ const App: React.FC = () => {
             <Route path="/my-trips" element={<MyTrips />} />
             <Route path="/festival-alerts" element={<FestivalAlerts />} />
             <Route path="/language" element={<LanguageSelector />} />
-            <Route path="/trip-planner" element={<TripPlannerWithSuggestions />} />
             <Route path="/rewards" element={<EcoRewardsDashboard />} />
             <Route path="/become-guide" element={<BecomeGuide />} />
             <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
