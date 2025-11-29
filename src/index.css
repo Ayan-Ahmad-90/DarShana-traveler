@@ -146,3 +146,42 @@ html,
   -webkit-user-drag: none;
   user-drag: none;
 }
+
+/* ----------------------------------------
+   Premium Hero Animations
+----------------------------------------- */
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* Glow effect for logo */
+@keyframes glowPulse {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(251, 146, 60, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(251, 146, 60, 0.8);
+  }
+}
+
+.animate-glow {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Premium transitions */
+button, a, [role="button"] {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

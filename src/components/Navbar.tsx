@@ -21,38 +21,40 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <nav className="fixed top-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 border-b border-primary-200">
+    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-xl shadow-lg z-50 border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           
           {/* Logo */}
           <Link 
-  to="/" 
-  className="text-3xl font-extrabold font-serif flex items-center gap-1 select-none"
->
-  {/* Dar (Professional Blue Gradient) */}
-  <span className="bg-gradient-to-r from-blue-500 to-blue-300 bg-clip-text text-transparent">
-    Dar
-  </span>
-  {/* Shana (Neon Purple Gradient) */}
-  <span className="bg-gradient-to-r from-purple-500 to-purple-300 bg-clip-text text-transparent">
-    Shana
-  </span>
-</Link>
+            to="/" 
+            className="text-3xl font-extrabold font-serif flex items-center gap-1 select-none group"
+          >
+            {/* Dar – Dark Orange to Amber Gradient with Glow */}
+            <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-400 bg-clip-text text-transparent group-hover:from-orange-500 group-hover:via-orange-400 group-hover:to-amber-300 transition-all duration-300">
+              Dar
+            </span>
+
+            {/* Shana – Deep Emerald to Light Green Gradient with Glow */}
+            <span className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-green-400 bg-clip-text text-transparent group-hover:from-emerald-600 group-hover:via-emerald-500 group-hover:to-green-300 transition-all duration-300">
+              Shana
+            </span>
+          </Link>
+
 
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-1">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`px-3 py-2 rounded-md text-sm flex items-center gap-2 font-medium transition-all ${
+                  className={`px-4 py-2 rounded-lg text-sm flex items-center gap-2 font-semibold transition-all duration-300 transform hover:scale-105 ${
                     isActive(link.path)
-                      ? "text-primary-700 bg-primary-100"
-                      : "text-primary-700 hover:text-primary-600 hover:bg-primary-50"
+                      ? "text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-md"
+                      : "text-slate-700 hover:text-orange-600 hover:bg-orange-50/60"
                   }`}
                 >
                   {Icon && <Icon size={18} />}
@@ -62,10 +64,10 @@ const Navbar: React.FC = () => {
             })}
 
             {/* CTA + Kebab Menu */}
-            <div className="ml-4 flex items-center gap-3">
+            <div className="ml-6 flex items-center gap-4">
               <Link
                 to="/register"
-                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-full text-sm font-medium transition shadow hover:scale-105"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
               >
                 Book Trip
               </Link>
@@ -73,7 +75,7 @@ const Navbar: React.FC = () => {
               {/* Kebab Menu (3-dot) */}
               <button
                 onClick={openSidebar}
-                className="p-2 text-primary-600 hover:bg-primary-100 rounded-lg transition hover:text-primary-700"
+                className="p-2.5 text-slate-600 hover:text-orange-600 hover:bg-orange-100/40 rounded-lg transition-all duration-300 hover:scale-110"
                 title="More options"
               >
                 <MoreVertical size={22} />
@@ -94,8 +96,8 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-primary-200">
-          <div className="px-4 py-3 space-y-2">
+        <div className="md:hidden bg-white/95 backdrop-blur-lg border-t border-white/20 shadow-xl">
+          <div className="px-4 py-4 space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -103,10 +105,10 @@ const Navbar: React.FC = () => {
                   key={link.name}
                   to={link.path}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-md text-base transition ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-all duration-300 transform ${
                     isActive(link.path)
-                      ? "text-primary-700 bg-primary-100"
-                      : "text-primary-700 hover:text-primary-600 hover:bg-primary-50"
+                      ? "text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-md"
+                      : "text-slate-700 hover:text-orange-600 hover:bg-orange-50/60"
                   }`}
                 >
                   {Icon && <Icon size={20} />}
@@ -119,7 +121,7 @@ const Navbar: React.FC = () => {
             <Link
               to="/register"
               onClick={() => setIsOpen(false)}
-              className="block text-center bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-full mt-2 shadow-md"
+              className="block text-center bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white py-3 rounded-lg mt-4 shadow-md font-bold"
             >
               Book Trip
             </Link>
