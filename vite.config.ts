@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 
 
 // https://vite.dev/config/
+// Use '/' for Vercel, '/DarShana-traveler/' for GitHub Pages
 export default defineConfig({
-  base: '/DarShana-traveler/',
+  base: process.env.GITHUB_PAGES ? '/DarShana-traveler/' : '/',
   plugins: [react()],
   optimizeDeps: {
     // Prebundle face-api to avoid duplicate runtime packages and speed up dev
