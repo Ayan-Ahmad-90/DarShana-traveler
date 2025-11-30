@@ -39,29 +39,30 @@ const formatNumber = (value: number): string => {
   return Math.abs(value) < 10 ? (Math.round(value * 10) / 10).toString() : Math.round(value).toString();
 };
 
-const useMouseTilt = (ref: React.RefObject<HTMLDivElement | null>, enabled = true) => {
-  const [rot, setRot] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !enabled) return;
-    const onMove = (e: MouseEvent) => {
-      const r = el.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      const ry = ((e.clientX - cx) / (r.width / 2)) * 6;
-      const rx = -((e.clientY - cy) / (r.height / 2)) * 6;
-      setRot({ x: rx, y: ry });
-    };
-    const onLeave = () => setRot({ x: 0, y: 0 });
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
-    return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-    };
-  }, [ref, enabled]);
-  return rot;
-};
+// Mouse tilt effect hook (available for future use)
+// const useMouseTilt = (ref: React.RefObject<HTMLDivElement | null>, enabled = true) => {
+//   const [rot, setRot] = useState({ x: 0, y: 0 });
+//   useEffect(() => {
+//     const el = ref.current;
+//     if (!el || !enabled) return;
+//     const onMove = (e: MouseEvent) => {
+//       const r = el.getBoundingClientRect();
+//       const cx = r.left + r.width / 2;
+//       const cy = r.top + r.height / 2;
+//       const ry = ((e.clientX - cx) / (r.width / 2)) * 6;
+//       const rx = -((e.clientY - cy) / (r.height / 2)) * 6;
+//       setRot({ x: rx, y: ry });
+//     };
+//     const onLeave = () => setRot({ x: 0, y: 0 });
+//     el.addEventListener('mousemove', onMove);
+//     el.addEventListener('mouseleave', onLeave);
+//     return () => {
+//       el.removeEventListener('mousemove', onMove);
+//       el.removeEventListener('mouseleave', onLeave);
+//     };
+//   }, [ref, enabled]);
+//   return rot;
+// };
 
 const SustainableFixed: React.FC = () => {
   const [from, setFrom] = useState('');
