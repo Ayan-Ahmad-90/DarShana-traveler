@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-// @ts-ignore - no type declarations available for 'pdfkit'
 import PDFDocument from 'pdfkit';
-// @ts-ignore - no type declarations available for 'qrcode'
 import QRCode from 'qrcode';
 import { fileURLToPath } from 'url';
 

@@ -39,7 +39,8 @@ const GuideListing = () => {
   const fetchGuides = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/guides/by-location?location=', {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${baseUrl}/api/guides/by-location?location=`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

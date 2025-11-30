@@ -16,7 +16,7 @@ import {
   Mail,
   MessageSquare,
 } from 'lucide-react';
-import { LocalGuide } from '../../types';
+import type { LocalGuide } from '../../types';
 
 interface FilterOptions {
   location: string;

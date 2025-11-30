@@ -1,341 +1,83 @@
-import { useState } from "react";
-import { Plane, Train, Ship, Bike, Car, Search, MapPin, Rocket, AlertCircle, BookOpen } from "lucide-react";
-import { flightApi, trainApi, transportApi } from "../services/api";
+import { useCallback } from 'react';
+import HeroBanner from '../components/travelhub/HeroBanner';
+import type { HeroSearchPayload } from '../components/travelhub/HeroBanner';
+import TravelCategoriesSection from '../components/travelhub/TravelCategoriesSection';
+import DestinationsSection from '../components/travelhub/DestinationsSection';
+import TourPackagesSection from '../components/travelhub/TourPackagesSection';
+import GallerySection from '../components/travelhub/GallerySection';
+import ReviewsSection from '../components/travelhub/ReviewsSection';
+import BlogHighlightsSection from '../components/travelhub/BlogHighlightsSection';
+import InteractiveMapSection from '../components/travelhub/InteractiveMapSection';
+import ContactSupportSection from '../components/travelhub/ContactSupportSection';
+import SpecialFeaturesSection from '../components/travelhub/SpecialFeaturesSection';
+import RouteMapSection from '../components/travelhub/RouteMapSection';
 
 const TravelHub = () => {
-  const [selectedMode, setSelectedMode] = useState("flight");
-  const [fromCity, setFromCity] = useState("");
-  const [toCity, setToCity] = useState("");
-  const [travelDate, setTravelDate] = useState("");
-  const [passengers, setPassengers] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [error, setError] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
-
-  const travelModes = [
-    { id: "flight", label: "Flights", icon: Plane },
-    { id: "train", label: "Train (Luxury + Local)", icon: Train },
-    { id: "cruise", label: "Cruise Ship", icon: Ship },
-    { id: "private", label: "Private Jet", icon: Rocket },
-    { id: "cab", label: "Taxi / Ola / Uber", icon: Car },
-    { id: "bike", label: "Bike & Scooty Rentals", icon: Bike },
-  ];
-
-  const handleSearch = async () => {
-    setError("");
-    setIsLoading(true);
-    setHasSearched(true);
-
-    if (!fromCity || !toCity || !travelDate) {
-      setError("Please fill in all fields");
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      let response: any;
-
-      switch (selectedMode) {
-        case "flight":
-          response = await flightApi.search(fromCity, toCity, travelDate, passengers);
-          break;
-        case "train":
-          response = await trainApi.search(fromCity, toCity, travelDate, passengers);
-          break;
-        case "cab":
-          response = await transportApi.searchCabs(fromCity, toCity, travelDate);
-          break;
-        case "cruise":
-          response = await transportApi.searchCruises(fromCity, toCity, travelDate);
-          break;
-        case "private":
-          response = await transportApi.searchJets(fromCity, toCity, travelDate);
-          break;
-        case "bike":
-          const endDate = new Date(travelDate);
-          endDate.setDate(endDate.getDate() + 1);
-          response = await transportApi.searchBikes(fromCity, toCity, travelDate, endDate.toISOString().split('T')[0]);
-          break;
-        default:
-          throw new Error("Invalid mode");
-      }
-
-      if (response.success && response.data) {
-        setResults(response.data.data || response.data);
-      } else {
-        setError(response.error || "No results found");
-        setResults([]);
-      }
-    } catch (err: any) {
-      setError(err.message || "Search failed");
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleHeroSearch = (payload: HeroSearchPayload) => {
+    console.log('Hero search:', payload);
   };
 
+  const scrollToDestinations = useCallback(() => {
+    document.getElementById('destinations')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const scrollToContact = useCallback(() => {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-24">
-      
-      <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold text-gray-900 tracking-tight">
-          Travel <span className="text-teal-600">Hub</span>
-        </h1>
-        <p className="mt-2 text-lg text-gray-600">
-          Compare routes, prices & transport options — all in one platform.
-        </p>
+    <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Soft World Map Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* World Map Pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Cpath fill='%230ea5e9' d='M170 120c20-10 45-5 60 15 10 15 5 35-10 45-20 15-50 10-65-10-10-20 0-40 15-50zm100 50c15-5 35 5 40 25 5 15-5 30-20 35-20 5-40-10-40-30 0-15 10-25 20-30zm-80 100c25-15 55-5 70 20 10 20 0 45-25 55-30 15-65-5-70-35-5-20 10-30 25-40zm200-80c30 0 55 25 55 55 0 25-20 50-50 50-35 0-60-30-55-60 5-25 25-45 50-45zm150 30c20 10 30 35 20 55-15 25-45 30-65 15-25-20-20-55 5-70 15-10 30-5 40 0zM450 250c35-10 70 15 75 50 5 30-20 60-55 65-40 5-75-25-70-65 5-30 30-45 50-50zm100-100c25 5 45 30 40 55-5 30-35 50-65 40-25-10-40-40-30-65 10-20 35-35 55-30zm-350 200c20-5 45 10 50 35 5 20-10 40-35 45-30 5-55-20-50-50 5-15 20-25 35-30zm500-50c30 10 50 40 40 70-10 35-50 50-80 35-25-15-35-50-20-75 15-20 40-35 60-30zm-200 100c25 0 50 20 50 50 0 25-20 50-50 50-35 0-55-30-50-60 5-25 30-40 50-40zm300-150c20 15 25 45 10 65-20 25-55 25-75 5-15-20-10-50 15-65 15-10 35-15 50-5z'/%3E%3Cpath fill='%2306b6d4' d='M600 80c25-5 50 15 55 40 5 30-20 55-50 55-35 0-60-30-50-60 5-20 25-30 45-35zm150 120c30 5 55 35 45 65-10 35-50 55-85 40-30-15-40-55-20-80 15-20 40-30 60-25zM100 350c20 0 40 20 40 45 0 20-15 40-40 40-30 0-50-25-45-50 5-20 25-35 45-35zm750-100c25 10 40 40 30 65-15 30-50 40-75 20-20-15-25-45-10-65 15-15 35-25 55-20zm-600 150c30-5 60 20 60 55 0 30-25 55-60 55-40 0-70-35-60-70 10-25 35-35 60-40zm400 50c20 5 35 25 30 50-10 30-45 45-70 30-20-15-25-45-5-65 15-15 30-20 45-15z'/%3E%3Cpath fill='%23fb923c' opacity='0.6' d='M300 50c15 0 30 15 30 35 0 15-15 30-30 30-20 0-35-20-30-40 5-15 15-25 30-25zm500 350c20-5 40 10 45 35 5 20-10 40-35 45-30 5-55-20-50-50 5-20 25-30 40-30zm-400 50c15 5 25 20 20 40-5 20-30 30-50 20-15-10-20-30-10-45 10-15 25-20 40-15z'/%3E%3C/svg%3E")`,
+            backgroundSize: '100% auto',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white opacity-80" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(6,182,212,0.08),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(251,146,60,0.06),_transparent_50%)]" />
+        
+        {/* Floating Travel Elements */}
+        <div className="absolute top-[15%] left-[10%] w-3 h-3 bg-[#06b6d4]/20 rounded-full blur-sm animate-pulse" />
+        <div className="absolute top-[25%] right-[15%] w-2 h-2 bg-[#06d6a0]/25 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[60%] left-[20%] w-2.5 h-2.5 bg-[#fb923c]/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-[40%] right-[25%] w-2 h-2 bg-[#0ea5e9]/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute bottom-[30%] left-[30%] w-1.5 h-1.5 bg-[#a855f7]/15 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-[20%] right-[10%] w-2 h-2 bg-[#06b6d4]/15 rounded-full blur-sm animate-pulse" style={{ animationDelay: '2.5s' }} />
+        
+        {/* Dotted Route Lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.03]" preserveAspectRatio="none">
+          <path d="M100,200 Q300,100 500,250 T900,150" stroke="#06b6d4" strokeWidth="2" fill="none" strokeDasharray="8,8" />
+          <path d="M50,400 Q250,300 450,350 T850,300" stroke="#fb923c" strokeWidth="2" fill="none" strokeDasharray="8,8" />
+          <path d="M200,100 Q400,200 600,150 T1000,250" stroke="#06d6a0" strokeWidth="1.5" fill="none" strokeDasharray="6,6" />
+        </svg>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
-        {travelModes.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setSelectedMode(id)}
-            className={`border rounded-xl py-4 flex flex-col items-center gap-2 transition-all duration-200 shadow-sm hover:scale-[1.03] 
-              ${selectedMode === id ? "border-teal-600 bg-teal-50 shadow-md" : "hover:border-teal-500 hover:bg-gray-50"}`}
-          >
-            <Icon size={28} className="text-teal-700" />
-            <span className="text-sm font-medium">{label}</span>
-          </button>
-        ))}
-      </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 space-y-16">
+        <HeroBanner
+          onSearch={handleHeroSearch}
+          onExploreDestinations={scrollToDestinations}
+          onContact={scrollToContact}
+        />
 
-      <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-          Search {selectedMode.charAt(0).toUpperCase() + selectedMode.slice(1)}
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div>
-            <label className="font-medium text-gray-700 text-sm">From</label>
-            <div className="flex items-center gap-3 px-4 py-3 border rounded-lg shadow-sm bg-white">
-              <MapPin size={20} className="text-teal-600" />
-              <input 
-                type="text" 
-                placeholder="City / Airport" 
-                value={fromCity}
-                onChange={(e) => setFromCity(e.target.value)}
-                className="w-full outline-none" 
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-medium text-gray-700 text-sm">To</label>
-            <div className="flex items-center gap-3 px-4 py-3 border rounded-lg shadow-sm bg-white">
-              <MapPin size={20} className="text-teal-600" />
-              <input 
-                type="text" 
-                placeholder="Destination" 
-                value={toCity}
-                onChange={(e) => setToCity(e.target.value)}
-                className="w-full outline-none" 
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="font-medium text-gray-700 text-sm">Travel Date</label>
-            <input 
-              type="date" 
-              value={travelDate}
-              onChange={(e) => setTravelDate(e.target.value)}
-              className="px-4 py-3 border rounded-lg shadow-sm w-full outline-none" 
-            />
-          </div>
-        </div>
-
-        {selectedMode === 'flight' && (
-          <div className="mt-5">
-            <label className="font-medium text-gray-700 text-sm">Passengers</label>
-            <select 
-              value={passengers}
-              onChange={(e) => setPassengers(parseInt(e.target.value))}
-              className="px-4 py-3 border rounded-lg shadow-sm w-full outline-none"
-            >
-              {[1, 2, 3, 4, 5, 6].map(n => (
-                <option key={n} value={n}>{n} {n === 1 ? 'Passenger' : 'Passengers'}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <button 
-          onClick={handleSearch}
-          disabled={isLoading}
-          className="mt-6 bg-teal-700 hover:bg-teal-800 disabled:bg-gray-400 text-white px-6 py-3 rounded-xl text-lg flex items-center gap-2 shadow-md transition-all hover:scale-[1.03] disabled:scale-100"
-        >
-          {isLoading ? (
-            <>
-              <div className="animate-spin">⏳</div> Searching...
-            </>
-          ) : (
-            <>
-              <Search size={20} /> Search & Compare
-            </>
-          )}
-        </button>
-
-        {error && hasSearched && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
-            <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Search Results */}
-      {hasSearched && !isLoading && results.length > 0 && (
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Options ({results.length})</h2>
-          <div className="grid grid-cols-1 gap-4">
-            {results.map((item: any, idx: number) => (
-              <div key={idx} className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {selectedMode === 'flight' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Flight</p>
-                        <p className="font-semibold text-gray-900">{item.airline}</p>
-                        <p className="text-xs text-gray-500">{item.flightNumber}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Route</p>
-                        <p className="font-semibold">{item.origin} → {item.destination}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Duration</p>
-                        <p className="font-semibold">{item.duration}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Price</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.price.toLocaleString()}</p>
-                      </div>
-                    </>
-                  )}
-                  {selectedMode === 'train' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Train</p>
-                        <p className="font-semibold text-gray-900">{item.trainName}</p>
-                        <p className="text-xs text-gray-500">{item.trainNumber}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Route</p>
-                        <p className="font-semibold">{item.source} → {item.destination}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Duration</p>
-                        <p className="font-semibold">{item.duration}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">From</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.classes?.[0]?.price?.toLocaleString() || 'N/A'}</p>
-                      </div>
-                    </>
-                  )}
-                  {selectedMode === 'cab' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Provider</p>
-                        <p className="font-semibold text-gray-900 capitalize">{item.provider}</p>
-                        <p className="text-xs text-gray-500">{item.carType}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Duration</p>
-                        <p className="font-semibold">{item.estimatedDuration}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Rating</p>
-                        <p className="font-semibold">⭐ {item.driverRating}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Price</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.price.toLocaleString()}</p>
-                      </div>
-                    </>
-                  )}
-                  {selectedMode === 'cruise' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Cruise</p>
-                        <p className="font-semibold text-gray-900">{item.cruiseName}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Duration</p>
-                        <p className="font-semibold">{item.duration} days</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Ports</p>
-                        <p className="font-semibold text-sm">{item.embarkPort} → {item.disembarkPort}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Price</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.price.toLocaleString()}</p>
-                      </div>
-                    </>
-                  )}
-                  {selectedMode === 'private' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Jet</p>
-                        <p className="font-semibold text-gray-900">{item.aircraft}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Capacity</p>
-                        <p className="font-semibold">{item.capacity} passengers</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Route</p>
-                        <p className="font-semibold">{item.origin} → {item.destination}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Price</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.totalPrice.toLocaleString()}</p>
-                      </div>
-                    </>
-                  )}
-                  {selectedMode === 'bike' && (
-                    <>
-                      <div>
-                        <p className="text-sm text-gray-600">Bike</p>
-                        <p className="font-semibold text-gray-900">{item.bikeName}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Type</p>
-                        <p className="font-semibold capitalize">{item.bikeType}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Rating</p>
-                        <p className="font-semibold">⭐ {item.rating}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Price/Day</p>
-                        <p className="text-2xl font-bold text-teal-600">₹{item.pricePerDay.toLocaleString()}</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <button className="mt-4 w-full bg-teal-700 hover:bg-teal-800 text-white py-2 rounded-lg font-semibold transition-colors">
-                  Book Now
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {hasSearched && !isLoading && results.length === 0 && !error && (
-        <div className="mt-12 text-center p-8 bg-gray-50 rounded-xl border border-gray-200">
-          <BookOpen size={48} className="mx-auto text-gray-400 mb-3" />
-          <p className="text-lg text-gray-600">No results found for your search</p>
-        </div>
-      )}
-
-      <div className="mt-12 p-6 rounded-xl border bg-gradient-to-r from-orange-50 to-teal-50 text-gray-800 shadow">
-        <h3 className="font-semibold text-lg mb-1">🚀 Coming Soon: AI Smart Planning</h3>
-        <p className="text-gray-600">Personalized route suggestions based on budget, weather, peak rush, and your mood!</p>
+        <TravelCategoriesSection />
+        <RouteMapSection />
+        <DestinationsSection />
+        <TourPackagesSection />
+        <GallerySection />
+        <SpecialFeaturesSection />
+        <InteractiveMapSection />
+        <ReviewsSection />
+        <BlogHighlightsSection />
+        <ContactSupportSection />
       </div>
     </div>
   );

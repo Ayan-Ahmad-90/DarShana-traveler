@@ -90,3 +90,27 @@ exports.saveDestination = async (req, res) => {
     res.status(500).json({ message: 'Failed to save destination', error: error.message });
   }
 };
+
+// Upload profile image
+exports.uploadProfileImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload a file' });
+    }
+
+    const profileImage = `/uploads/${req.file.filename}`;
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { profileImage },
+      { new: true }
+    );
+
+    res.json({
+      message: 'Profile image uploaded successfully',
+      profileImage: user.profileImage,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Image upload failed', error: error.message });
+  }
+};

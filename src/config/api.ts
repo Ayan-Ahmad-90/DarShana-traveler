@@ -25,7 +25,7 @@ export const getBackendUrl = (): string => {
   }
 
   // Development: Use localhost or env variable
-  return backendUrl || 'http://localhost:3000';
+  return backendUrl || 'http://localhost:3001';
 };
 
 export const API_BASE_URL = getBackendUrl();

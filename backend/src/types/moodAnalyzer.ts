@@ -52,7 +52,7 @@ export interface DetectedFace {
  * Backend API request for mood analysis
  */
 export interface MoodAnalyzeRequest {
-  imageData: string; // base64 encoded image
+  imageData?: string; // base64 encoded image (optional if imageUrl provided)
   imageUrl?: string; // optional URL instead of base64
 }
 

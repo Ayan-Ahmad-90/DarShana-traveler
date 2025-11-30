@@ -29,7 +29,7 @@ export const calculateRoutes = async (req: Request, res: Response) => {
     logger.info(`🚗 Route calculation request: ${from} → ${to}`);
     
     // Generate route options
-    const options = await generateRouteOptions(from, to);
+    const { summary, options } = await generateRouteOptions(from, to);
     
     if (options.length === 0) {
       return res.status(404).json({
@@ -38,8 +38,7 @@ export const calculateRoutes = async (req: Request, res: Response) => {
       });
     }
     
-    // Calculate distance from first option
-    const distance = options[0].distance;
+    const distance = summary?.distanceKm ?? options[0].distance;
     
     // Save to database
     const routeDoc = new Route({
@@ -49,12 +48,14 @@ export const calculateRoutes = async (req: Request, res: Response) => {
       options: options.map(opt => ({
         mode: opt.mode,
         time: opt.time,
+        durationMinutes: opt.durationMinutes,
         cost: opt.cost,
         co2: opt.co2,
         greenScore: opt.greenScore,
         rewards: opt.rewards,
         description: opt.description,
       })),
+      summary,
     });
     
     await routeDoc.save();
@@ -65,6 +66,8 @@ export const calculateRoutes = async (req: Request, res: Response) => {
         from,
         to,
         distance: Math.round(distance * 10) / 10,
+        durationMinutes: summary?.durationMinutes ?? options[0].durationMinutes,
+        summary,
         options,
       },
     });

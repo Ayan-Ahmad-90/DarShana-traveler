@@ -3,6 +3,142 @@ const Festival = require('../models/Festival');
 const Notification = require('../models/Notification');
 const FestivalReminder = require('../models/FestivalReminder');
 
+// Sample festivals data (used when DB is empty)
+const sampleFestivals = [
+  {
+    _id: 'durga-puja-2025',
+    name: 'Durga Puja',
+    region: 'East India',
+    date: '2025-10-21',
+    description: 'The grand festival celebrating Goddess Durga with elaborate pandals, cultural performances, and community gatherings across Kolkata and Bengal.',
+    subscribers: []
+  },
+  {
+    _id: 'dussehra-2025',
+    name: 'Dussehra / Vijayadashami',
+    region: 'North India',
+    date: '2025-10-23',
+    description: 'Victory of good over evil celebrated with Ramlila performances and burning of Ravana effigies.',
+    subscribers: []
+  },
+  {
+    _id: 'diwali-2025',
+    name: 'Diwali - Festival of Lights',
+    region: 'North India',
+    date: '2025-11-12',
+    description: 'The biggest festival of India! Celebrate with diyas, fireworks, rangoli, sweets, and family gatherings.',
+    subscribers: []
+  },
+  {
+    _id: 'bhai-dooj-2025',
+    name: 'Bhai Dooj',
+    region: 'North India',
+    date: '2025-11-14',
+    description: 'A celebration of the bond between brothers and sisters, with tilak ceremonies and gift exchanges.',
+    subscribers: []
+  },
+  {
+    _id: 'chhath-puja-2025',
+    name: 'Chhath Puja',
+    region: 'East India',
+    date: '2025-11-16',
+    description: 'Ancient Hindu festival dedicated to Sun God. Devotees fast and offer prayers at riverbanks.',
+    subscribers: []
+  },
+  {
+    _id: 'kartik-purnima-2025',
+    name: 'Kartik Purnima',
+    region: 'Central India',
+    date: '2025-11-27',
+    description: 'Sacred full moon day with Dev Deepawali celebrations in Varanasi. Thousands of diyas light up the ghats.',
+    subscribers: []
+  },
+  {
+    _id: 'hornbill-2025',
+    name: 'Hornbill Festival',
+    region: 'North-East India',
+    date: '2025-12-01',
+    description: 'The "Festival of Festivals" in Nagaland showcasing tribal culture, traditional dances, and local cuisine.',
+    subscribers: []
+  },
+  {
+    _id: 'rann-utsav-2025',
+    name: 'Rann Utsav',
+    region: 'West India',
+    date: '2025-12-10',
+    description: 'Experience the magical white desert of Kutch under full moon. Folk music, handicrafts, and luxury tent stays.',
+    subscribers: []
+  },
+  {
+    _id: 'christmas-goa-2025',
+    name: 'Christmas in Goa',
+    region: 'West India',
+    date: '2025-12-25',
+    description: 'Celebrate Christmas with Portuguese-influenced traditions, midnight masses, and beach parties.',
+    subscribers: []
+  },
+  {
+    _id: 'konark-dance-2025',
+    name: 'Konark Dance Festival',
+    region: 'East India',
+    date: '2025-12-20',
+    description: 'Classical dance performances against the backdrop of the magnificent Sun Temple.',
+    subscribers: []
+  }
+];
+
+// Get festival alerts (for Festival Alerts page)
+exports.getAlerts = async (req, res) => {
+  try {
+    const { region } = req.query;
+    
+    // Try to get from DB first
+    let festivals = await Festival.find().sort({ startDate: 1 });
+    
+    // If DB is empty, use sample data
+    if (!festivals || festivals.length === 0) {
+      festivals = sampleFestivals;
+    } else {
+      // Map DB festivals to expected format
+      festivals = festivals.map(f => ({
+        _id: f._id.toString(),
+        name: f.name,
+        region: f.location || 'India',
+        date: f.startDate || f.date,
+        description: f.description,
+        subscribers: f.subscribers || []
+      }));
+    }
+    
+    // Filter by region if specified
+    if (region) {
+      festivals = festivals.filter(f => 
+        f.region.toLowerCase().includes(region.toLowerCase())
+      );
+    }
+    
+    res.json({ 
+      success: true,
+      alerts: festivals 
+    });
+  } catch (error) {
+    // Return sample data on error
+    let festivals = sampleFestivals;
+    const { region } = req.query;
+    
+    if (region) {
+      festivals = festivals.filter(f => 
+        f.region.toLowerCase().includes(region.toLowerCase())
+      );
+    }
+    
+    res.json({ 
+      success: true,
+      alerts: festivals 
+    });
+  }
+};
+
 // Get all festivals
 exports.getAllFestivals = async (req, res) => {
   try {

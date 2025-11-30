@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LocalGuide, GuideRequest } from '../types';
+import type { LocalGuide } from '../../types';
 import { Star, MessageCircle, Phone, MapPin, Award } from 'lucide-react';
 
 const LocalGuideSupport: React.FC = () => {
@@ -195,7 +195,7 @@ const LocalGuideSupport: React.FC = () => {
                       <p className="text-sm text-gray-600 mt-2">{guide.bio}</p>
 
                       <div className="mt-3 flex flex-wrap gap-2">
-                        {guide.specialties.map((specialty, idx) => (
+                        {guide.specialties.map((specialty: string, idx: number) => (
                           <span
                             key={idx}
                             className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"

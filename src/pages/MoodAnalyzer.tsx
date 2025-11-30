@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useFaceDetection } from '../hooks/useFaceDetection';
-import { analyzeMoodWithImage } from '../services/moodApi';
+import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
 import { DESTINATIONS } from '../data/destinations';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
@@ -128,6 +128,8 @@ const MoodAnalyzer: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AIAnalysisResult | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imagePreviewRef = useRef<HTMLImageElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [aiStep, setAIStep] = useState<number>(0); // 0: input, 1: recommendations shown
   const [isPayingAI, setIsPayingAI] = useState(false);
@@ -135,6 +137,13 @@ const MoodAnalyzer: React.FC = () => {
   const [selectedDestinationIdx, setSelectedDestinationIdx] = useState<number | null>(0);
   const [faceCount, setFaceCount] = useState<number | null>(null);
   const [detectionError, setDetectionError] = useState<string | null>(null);
+
+  // Sync face count from detection hook
+  useEffect(() => {
+    if (faceDetection.faceCount !== null) {
+      setFaceCount(faceDetection.faceCount);
+    }
+  }, [faceDetection.faceCount]);
   const [selectedFAQIndex, setSelectedFAQIndex] = useState<number>(0);
 
   // Manual multi-step analyzer states
@@ -146,24 +155,231 @@ const MoodAnalyzer: React.FC = () => {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [isPaying, setIsPaying] = useState(false);
 
-  // Initialize face detection models on mount
-  useEffect(() => {
-    faceDetection.loadModels();
+  // Handlers for AI flow
+  const stopCamera = useCallback(() => {
+    console.log('🛑 Stopping camera...');
+    
+    // Stop all media tracks
+    const mediaStream = cameraStreamRef.current;
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('⏹️ Stopped track:', track.kind);
+      });
+      cameraStreamRef.current = null;
+    }
+    
+    // Clear video element
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+      videoRef.current.load(); // Reset video element
+    }
+    
+    setIsCameraOpen(false);
+    console.log('✅ Camera stopped and cleaned up');
   }, []);
 
-  // Handlers for AI flow
-  const startCamera = async () => {
+  const initCamera = useCallback(async () => {
+    console.log('🎥 Initializing camera...');
+    setDetectionError(null);
+
+    // Guard: ensure videoRef.current exists
+    const videoElement = videoRef.current;
+    if (!videoElement) {
+      console.error('❌ Video element ref is null - cannot initialize camera');
+      setDetectionError('Camera preview element not ready. Please try again.');
+      setIsCameraOpen(false);
+      return;
+    }
+
+    // Browser support check
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('❌ Browser does not support getUserMedia');
+      setDetectionError('Your browser does not support camera access. Please use Chrome, Firefox, Edge, or Safari.');
+      setIsCameraOpen(false);
+      return;
+    }
+
+    // Secure context check
+    const isSecureContext = window.isSecureContext || 
+                           window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+    
+    if (!isSecureContext) {
+      console.error('❌ Not running on secure context');
+      setDetectionError(`Camera requires HTTPS or localhost. Current: ${window.location.protocol}//${window.location.host}`);
+      setIsCameraOpen(false);
+      return;
+    }
+
     try {
-      setIsCameraOpen(true);
-      setDetectionError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) videoRef.current.srcObject = stream;
+      console.log('📹 Requesting camera permission...');
+      
+      // Request camera stream
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          width: { ideal: 640, max: 1280 }, 
+          height: { ideal: 480, max: 720 }, 
+          facingMode: 'user' 
+        },
+        audio: false,
+      });
+      
+      console.log('✅ Camera permission granted!');
+      console.log('📊 Stream active:', stream.active, 'Tracks:', stream.getTracks().length);
+
+      // Attach stream to video element
+      videoElement.srcObject = stream;
+      cameraStreamRef.current = stream;
+
+      // Wait for video metadata to load
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Camera metadata loading timeout'));
+        }, 5000);
+
+        const onLoadedMetadata = () => {
+          console.log('✅ Video metadata loaded');
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          resolve();
+        };
+
+        const onError = (e: Event) => {
+          console.error('❌ Video error:', e);
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          reject(new Error('Failed to load camera preview'));
+        };
+
+        videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
+        videoElement.addEventListener('error', onError);
+
+        // If already loaded, resolve immediately
+        if (videoElement.readyState >= 1) {
+          console.log('✅ Video already has metadata');
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          resolve();
+        }
+      });
+
+      // Start playback
+      console.log('▶️ Starting video playback...');
+      await videoElement.play();
+      
+      console.log('✅ Camera active:', {
+        videoWidth: videoElement.videoWidth,
+        videoHeight: videoElement.videoHeight,
+        readyState: videoElement.readyState
+      });
+
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Camera not accessible';
+      console.error('❌ Camera initialization error:', err);
+      
+      // Clean up on error
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      
+      let errorMsg = 'Unable to access camera';
+      let showAlert = false;
+      
+      if (err instanceof DOMException) {
+        switch (err.name) {
+          case 'NotAllowedError':
+          case 'PermissionDeniedError':
+            errorMsg = '🚫 Camera permission denied.\n\nPlease allow camera access in your browser settings and try again.';
+            showAlert = true;
+            break;
+          case 'NotFoundError':
+          case 'DevicesNotFoundError':
+            errorMsg = '📷 No camera device found.\n\nPlease connect a camera and try again.';
+            break;
+          case 'NotReadableError':
+          case 'TrackStartError':
+            errorMsg = '⚠️ Camera is in use by another application.\n\nClose other apps (Zoom, Teams, etc.) and try again.';
+            break;
+          case 'OverconstrainedError':
+            errorMsg = '⚙️ Camera settings incompatible.\n\nYour camera doesn\'t support the required resolution.';
+            break;
+          case 'SecurityError':
+            errorMsg = '🔒 Camera blocked by browser security.\n\nCheck your browser permissions.';
+            break;
+          default:
+            errorMsg = `Camera error: ${err.message}`;
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      }
+      
       setDetectionError(errorMsg);
       setIsCameraOpen(false);
+      
+      if (showAlert) {
+        alert('⚠️ Camera Access Required\n\n' + errorMsg);
+      }
     }
-  };
+  }, []);
+
+  const startCamera = useCallback(() => {
+    console.log('🎬 Opening camera interface...');
+    setDetectionError(null);
+    
+    // Pre-flight checks
+    if (!navigator.mediaDevices?.getUserMedia) {
+      const msg = '❌ Your browser does not support camera access.\n\nPlease use Chrome, Firefox, Edge, or Safari.';
+      setDetectionError(msg);
+      alert(msg);
+      return;
+    }
+    
+    const isSecure = window.isSecureContext || 
+                     window.location.protocol === 'https:' || 
+                     ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    
+    if (!isSecure) {
+      const msg = `⚠️ Camera requires HTTPS or localhost.\n\nCurrent: ${window.location.protocol}//${window.location.host}`;
+      setDetectionError(msg);
+      alert(msg);
+      return;
+    }
+    
+    console.log('✅ Pre-flight checks passed');
+    setIsCameraOpen(true);
+  }, []);
+
+  // Initialize camera when video element becomes available
+  useEffect(() => {
+    if (isCameraOpen && videoRef.current && !cameraStreamRef.current) {
+      console.log('📍 Video element available, initializing camera...');
+      initCamera();
+    }
+  }, [isCameraOpen, initCamera]);
+
+  // Detect faces from video stream when camera is active
+  useEffect(() => {
+    if (!isCameraOpen || !cameraStreamRef.current || !faceDetection.modelsLoaded) {
+      return;
+    }
+
+    console.log('👁️ Starting face detection from video stream...');
+    const intervalId = setInterval(() => {
+      if (videoRef.current) {
+        faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+      }
+    }, 1000); // Detect every second
+
+    return () => {
+      console.log('🛑 Stopping face detection interval');
+      clearInterval(intervalId);
+    };
+  }, [isCameraOpen, faceDetection, videoRef]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
@@ -177,13 +393,27 @@ const MoodAnalyzer: React.FC = () => {
     }
   };
 
-  const stopCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
-      setIsCameraOpen(false);
-    }
-  };
+  // Initialize face detection models on mount and ensure camera stops on unmount
+  useEffect(() => {
+    void faceDetection.loadModels().catch(err => {
+      console.error('Failed to preload face detection models:', err);
+    });
+    
+    // Cleanup on unmount only
+    return () => {
+      console.log('🧹 Component unmounting, cleaning up camera...');
+      const mediaStream = cameraStreamRef.current;
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      imagePreviewRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount/unmount
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,6 +424,8 @@ const MoodAnalyzer: React.FC = () => {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
+        stopCamera();
+        imagePreviewRef.current = null;
         setImage(reader.result as string);
         setDetectionError(null);
       };
@@ -201,43 +433,118 @@ const MoodAnalyzer: React.FC = () => {
     }
   };
 
+  const clearCapturedImage = useCallback(() => {
+    setImage(null);
+    setResult(null);
+    setDetectionError(null);
+    setFaceCount(null);
+    imagePreviewRef.current = null;
+  }, []);
+
   const analyzeAI = async () => {
-    if (!image) return;
+    if (!image) {
+      setDetectionError('Please capture or upload a photo before analysis.');
+      return;
+    }
 
     setLoading(true);
     setDetectionError(null);
 
-    try {
-      // First, detect faces locally
-      const faces = await faceDetection.analyzeFromImage(image);
+    const backendEndpoint = getMoodAnalyzerUrl();
 
-      if (!faces || faces.length === 0) {
-        setDetectionError(faceDetection.error || 'No face detected. Please try again.');
-        setLoading(false);
+    const prepareImageForAnalysis = async (): Promise<HTMLImageElement> => {
+      const previewNode = imagePreviewRef.current;
+
+      if (previewNode) {
+        if (!previewNode.complete || previewNode.naturalWidth === 0) {
+          await new Promise<void>((resolve, reject) => {
+            const node = previewNode;
+            if (!node) {
+              resolve();
+              return;
+            }
+
+            function cleanup() {
+              node.removeEventListener('load', handleLoad);
+              node.removeEventListener('error', handleError);
+            }
+
+            const handleLoad = () => {
+              cleanup();
+              resolve();
+            };
+
+            const handleError = () => {
+              cleanup();
+              reject(new Error('Failed to load image for analysis. Please try another photo.'));
+            };
+
+            node.addEventListener('load', handleLoad);
+            node.addEventListener('error', handleError);
+          });
+        }
+
+        if (previewNode.naturalWidth === 0) {
+          throw new Error('Preview image is empty. Please capture a new photo.');
+        }
+
+        return previewNode;
+      }
+
+      return await new Promise<HTMLImageElement>((resolve, reject) => {
+        const imgEl = new Image();
+        imgEl.crossOrigin = 'anonymous';
+        imgEl.onload = () => resolve(imgEl);
+        imgEl.onerror = () => reject(new Error('Failed to load image for analysis. Please try another photo.'));
+        imgEl.src = image;
+      });
+    };
+
+    try {
+      if (!faceDetection.modelsLoaded) {
+        console.debug('Face detection models not ready — loading now.');
+        await faceDetection.loadModels();
+        await new Promise(resolve => setTimeout(resolve, 250));
+      }
+
+      let imageNode: HTMLImageElement;
+      try {
+        imageNode = await prepareImageForAnalysis();
+      } catch (prepError) {
+        const message = prepError instanceof Error ? prepError.message : 'Could not load image for analysis.';
+        setDetectionError(message);
+        setFaceCount(null);
         return;
       }
 
-      setFaceCount(faces.length);
+      const localAnalysis = await faceDetection.analyzeImage(imageNode);
 
-      // Send to backend for emotion analysis
+      if (!localAnalysis) {
+        setDetectionError(faceDetection.error || 'No face detected. Please try again.');
+        setFaceCount(null);
+        return;
+      }
+
+      const match = localAnalysis.reasoning?.match(/Detected\s+(\d+)\s+face/i);
+      setFaceCount(match ? parseInt(match[1], 10) : 1);
+
       const moodResponse = await analyzeMoodWithImage(image);
 
       if (moodResponse.error) {
         setDetectionError(moodResponse.error);
-        setLoading(false);
         return;
       }
 
-      // Filter destinations based on mood
-      const recommendations = filterDestinationsByMood(moodResponse);
+      const recommendations = filterDestinationsByMood({
+        ...moodResponse,
+        recommendedKeys: moodResponse.recommendedKeys ?? [],
+      });
 
       if (recommendations.length === 0) {
         setDetectionError('Could not find matching destinations. Please try again.');
-        setLoading(false);
         return;
       }
 
-      // Build result
       const aiResult: AIAnalysisResult = {
         detectedMood: moodResponse.detectedMood,
         confidence: moodResponse.confidence,
@@ -254,8 +561,19 @@ const MoodAnalyzer: React.FC = () => {
       setSelectedFAQIndex(0);
       setAIStep(1);
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Analysis failed';
-      setDetectionError(errorMsg);
+      const message = error instanceof Error ? error.message : 'Analysis failed';
+      console.error('❌ Mood analysis failed:', error);
+
+      if (/Failed to reach mood analyzer service/i.test(message) || message.includes('Failed to fetch')) {
+        setDetectionError(
+          `Cannot connect to backend at ${backendEndpoint}. Make sure the server is running on port 3001.\n` +
+          'Run: cd backend && npm run dev'
+        );
+      } else if (message.startsWith('HTTP')) {
+        setDetectionError(`Backend returned error: ${message}`);
+      } else {
+        setDetectionError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -339,9 +657,9 @@ const MoodAnalyzer: React.FC = () => {
           onClick={() => {
             setMode('ai');
             setAIStep(0);
-            setImage(null);
-            setResult(null);
-            setDetectionError(null);
+            clearCapturedImage();
+            setPaidAI(false);
+            setIsPayingAI(false);
           }}
         >
           <Camera size={18} className="inline mr-2" /> AI Mood Analyzer
@@ -374,16 +692,72 @@ const MoodAnalyzer: React.FC = () => {
               </p>
 
               {detectionError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-                  <AlertCircle className="text-red-600 flex-shrink-0" />
-                  <div className="text-red-700">{detectionError}</div>
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex gap-3 mb-3">
+                    <AlertCircle className="text-red-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="text-red-700 font-semibold mb-1">Camera Error</div>
+                      <div className="text-red-600 text-sm whitespace-pre-line">{detectionError}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-3">
+                    <button 
+                      onClick={() => {
+                        console.log('🔄 Retry button clicked');
+                        // Stop any existing stream
+                        if (cameraStreamRef.current) {
+                          console.log('🛑 Stopping existing stream');
+                          cameraStreamRef.current.getTracks().forEach(track => track.stop());
+                          cameraStreamRef.current = null;
+                        }
+                        // Reset state
+                        setDetectionError(null);
+                        setIsCameraOpen(false);
+                        // Small delay to ensure state is cleared before retrying
+                        setTimeout(() => {
+                          console.log('🔄 Starting camera after retry');
+                          startCamera();
+                        }, 100);
+                      }}
+                      className="text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
+                    >
+                      🔄 Retry Camera
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setDetectionError(null);
+                      }}
+                      className="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                  
+                  {/* Troubleshooting tips */}
+                  <details className="mt-4 text-sm">
+                    <summary className="cursor-pointer text-red-700 font-semibold hover:text-red-800">
+                      💡 Troubleshooting Tips
+                    </summary>
+                    <div className="mt-2 text-gray-700 space-y-2 bg-white p-3 rounded">
+                      <p>✅ <strong>Check Browser Permissions:</strong> Click the camera/lock icon in the address bar and allow camera access</p>
+                      <p>✅ <strong>Use HTTPS or Localhost:</strong> Camera requires secure connection (you're on: {window.location.protocol}//{window.location.host})</p>
+                      <p>✅ <strong>Close Other Apps:</strong> Make sure no other application is using your camera (Zoom, Teams, Skype, etc.)</p>
+                      <p>✅ <strong>Try Different Browser:</strong> Chrome, Firefox, Edge, and Safari support camera access</p>
+                      <p>✅ <strong>Check System Settings:</strong> Ensure camera is enabled in your OS privacy settings</p>
+                      <p>✅ <strong>Refresh Page:</strong> Sometimes a simple page refresh resolves permission issues</p>
+                    </div>
+                  </details>
                 </div>
               )}
 
               {!image && !isCameraOpen && (
                 <div className="h-64 border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center gap-4 bg-stone-50">
                   <button 
-                    onClick={startCamera}
+                    onClick={() => {
+                      console.log('Open Camera button clicked');
+                      startCamera();
+                    }}
                     className="flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-full font-medium hover:bg-orange-700 transition"
                   >
                     <Camera size={20} /> Open Camera
@@ -398,21 +772,57 @@ const MoodAnalyzer: React.FC = () => {
 
               {isCameraOpen && (
                 <div className="relative h-64 bg-black rounded-xl overflow-hidden">
-                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                  <button 
-                    onClick={capturePhoto}
-                    className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-3 rounded-full shadow-lg hover:bg-stone-100"
-                  >
-                    <Camera size={24} />
-                  </button>
+                  <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                  
+                  {/* Loading indicator while camera initializes */}
+                  {!cameraStreamRef.current && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
+                      <Loader2 className="w-12 h-12 animate-spin mb-3" />
+                      <p className="text-sm">Initializing camera...</p>
+                      <p className="text-xs text-gray-300 mt-2">Please allow camera permission if prompted</p>
+                    </div>
+                  )}
+                  
+                  {/* Camera controls */}
+                  {cameraStreamRef.current && (
+                    <>
+                      {/* Face count indicator */}
+                      {faceCount !== null && (
+                        <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-lg">
+                          {faceCount === 0 ? '😐 No faces detected' : 
+                           faceCount === 1 ? '😊 1 face detected' : 
+                           `👥 ${faceCount} faces detected`}
+                        </div>
+                      )}
+                      
+                      <button 
+                        onClick={capturePhoto}
+                        aria-label="Capture photo"
+                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-4 rounded-full shadow-lg hover:bg-stone-100 transition-all hover:scale-110"
+                      >
+                        <Camera size={28} />
+                      </button>
+                      <button 
+                        onClick={stopCamera}
+                        aria-label="Close camera"
+                        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
 
               {image && (
                 <div className="relative h-64 rounded-xl overflow-hidden bg-stone-100">
-                  <img src={image} alt="Captured" className="w-full h-full object-cover" />
+                  <img ref={imagePreviewRef} src={image} alt="Captured" className="w-full h-full object-cover" />
                   <button 
-                    onClick={() => { setImage(null); setResult(null); setDetectionError(null); setFaceCount(null); }}
+                    onClick={() => {
+                      clearCapturedImage();
+                      setAIStep(0);
+                    }}
+                    aria-label="Retake photo"
                     className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
                   >
                     <RefreshCw size={16} />
@@ -557,9 +967,10 @@ const MoodAnalyzer: React.FC = () => {
                   className="flex-1 px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
                   onClick={() => {
                     setAIStep(0);
-                    setImage(null);
-                    setResult(null);
-                    setFaceCount(null);
+                    clearCapturedImage();
+                    setPaidAI(false);
+                    setSelectedDestinationIdx(0);
+                    setSelectedFAQIndex(0);
                   }}
                 >
                   Try Different Expression
@@ -616,9 +1027,10 @@ const MoodAnalyzer: React.FC = () => {
                   onClick={() => {
                     setAIStep(0);
                     setPaidAI(false);
-                    setImage(null);
-                    setResult(null);
-                    setFaceCount(null);
+                    clearCapturedImage();
+                    setSelectedDestinationIdx(0);
+                    setSelectedFAQIndex(0);
+                    setIsPayingAI(false);
                   }}
                 >
                   Plan Another Trip

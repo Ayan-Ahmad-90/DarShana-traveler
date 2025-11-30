@@ -3,15 +3,15 @@
  * Handles guide registration, profile updates, request management, and statistics
  */
 
-const LocalGuide = require('../models/LocalGuide');
-const GuideRequest = require('../models/GuideRequest');
-const User = require('../models/User');
+import LocalGuide from '../models/LocalGuide.js';
+import GuideRequest from '../models/GuideRequest.js';
+import User from '../models/User.js';
 
 /**
  * Register a new guide
  * POST /api/guides/register
  */
-exports.registerGuide = async (req, res) => {
+export const registerGuide = async (req, res) => {
   try {
     const userId = req.userId;
     const {
@@ -122,7 +122,7 @@ exports.registerGuide = async (req, res) => {
  * Get all verified guides with optional filtering
  * GET /api/guides?location=&specialty=&minRating=&verified=true
  */
-exports.getAllGuides = async (req, res) => {
+export const getAllGuides = async (req, res) => {
   try {
     const { location, specialty, minRating = 0, verified = true } = req.query;
 
@@ -166,7 +166,7 @@ exports.getAllGuides = async (req, res) => {
  * Get guide by ID (for public viewing)
  * GET /api/guides/:guideId
  */
-exports.getGuideById = async (req, res) => {
+export const getGuideById = async (req, res) => {
   try {
     const { guideId } = req.params;
 
@@ -194,7 +194,7 @@ exports.getGuideById = async (req, res) => {
  * Get current user's guide profile
  * GET /api/guides/me
  */
-exports.getMyGuideProfile = async (req, res) => {
+export const getMyGuideProfile = async (req, res) => {
   try {
     const userId = req.userId;
 
@@ -222,7 +222,7 @@ exports.getMyGuideProfile = async (req, res) => {
  * Update guide profile
  * PUT /api/guides/me
  */
-exports.updateGuideProfile = async (req, res) => {
+export const updateGuideProfile = async (req, res) => {
   try {
     const userId = req.userId;
     const updates = req.body;
@@ -264,7 +264,7 @@ exports.updateGuideProfile = async (req, res) => {
  * Get guide statistics
  * GET /api/guides/stats
  */
-exports.getGuideStats = async (req, res) => {
+export const getGuideStats = async (req, res) => {
   try {
     const userId = req.userId;
 
@@ -317,7 +317,7 @@ exports.getGuideStats = async (req, res) => {
  * Get requests for current guide
  * GET /api/guides/requests
  */
-exports.getGuideRequests = async (req, res) => {
+export const getGuideRequests = async (req, res) => {
   try {
     const userId = req.userId;
     const { status } = req.query;
@@ -356,7 +356,7 @@ exports.getGuideRequests = async (req, res) => {
  * Accept a guide request
  * PUT /api/guides/requests/:requestId/accept
  */
-exports.acceptGuideRequest = async (req, res) => {
+export const acceptGuideRequest = async (req, res) => {
   try {
     const userId = req.userId;
     const { requestId } = req.params;
@@ -402,7 +402,7 @@ exports.acceptGuideRequest = async (req, res) => {
  * Reject a guide request
  * PUT /api/guides/requests/:requestId/reject
  */
-exports.rejectGuideRequest = async (req, res) => {
+export const rejectGuideRequest = async (req, res) => {
   try {
     const userId = req.userId;
     const { requestId } = req.params;
@@ -452,7 +452,7 @@ exports.rejectGuideRequest = async (req, res) => {
  * Mark trip as completed
  * PUT /api/guides/requests/:requestId/complete
  */
-exports.completeTrip = async (req, res) => {
+export const completeTrip = async (req, res) => {
   try {
     const userId = req.userId;
     const { requestId } = req.params;
@@ -501,7 +501,7 @@ exports.completeTrip = async (req, res) => {
  * Update guide rating (called after trip completion)
  * PUT /api/guides/:guideId/rate
  */
-exports.rateGuide = async (req, res) => {
+export const rateGuide = async (req, res) => {
   try {
     const { guideId } = req.params;
     const { rating, review } = req.body;
@@ -562,7 +562,7 @@ exports.rateGuide = async (req, res) => {
  * Get guide availability
  * GET /api/guides/:guideId/availability
  */
-exports.getGuideAvailability = async (req, res) => {
+export const getGuideAvailability = async (req, res) => {
   try {
     const { guideId } = req.params;
     const { startDate, endDate } = req.query;
@@ -602,3 +602,6 @@ exports.getGuideAvailability = async (req, res) => {
     });
   }
 };
+
+export default { registerGuide, getAllGuides, getGuideById, getMyGuideProfile, updateGuideProfile, getGuideStats, getGuideRequests, acceptGuideRequest, rejectGuideRequest, completeTrip, rateGuide, getGuideAvailability };
+

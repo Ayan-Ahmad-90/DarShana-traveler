@@ -1,4 +1,12 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001/api';
+import { getBackendUrl } from '../config/api';
+
+const resolveBackendOrigin = (): string => {
+  const envUrl = import.meta.env.VITE_BACKEND_URL?.trim();
+  const candidate = envUrl || getBackendUrl() || 'http://localhost:3001';
+  return candidate.replace(/\/+$/, '');
+};
+
+const API_BASE_URL = `${resolveBackendOrigin()}/api`;
 
 interface ApiResponse<T> {
   success: boolean;
@@ -132,6 +140,9 @@ export const authApi = {
   register: (data: any) => apiClient.post('/auth/register', data),
   login: (email: string, password: string) =>
     apiClient.post('/auth/login', { email, password }),
+  forgotPassword: (email: string) => apiClient.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    apiClient.put(`/auth/reset-password/${token}`, { password }),
   getProfile: () => apiClient.get('/auth/profile'),
   updateProfile: (data: any) => apiClient.put('/auth/profile', data),
   deleteAccount: () => apiClient.delete('/user/account'),
@@ -211,10 +222,42 @@ export const bookingApi = {
   cancel: (id: string, reason: string) =>
     apiClient.post(`/bookings/${id}/cancel`, { reason }),
   getStats: () => apiClient.get('/bookings/stats'),
+  processPayment: (bookingId: string, paymentData: any) =>
+    apiClient.post(`/bookings/${bookingId}/payment`, paymentData),
+  shareTrip: (bookingId: string) => apiClient.post(`/bookings/${bookingId}/share`),
+  getSharedTrip: (slug: string) => apiClient.get(`/bookings/shared/${slug}`),
 };
 
 // Smart Planner APIs
 export const plannerApi = {
-  getSuggestions: (params: any) =>
-    apiClient.get('/planner/suggestions', params),
+  getSuggestions: (preferences: any) => apiClient.post('/planner/suggestions', preferences),
+  analyzeMood: (emotions: any) => apiClient.post('/planner/mood-analyze', { emotions }),
 };
+
+// Review APIs
+export const reviewApi = {
+  create: (data: any) => apiClient.post('/reviews', data),
+  getReviews: (targetId: string) => apiClient.get(`/reviews/${targetId}`),
+};
+
+// Safety APIs
+export const safetyApi = {
+  getResources: (region: string) => apiClient.get('/safety', { region }),
+};
+
+// Yatra Shayak APIs
+export const yatraShayakApi = {
+  chat: (message: string) => apiClient.post('/yatra-shayak/chat', { message }),
+};
+
+// Itinerary APIs
+export const itineraryApi = {
+  getItineraries: () => apiClient.get('/itineraries'),
+  createItinerary: (data: any) => apiClient.post('/itineraries', data),
+};
+
+// AI APIs
+export const aiApi = {
+  generatePlan: (data: any) => apiClient.post('/ai/plan', data),
+};
+

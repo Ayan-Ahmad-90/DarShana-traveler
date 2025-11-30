@@ -6,7 +6,6 @@
 import {
   calculateEmissions,
   calculateSustainabilityScore,
-  calculateEmissionComparison,
 } from '../utils/emissions.js';
 import { calculateRewardPoints } from '../utils/rewards.js';
 import { getRoadDistance, getFlightDistance, getTrainDistance } from '../utils/routing.js';
@@ -15,12 +14,31 @@ import logger from '../utils/logger.js';
 export interface RouteOption {
   mode: string;
   time: string; // e.g., "4 hours"
+  durationMinutes: number;
   distance: number;
   cost: number;
   co2: number;
   greenScore: number;
   rewards: number;
   description: string;
+}
+
+export interface RouteGenerationSummary {
+  distanceKm: number;
+  durationMinutes: number;
+  source: 'api' | 'cached' | 'calculated';
+  emissions: {
+    baseline: number;
+    best: number;
+    savings: number;
+    savingsPercentage: number;
+  };
+  bestMode: RouteOption;
+}
+
+export interface RouteGenerationResult {
+  summary: RouteGenerationSummary;
+  options: RouteOption[];
 }
 
 /**
@@ -46,7 +64,10 @@ const estimateCost = (mode: string, distance: number): number => {
 /**
  * Time estimation for different transport modes
  */
-const estimateTravelTime = (mode: string, distance: number): string => {
+const estimateTravelTime = (
+  mode: string,
+  distance: number
+): { label: string; minutes: number } => {
   const speedKmH: { [key: string]: number } = {
     flight: 800, // Average flight speed
     train: 60, // Average train speed in India
@@ -60,22 +81,28 @@ const estimateTravelTime = (mode: string, distance: number): string => {
   
   const speed = speedKmH[mode.toLowerCase()] || 60;
   const hours = distance / speed;
+  const totalMinutes = Math.max(1, Math.round(hours * 60));
   
   if (hours < 1) {
-    const minutes = Math.round(hours * 60);
-    return `${minutes} mins`;
+    return {
+      label: `${totalMinutes} mins`,
+      minutes: totalMinutes,
+    };
   }
   
   const wholeHours = Math.floor(hours);
-  const minutes = Math.round((hours - wholeHours) * 60);
+  const minutes = Math.max(0, totalMinutes - wholeHours * 60);
   
-  return minutes === 0 ? `${wholeHours} hours` : `${wholeHours}h ${minutes}m`;
+  return {
+    label: minutes === 0 ? `${wholeHours} hours` : `${wholeHours}h ${minutes}m`,
+    minutes: totalMinutes,
+  };
 };
 
 /**
  * Generate route description based on mode
  */
-const generateDescription = (mode: string, distance: number, time: string): string => {
+const generateDescription = (mode: string, distance: number): string => {
   const descriptions: { [key: string]: string } = {
     flight: `Direct or connecting flights with comfortable seating. Fastest option for long distances.`,
     train: `Comfortable journey with meals. Indian Railways offers multiple classes for different budgets.`,
@@ -97,14 +124,20 @@ export const generateRouteOptions = async (
   from: string,
   to: string,
   distance?: number,
-): Promise<RouteOption[]> => {
+): Promise<RouteGenerationResult> => {
   try {
     let roadDistance: number = distance || 0;
+    let durationMinutes = 0;
+    let distanceSource: 'api' | 'cached' | 'calculated' = 'calculated';
     
     // Get distance if not provided
     if (!roadDistance) {
       const result = await getRoadDistance(from, to);
       roadDistance = result?.distance || 100; // Default 100 km if calculation fails
+      durationMinutes = result?.duration || estimateTravelTime('car', roadDistance).minutes;
+      distanceSource = result?.source || 'calculated';
+    } else {
+      durationMinutes = estimateTravelTime('car', roadDistance).minutes;
     }
     
     // Ensure minimum realistic distance
@@ -126,13 +159,14 @@ export const generateRouteOptions = async (
       
       options.push({
         mode: 'Flight',
-        time,
+        time: time.label,
+        durationMinutes: time.minutes,
         distance: flightDistance,
         cost,
         co2: emissions,
         greenScore,
         rewards: calculateRewardPoints({ mode: 'flight', distanceKm: flightDistance, sustainabilityScore: greenScore, emissionsCO2: emissions }),
-        description: generateDescription('flight', flightDistance, time),
+        description: generateDescription('flight', flightDistance),
       });
     }
     
@@ -146,13 +180,14 @@ export const generateRouteOptions = async (
       
       options.push({
         mode: 'Train',
-        time,
+        time: time.label,
+        durationMinutes: time.minutes,
         distance: trainDistance,
         cost,
         co2: emissions,
         greenScore,
         rewards: calculateRewardPoints({ mode: 'train', distanceKm: trainDistance, sustainabilityScore: greenScore, emissionsCO2: emissions }),
-        description: generateDescription('train', trainDistance, time),
+        description: generateDescription('train', trainDistance),
       });
     }
     
@@ -164,13 +199,14 @@ export const generateRouteOptions = async (
     
     options.push({
       mode: 'Bus',
-      time: busTime,
+      time: busTime.label,
+      durationMinutes: busTime.minutes,
       distance: roadDistance,
       cost: busCost,
       co2: busEmissions,
       greenScore: busGreenScore,
       rewards: calculateRewardPoints({ mode: 'bus', distanceKm: roadDistance, sustainabilityScore: busGreenScore, emissionsCO2: busEmissions }),
-      description: generateDescription('bus', roadDistance, busTime),
+      description: generateDescription('bus', roadDistance),
     });
     
     // 4. Car
@@ -181,13 +217,14 @@ export const generateRouteOptions = async (
     
     options.push({
       mode: 'Car',
-      time: carTime,
+      time: carTime.label,
+      durationMinutes: carTime.minutes,
       distance: roadDistance,
       cost: carCost,
       co2: carEmissions,
       greenScore: carGreenScore,
       rewards: calculateRewardPoints({ mode: 'car', distanceKm: roadDistance, sustainabilityScore: carGreenScore, emissionsCO2: carEmissions }),
-      description: generateDescription('car', roadDistance, carTime),
+      description: generateDescription('car', roadDistance),
     });
     
     // 5. Electric Car
@@ -198,13 +235,14 @@ export const generateRouteOptions = async (
     
     options.push({
       mode: 'Electric Car',
-      time: evTime,
+      time: evTime.label,
+      durationMinutes: evTime.minutes,
       distance: roadDistance,
       cost: evCost,
       co2: evEmissions,
       greenScore: evGreenScore,
       rewards: calculateRewardPoints({ mode: 'electric-car', distanceKm: roadDistance, sustainabilityScore: evGreenScore, emissionsCO2: evEmissions }),
-      description: generateDescription('electric-car', roadDistance, evTime),
+      description: generateDescription('electric-car', roadDistance),
     });
     
     // 6. Metro (for short distances in metro cities: Delhi, Mumbai, Bangalore, etc.)
@@ -219,13 +257,14 @@ export const generateRouteOptions = async (
       
       options.push({
         mode: 'Metro',
-        time: metroTime,
+        time: metroTime.label,
+        durationMinutes: metroTime.minutes,
         distance: roadDistance,
         cost: metroCost,
         co2: metroEmissions,
         greenScore: metroGreenScore,
         rewards: calculateRewardPoints({ mode: 'metro', distanceKm: roadDistance, sustainabilityScore: metroGreenScore, emissionsCO2: metroEmissions }),
-        description: generateDescription('metro', roadDistance, metroTime),
+        description: generateDescription('metro', roadDistance),
       });
     }
     
@@ -238,13 +277,14 @@ export const generateRouteOptions = async (
       
       options.push({
         mode: 'Bike',
-        time: bikeTime,
+        time: bikeTime.label,
+        durationMinutes: bikeTime.minutes,
         distance: roadDistance,
         cost: bikeCost,
         co2: bikeEmissions,
         greenScore: bikeGreenScore,
         rewards: calculateRewardPoints({ mode: 'bike', distanceKm: roadDistance, sustainabilityScore: bikeGreenScore, emissionsCO2: bikeEmissions }),
-        description: generateDescription('bike', roadDistance, bikeTime),
+        description: generateDescription('bike', roadDistance),
       });
     }
     
@@ -256,25 +296,51 @@ export const generateRouteOptions = async (
     
     options.push({
       mode: 'Cab',
-      time: cabTime,
+      time: cabTime.label,
+      durationMinutes: cabTime.minutes,
       distance: roadDistance,
       cost: cabCost,
       co2: cabEmissions,
       greenScore: cabGreenScore,
       rewards: calculateRewardPoints({ mode: 'cab', distanceKm: roadDistance, sustainabilityScore: cabGreenScore, emissionsCO2: cabEmissions }),
-      description: generateDescription('cab', roadDistance, cabTime),
+      description: generateDescription('cab', roadDistance),
     });
     
-    // Sort by sustainability score (best first) - Mark best option
+    // Sort options by sustainability score (best first)
     options.sort((a, b) => b.greenScore - a.greenScore);
-    
-    // Mark the most eco-friendly option
-    if (options.length > 0) {
-      options[0].description = `🌱 Eco Choice: ${options[0].description}`;
-    }
-    
+
+    const bestOption = options.reduce((prev, current) =>
+      current.greenScore > prev.greenScore ? current : prev
+    , options[0]);
+    const baselineOption = options.find(opt => opt.mode.toLowerCase() === 'car') || options[0];
+
+    bestOption.description = bestOption.description.includes('🌱 Eco Choice')
+      ? bestOption.description
+      : `🌱 Eco Choice: ${bestOption.description}`;
+
+    const savings = Math.max(0, baselineOption.co2 - bestOption.co2);
+    const savingsPercentage = baselineOption.co2 > 0
+      ? Math.round((savings / baselineOption.co2) * 1000) / 10
+      : 0;
+    const summaryDuration = durationMinutes || bestOption.durationMinutes;
+
     logger.info(`✅ Generated ${options.length} route options`);
-    return options;
+
+    return {
+      summary: {
+        distanceKm: Math.round(roadDistance * 100) / 100,
+        durationMinutes: summaryDuration,
+        source: distanceSource,
+        emissions: {
+          baseline: baselineOption.co2,
+          best: bestOption.co2,
+          savings,
+          savingsPercentage,
+        },
+        bestMode: bestOption,
+      },
+      options,
+    };
   } catch (error) {
     logger.error('Error generating route options:', error);
     throw error;

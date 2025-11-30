@@ -71,18 +71,27 @@ async function detectEmotionsFromImage(_imageData: string): Promise<EmotionScore
  */
 export async function analyzeMood(req: Request, res: Response): Promise<void> {
   try {
+    console.log('\n📥 ===== MOOD ANALYZER REQUEST RECEIVED =====');
+    console.log('🌐 Headers:', req.headers);
+    console.log('📦 Body keys:', Object.keys(req.body));
+    
     const { imageData, imageUrl } = req.body as MoodAnalyzeRequest;
 
     // Validate input
     if (!imageData && !imageUrl) {
+      console.warn('❌ Missing imageData or imageUrl');
       res.status(400).json({
         error: 'Missing imageData or imageUrl in request body',
       });
       return;
     }
 
+    console.log('✅ Image data received');
+    console.log(`📏 Data size: ${imageData ? imageData.length : 0} bytes`);
+
     // Limit image data size (5MB)
     if (imageData && imageData.length > 5 * 1024 * 1024) {
+      console.warn('❌ Image too large');
       res.status(400).json({
         error: 'Image data too large (max 5MB)',
       });
@@ -92,26 +101,31 @@ export async function analyzeMood(req: Request, res: Response): Promise<void> {
     // Detect emotions from image
     const imageToAnalyze = imageData || imageUrl;
     if (!imageToAnalyze) {
+      console.warn('❌ No valid image data');
       res.status(400).json({
         error: 'Invalid image data provided',
       });
       return;
     }
 
+    console.log('🔍 Detecting emotions...');
     let emotions: EmotionScores;
     try {
       emotions = await detectEmotionsFromImage(imageToAnalyze);
+      console.log('✅ Emotions detected:', emotions);
     } catch (detectionError) {
       const errorMsg = detectionError instanceof Error ? detectionError.message : 'Unknown error';
-      console.error('Emotion detection error:', errorMsg);
+      console.error('❌ Emotion detection error:', errorMsg);
 
       // Fallback to mock for demo
-      console.warn('Falling back to mock emotions for demo');
+      console.log('📊 Using mock emotions for demo');
       emotions = generateMockEmotions();
+      console.log('✅ Mock emotions:', emotions);
     }
 
     // Validate emotions
     if (!validateEmotions(emotions)) {
+      console.warn('❌ Invalid emotion data');
       res.status(400).json({
         error: 'Invalid emotion data received from detector',
       });
@@ -119,12 +133,15 @@ export async function analyzeMood(req: Request, res: Response): Promise<void> {
     }
 
     // Process mood analysis
+    console.log('🎯 Processing mood analysis...');
     const analysis = processMoodAnalysis(emotions);
+    console.log('✅ Analysis complete:', analysis.detectedMood);
 
     // Return result
+    console.log('📤 Sending response...\n');
     res.json(analysis);
   } catch (error) {
-    console.error('Mood analysis error:', error);
+    console.error('❌ Mood analysis error:', error);
     res.status(500).json({
       error: 'Failed to analyze mood. Please try again.',
     });

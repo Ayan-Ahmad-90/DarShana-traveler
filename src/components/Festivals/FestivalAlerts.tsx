@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Notification, Festival } from '../types';
+import type { Notification, Festival } from '../../types';
 import { Bell, MapPin, Calendar, Zap } from 'lucide-react';
 
 const FestivalAlerts: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [festivals, setFestivals] = useState<Festival[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState('');
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
 

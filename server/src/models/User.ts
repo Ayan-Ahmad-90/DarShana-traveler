@@ -1,134 +1,129 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const userSchema = new mongoose.Schema(
+export type UserRole = 'Traveler' | 'Guide' | 'SuperAdmin' | 'Manager' | 'Finance' | 'Support';
+
+interface KycDocument {
+  type: string;
+  url: string;
+  status: 'pending' | 'approved' | 'rejected';
+  verifiedAt?: Date;
+}
+
+export interface UserDocument extends Document {
+  fullName: string;
+  email: string;
+  password: string;
+  phone?: string;
+  primaryRole: UserRole;
+  roles: UserRole[];
+  status: 'pending' | 'active' | 'suspended';
+  walletBalance: number;
+  walletCurrency: string;
+  preferences?: {
+    language: string;
+    notifications: boolean;
+  };
+  kyc?: {
+    status: 'pending' | 'verified' | 'rejected';
+    documents: KycDocument[];
+  };
+  address?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+  };
+  lastLoginAt?: Date;
+  security: {
+    refreshTokenVersion: number;
+    passwordResetToken?: string;
+    passwordResetExpires?: Date;
+  };
+  comparePassword(candidate: string): Promise<boolean>;
+}
+
+const userSchema = new Schema<UserDocument>(
   {
-    name: { 
-      type: String, 
-      required: true,
-      trim: true
-    },
-    email: { 
-      type: String, 
-      required: true, 
-      unique: true, 
-      lowercase: true,
-      trim: true
-    },
-    phone: { 
-      type: String, 
-      required: true,
-      unique: true
-    },
-    password: { 
-      type: String, 
-      required: true,
-      minlength: 6
-    },
-    gender: {
+    fullName: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    password: { type: String, required: true },
+    phone: { type: String, trim: true },
+    primaryRole: {
       type: String,
-      enum: ['male', 'female', 'other'],
-      default: 'other'
+      enum: ['Traveler', 'Guide', 'SuperAdmin', 'Manager', 'Finance', 'Support'],
+      default: 'Traveler'
     },
-    dob: {
-      type: Date
+    roles: {
+      type: [
+        {
+          type: String,
+          enum: ['Traveler', 'Guide', 'SuperAdmin', 'Manager', 'Finance', 'Support']
+        }
+      ],
+      default: ['Traveler']
     },
-    profileImage: { 
+    status: {
       type: String,
-      default: null
+      enum: ['pending', 'active', 'suspended'],
+      default: 'active'
     },
-    address: { 
-      type: String,
-      default: ''
-    },
-    city: { 
-      type: String,
-      default: ''
-    },
-    country: { 
-      type: String,
-      default: ''
-    },
-    savedTrips: {
-      type: [String],
-      default: []
-    },
-    notificationPreferences: {
-      emailNotifications: {
-        type: Boolean,
-        default: true
-      },
-      festivalAlerts: {
-        type: Boolean,
-        default: true
-      },
-      smsNotifications: {
-        type: Boolean,
-        default: false
-      },
-      region: {
-        type: String,
-        default: ''
-      }
-    },
-    preferredLanguage: {
-      type: String,
-      default: 'en',
-      enum: ['en', 'hi', 'ur', 'ta', 'te', 'kn', 'ml']
-    },
-    travelInterests: {
-      type: [String],
-      default: []
-    },
-    passportNumber: { 
-      type: String 
-    },
+    walletBalance: { type: Number, default: 0 },
+    walletCurrency: { type: String, default: 'INR' },
     preferences: {
-      preferedAirlines: [String],
-      preferedHotels: [String],
-      seatPreference: { 
-        type: String, 
-        enum: ['window', 'middle', 'aisle'] 
+      language: { type: String, default: 'en' },
+      notifications: { type: Boolean, default: true }
+    },
+    kyc: {
+      status: {
+        type: String,
+        enum: ['pending', 'verified', 'rejected'],
+        default: 'pending'
       },
+      documents: [
+        {
+          type: {
+            type: String
+          },
+          url: String,
+          status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending'
+          },
+          verifiedAt: Date
+        }
+      ]
     },
-    bookings: [{ 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Booking' 
-    }],
-    isVerified: { 
-      type: Boolean, 
-      default: false 
+    address: {
+      line1: String,
+      line2: String,
+      city: String,
+      state: String,
+      country: { type: String, default: 'India' },
+      postalCode: String
     },
-    createdAt: { 
-      type: Date, 
-      default: Date.now 
-    },
-    updatedAt: { 
-      type: Date, 
-      default: Date.now 
-    },
+    lastLoginAt: Date,
+    security: {
+      refreshTokenVersion: { type: Number, default: 0 },
+      passwordResetToken: String,
+      passwordResetExpires: Date
+    }
   },
   { timestamps: true }
 );
 
-// Hash password before saving
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error: any) {
-    next(error);
-  }
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
 });
 
-// Compare password method
-userSchema.methods.comparePassword = async function (enteredPassword: string) {
-  return await bcrypt.compare(enteredPassword, this.password);
+userSchema.methods.comparePassword = async function (candidate: string) {
+  return bcrypt.compare(candidate, this.password);
 };
 
-export default mongoose.model('User', userSchema);
+export default model<UserDocument>('User', userSchema);

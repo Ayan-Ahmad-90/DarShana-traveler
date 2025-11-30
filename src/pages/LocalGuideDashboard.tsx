@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MapPin, Phone, Mail, AlertCircle, Loader, Save, DollarSign, MessageSquare, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { getBackendUrl } from '../config/api';
 
 interface GuideProfile {
   _id: string;
@@ -57,6 +58,11 @@ const LocalGuideDashboard = () => {
     }
   });
 
+  const resolveBackendUrl = useCallback(() => {
+    const candidate = import.meta.env.VITE_BACKEND_URL?.trim() || getBackendUrl() || 'http://localhost:3001';
+    return candidate.replace(/\/+$/, '');
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchGuideProfile();
@@ -65,7 +71,8 @@ const LocalGuideDashboard = () => {
 
   const fetchGuideProfile = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-profile', {
+      const baseUrl = resolveBackendUrl();
+      const response = await fetch(`${baseUrl}/api/guides/my-profile`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -95,7 +102,8 @@ const LocalGuideDashboard = () => {
 
   const fetchInteractions = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-interactions', {
+      const baseUrl = resolveBackendUrl();
+      const response = await fetch(`${baseUrl}/api/guides/my-interactions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -112,7 +120,8 @@ const LocalGuideDashboard = () => {
   const handleRegisterAsGuide = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/guides/register', {
+      const baseUrl = resolveBackendUrl();
+      const response = await fetch(`${baseUrl}/api/guides/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +144,8 @@ const LocalGuideDashboard = () => {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3001/api/guides/my-profile', {
+      const baseUrl = resolveBackendUrl();
+      const response = await fetch(`${baseUrl}/api/guides/my-profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

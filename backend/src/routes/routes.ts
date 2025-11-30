@@ -21,12 +21,12 @@ router.get('/', getRouteHistory);
 // GET /api/routes/stats/summary - Get statistics
 router.get('/stats/summary', getStats);
 
-// GET /api/routes/:id - Get specific route
-router.get('/:id', getRouteDetails);
-
 // Health check
 router.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'ok', service: 'routes' });
 });
+
+// GET /api/routes/:id - Get specific route
+router.get('/:id', getRouteDetails);
 
 export default router;

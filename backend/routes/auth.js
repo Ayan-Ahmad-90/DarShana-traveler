@@ -3,12 +3,18 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const auth = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 // Public routes
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
+router.post('/signup', authLimiter, authController.signup);
+router.post('/register', authLimiter, authController.signup); // Alias for frontend compatibility
+router.post('/login', authLimiter, authController.login);
+router.post('/forgot-password', authLimiter, authController.forgotPassword);
+router.put('/reset-password/:resetToken', authLimiter, authController.resetPassword);
 
 // Protected routes
 router.post('/logout', auth, authController.logout);
+router.get('/me', auth, authController.getMe);
+router.put('/update-profile', auth, authController.updateProfile);
 
 module.exports = router;

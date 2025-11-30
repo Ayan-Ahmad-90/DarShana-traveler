@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LoginData } from '../types';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { API_BASE_URL } from '../../config/api';
+import type { LoginData } from '../../types';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setAuth } = useAuth();
+  
   const [formData, setFormData] = useState<LoginData>({
     email: '',
     password: '',
@@ -12,6 +17,20 @@ const Login: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+
+  // Auto-fill email if coming from signup or remembered
+  useEffect(() => {
+    // From signup redirect
+    if (location.state?.email) {
+      setFormData(prev => ({ ...prev, email: location.state.email }));
+    }
+    // From remember me
+    const rememberedEmail = localStorage.getItem('rememberEmail');
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, [location.state]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -32,7 +51,7 @@ const Login: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev: LoginData) => ({
       ...prev,
       [name]: value,
     }));
@@ -53,7 +72,7 @@ const Login: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,21 +80,38 @@ const Login: React.FC = () => {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid credentials');
+      }
       
       // Store auth data
       if (data.token) {
         localStorage.setItem('authToken', data.token);
+        
+        // Store user data
+        if (data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+        }
+        
+        // Remember email if checked
         if (rememberMe) {
           localStorage.setItem('rememberEmail', formData.email);
+        } else {
+          localStorage.removeItem('rememberEmail');
         }
+
+        // Update auth context
+        setAuth(data.token, data.user);
       }
 
-      navigate('/dashboard');
+      // Redirect based on role
+      if (data.user?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/profile');
+      }
     } catch (error) {
       setErrors(prev => ({
         ...prev,

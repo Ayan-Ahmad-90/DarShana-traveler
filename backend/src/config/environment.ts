@@ -5,7 +5,7 @@ dotenv.config();
 export const env = {
   // Server
   NODE_ENV: process.env.NODE_ENV || 'development',
-  PORT: parseInt(process.env.PORT || '5000', 10),
+  PORT: parseInt(process.env.PORT || '3001', 10),
   
   // Database
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/darshana-travel',
@@ -23,7 +23,7 @@ export const env = {
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   
   // CORS - Accept both localhost for dev and Vercel domains for production
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,https://dar-shana-traveler-seven.vercel.app,https://darshana-traveler.vercel.app',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://dar-shana-traveler-seven.vercel.app,https://darshana-traveler.vercel.app',
   
   // Feature flags
   ENABLE_EXTERNAL_APIS: process.env.ENABLE_EXTERNAL_APIS === 'true',
