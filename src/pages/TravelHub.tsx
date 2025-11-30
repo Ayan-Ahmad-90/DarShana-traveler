@@ -12,6 +12,7 @@ import BlogHighlightsSection from '../components/travelhub/BlogHighlightsSection
 import InteractiveMapSection from '../components/travelhub/InteractiveMapSection';
 import ContactSupportSection from '../components/travelhub/ContactSupportSection';
 import SpecialFeaturesSection from '../components/travelhub/SpecialFeaturesSection';
+import RouteMapSection from '../components/travelhub/RouteMapSection';
 
 const TravelHub = () => {
   const [selectedTransport, setSelectedTransport] = useState('flights');
@@ -54,6 +55,7 @@ const TravelHub = () => {
         </section>
 
         <TravelCategoriesSection />
+        <RouteMapSection />
         <DestinationsSection />
         <TourPackagesSection />
         <GallerySection />
