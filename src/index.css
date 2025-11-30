@@ -1,5 +1,8 @@
+/* TravelHub premium styles */
+@import url('./styles/travelhub.css');
+
 /* ----------------------------------------
-   Tailwind Base Layers
+  Tailwind Base Layers
 ----------------------------------------- */
 @tailwind base;
 @tailwind components;

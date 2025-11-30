@@ -14,6 +14,9 @@ interface User {
   country?: string;
   preferredLanguage?: string;
   travelInterests?: string[];
+  username?: string;
+  usernameChangeCount?: number;
+  role?: 'user' | 'admin';
   notificationPreferences?: {
     emailNotifications: boolean;
     festivalAlerts: boolean;
@@ -25,8 +28,10 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  loading: boolean; // Alias for isLoading
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
+  setAuth: (token: string, user: User) => void; // Direct auth setter
   register: (name: string, email: string, phone: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -39,26 +44,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Start as true to check auth
 
+  // Check for existing auth on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (token) {
-      const fetchUser = async () => {
-        const response = await authApi.getProfile();
-        if (response.success && response.data) {
-          setUser(response.data as User);
+    const checkAuth = async () => {
+      const storedToken = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedToken) {
+        setToken(storedToken);
+        
+        // Try to use stored user data first
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+          } catch (e) {
+            console.error('Failed to parse stored user');
+          }
         }
-      };
-      fetchUser();
-    }
-  }, [token]);
+        
+        // Then try to fetch fresh data from API
+        try {
+          const response = await authApi.getProfile();
+          if (response.success && response.data) {
+            setUser(response.data as User);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      }
+      
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -73,6 +95,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw new Error((response as any).error || 'Login failed');
     }
     setIsLoading(false);
+  };
+
+  // Direct auth setter for when Login component handles its own API call
+  const setAuth = (newToken: string, newUser: User) => {
+    setToken(newToken);
+    setUser(newUser);
   };
 
   const register = async (name: string, email: string, phone: string, password: string) => {
@@ -122,8 +150,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         isLoading,
+        loading: isLoading,
         token,
         login,
+        setAuth,
         register,
         logout,
         updateUser,

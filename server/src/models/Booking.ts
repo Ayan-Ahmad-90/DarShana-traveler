@@ -1,54 +1,125 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
-const bookingSchema = new mongoose.Schema(
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'refunded';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
+export type BookingType = 'package' | 'custom' | 'guide';
+
+interface TimelineEntry {
+  status: string;
+  note?: string;
+  updatedBy?: Types.ObjectId;
+  timestamp: Date;
+}
+
+interface FareBreakdown {
+  baseFare: number;
+  taxes: number;
+  fees: number;
+  discounts: number;
+  total: number;
+  currency: string;
+  walletAmount?: number;
+  payableAmount?: number;
+}
+
+interface TravelDetails {
+  from: string;
+  to: string;
+  startDate: Date;
+  endDate: Date;
+  passengers: number;
+  transportMode?: string;
+}
+
+export interface BookingDocument extends Document {
+  bookingCode: string;
+  user: Types.ObjectId;
+  guide?: Types.ObjectId;
+  package?: Types.ObjectId;
+  destination?: Types.ObjectId;
+  bookingType: BookingType;
+  status: BookingStatus;
+  paymentStatus: PaymentStatus;
+  amountBreakdown: FareBreakdown;
+  travelDetails: TravelDetails;
+  addons?: Array<{ name: string; price: number }>;
+  coupon?: {
+    code: string;
+    discountAmount: number;
+  };
+  walletUsed?: number;
+  timeline: TimelineEntry[];
+  invoice?: Types.ObjectId;
+  ticket?: Types.ObjectId;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+const bookingSchema = new Schema<BookingDocument>(
   {
-    bookingId: {
-      type: String,
-      unique: true,
-      required: true,
-      index: true,
-    },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    bookingCode: { type: String, required: true, unique: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    guide: { type: Schema.Types.ObjectId, ref: 'Guide' },
+    package: { type: Schema.Types.ObjectId, ref: 'Package' },
+    destination: { type: Schema.Types.ObjectId, ref: 'Destination' },
     bookingType: {
       type: String,
-      enum: ['flight', 'train', 'cruise', 'private_jet', 'cab', 'bike'],
-      required: true,
+      enum: ['package', 'custom', 'guide'],
+      default: 'package'
     },
-    itemId: { type: mongoose.Schema.Types.ObjectId, required: true }, // reference to Flight/Train/etc
-    passengers: [
-      {
-        name: String,
-        email: String,
-        phone: String,
-        dateOfBirth: Date,
-        documentId: String,
-      },
-    ],
-    totalPrice: { type: Number, required: true },
-    currency: { type: String, default: 'INR' },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'cancelled', 'completed', 'refunded'],
+      default: 'pending'
+    },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'completed', 'failed', 'refunded'],
-      default: 'pending',
+      enum: ['pending', 'paid', 'failed', 'refunded', 'partially_refunded'],
+      default: 'pending'
     },
-    bookingStatus: {
-      type: String,
-      enum: ['confirmed', 'pending', 'cancelled', 'completed'],
-      default: 'confirmed',
+    amountBreakdown: {
+      baseFare: { type: Number, required: true },
+      taxes: { type: Number, default: 0 },
+      fees: { type: Number, default: 0 },
+      discounts: { type: Number, default: 0 },
+      total: { type: Number, required: true },
+      currency: { type: String, default: 'INR' },
+      walletAmount: { type: Number, default: 0 },
+      payableAmount: { type: Number, default: 0 }
     },
-    bookingDate: { type: Date, default: Date.now },
-    departureDate: Date,
-    returnDate: Date,
-    specialRequests: String,
-    insuranceIncluded: { type: Boolean, default: false },
-    cancellationPolicy: String,
-    paymentMethod: String,
-    transactionId: String,
+    travelDetails: {
+      from: { type: String, required: true },
+      to: { type: String, required: true },
+      startDate: { type: Date, required: true },
+      endDate: { type: Date, required: true },
+      passengers: { type: Number, required: true },
+      transportMode: String
+    },
+    addons: [
+      {
+        name: String,
+        price: Number
+      }
+    ],
+    coupon: {
+      code: String,
+      discountAmount: { type: Number, default: 0 }
+    },
+    walletUsed: { type: Number, default: 0 },
+    timeline: [
+      {
+        status: String,
+        note: String,
+        updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        timestamp: { type: Date, default: Date.now }
+      }
+    ],
+    invoice: { type: Schema.Types.ObjectId, ref: 'Invoice' },
+    ticket: { type: Schema.Types.ObjectId, ref: 'Ticket' },
     notes: String,
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    metadata: Schema.Types.Mixed
   },
   { timestamps: true }
 );
 
-export default mongoose.model('Booking', bookingSchema);
+export default model<BookingDocument>('Booking', bookingSchema);

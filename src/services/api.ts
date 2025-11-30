@@ -250,3 +250,14 @@ export const yatraShayakApi = {
   chat: (message: string) => apiClient.post('/yatra-shayak/chat', { message }),
 };
 
+// Itinerary APIs
+export const itineraryApi = {
+  getItineraries: () => apiClient.get('/itineraries'),
+  createItinerary: (data: any) => apiClient.post('/itineraries', data),
+};
+
+// AI APIs
+export const aiApi = {
+  generatePlan: (data: any) => apiClient.post('/ai/plan', data),
+};
+

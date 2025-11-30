@@ -5,6 +5,9 @@ import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
+// Auth Components
+import { RequireAuth, RequireAdmin, GuestOnly } from "./components/Auth/ProtectedRoute";
+
 // Pages
 import Home from "./pages/Home";
 import MoodAnalyzer from "./pages/MoodAnalyzer";
@@ -25,7 +28,10 @@ import GuideListing from "./pages/GuideListing";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UIStyleGuide from "./pages/UIStyleGuide";
+import Booking from "./pages/Booking";
 import YatraShayak from "./components/YatraShayak";
+import AdminDashboard from "./pages/AdminDashboard";
+import NotAuthorized from "./pages/NotAuthorized";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -54,25 +60,35 @@ const App: React.FC = () => {
           {/* Page Content */}
           <main className="flex-grow pt-20 sm:pt-24">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/mood" element={<MoodAnalyzer />} />
             <Route path="/travelhub" element={<TravelHub />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/assistant" element={<Assistant />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/my-trips" element={<MyTrips />} />
             <Route path="/festival-alerts" element={<FestivalAlerts />} />
             <Route path="/language" element={<LanguageSelector />} />
-            <Route path="/rewards" element={<EcoRewardsDashboard />} />
-            <Route path="/become-guide" element={<BecomeGuide />} />
-            <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/guides" element={<GuideListing />} />
             <Route path="/style-guide" element={<UIStyleGuide />} />
+            <Route path="/not-authorized" element={<NotAuthorized />} />
+            
+            {/* Guest Only Routes (redirect if logged in) */}
+            <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
+            <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
+            <Route path="/forgot-password" element={<GuestOnly><ForgotPassword /></GuestOnly>} />
+            <Route path="/reset-password/:token" element={<GuestOnly><ResetPassword /></GuestOnly>} />
+            
+            {/* Protected Routes (require authentication) */}
+            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+            <Route path="/my-trips" element={<RequireAuth><MyTrips /></RequireAuth>} />
+            <Route path="/rewards" element={<RequireAuth><EcoRewardsDashboard /></RequireAuth>} />
+            <Route path="/become-guide" element={<RequireAuth><BecomeGuide /></RequireAuth>} />
+            <Route path="/guide-dashboard" element={<RequireAuth><LocalGuideDashboard /></RequireAuth>} />
+            <Route path="/booking" element={<RequireAuth><Booking /></RequireAuth>} />
+            
+            {/* Admin Only Routes */}
+            <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
           </Routes>
         </main>
         {/* Footer */}

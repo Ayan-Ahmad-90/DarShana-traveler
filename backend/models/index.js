@@ -1,16 +1,17 @@
-import User from './User.js';
-import Trip from './Trip.js';
-import Booking from './Booking.js';
-import LocalGuide from './LocalGuide.js';
-import GuideRequest from './GuideRequest.js';
-import ContactMessage from './ContactMessage.js';
-import Festival from './Festival.js';
-import Notification from './Notification.js';
-import FestivalReminder from './FestivalReminder.js';
-import Review from './Review.js';
-import SafetyResource from './SafetyResource.js';
+const User = require('./User.js');
+const Trip = require('./Trip.js');
+const Booking = require('./Booking.js');
+const LocalGuide = require('./LocalGuide.js');
+const GuideRequest = require('./GuideRequest.js');
+const ContactMessage = require('./ContactMessage.js');
+const Festival = require('./Festival.js');
+const Notification = require('./Notification.js');
+const FestivalReminder = require('./FestivalReminder.js');
+const Review = require('./Review.js');
+const SafetyResource = require('./SafetyResource.js');
+const Itinerary = require('./Itinerary.js');
 
-export {
+module.exports = {
   User,
   Trip,
   Booking,
@@ -21,5 +22,6 @@ export {
   Notification,
   FestivalReminder,
   Review,
-  SafetyResource
+  SafetyResource,
+  Itinerary
 };

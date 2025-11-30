@@ -137,6 +137,13 @@ const MoodAnalyzer: React.FC = () => {
   const [selectedDestinationIdx, setSelectedDestinationIdx] = useState<number | null>(0);
   const [faceCount, setFaceCount] = useState<number | null>(null);
   const [detectionError, setDetectionError] = useState<string | null>(null);
+
+  // Sync face count from detection hook
+  useEffect(() => {
+    if (faceDetection.faceCount !== null) {
+      setFaceCount(faceDetection.faceCount);
+    }
+  }, [faceDetection.faceCount]);
   const [selectedFAQIndex, setSelectedFAQIndex] = useState<number>(0);
 
   // Manual multi-step analyzer states
@@ -150,63 +157,229 @@ const MoodAnalyzer: React.FC = () => {
 
   // Handlers for AI flow
   const stopCamera = useCallback(() => {
-    const mediaStream = cameraStreamRef.current || (videoRef.current?.srcObject as MediaStream | null);
+    console.log('🛑 Stopping camera...');
+    
+    // Stop all media tracks
+    const mediaStream = cameraStreamRef.current;
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('⏹️ Stopped track:', track.kind);
+      });
+      cameraStreamRef.current = null;
     }
-    cameraStreamRef.current = null;
+    
+    // Clear video element
     if (videoRef.current) {
       videoRef.current.srcObject = null;
+      videoRef.current.load(); // Reset video element
     }
+    
     setIsCameraOpen(false);
+    console.log('✅ Camera stopped and cleaned up');
   }, []);
 
   const initCamera = useCallback(async () => {
+    console.log('🎥 Initializing camera...');
     setDetectionError(null);
+
+    // Guard: ensure videoRef.current exists
+    const videoElement = videoRef.current;
+    if (!videoElement) {
+      console.error('❌ Video element ref is null - cannot initialize camera');
+      setDetectionError('Camera preview element not ready. Please try again.');
+      setIsCameraOpen(false);
+      return;
+    }
+
+    // Browser support check
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('❌ Browser does not support getUserMedia');
+      setDetectionError('Your browser does not support camera access. Please use Chrome, Firefox, Edge, or Safari.');
+      setIsCameraOpen(false);
+      return;
+    }
+
+    // Secure context check
+    const isSecureContext = window.isSecureContext || 
+                           window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+    
+    if (!isSecureContext) {
+      console.error('❌ Not running on secure context');
+      setDetectionError(`Camera requires HTTPS or localhost. Current: ${window.location.protocol}//${window.location.host}`);
+      setIsCameraOpen(false);
+      return;
+    }
+
     try {
+      console.log('📹 Requesting camera permission...');
+      
+      // Request camera stream
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+        video: { 
+          width: { ideal: 640, max: 1280 }, 
+          height: { ideal: 480, max: 720 }, 
+          facingMode: 'user' 
+        },
         audio: false,
       });
+      
+      console.log('✅ Camera permission granted!');
+      console.log('📊 Stream active:', stream.active, 'Tracks:', stream.getTracks().length);
 
-      const videoElement = videoRef.current;
-      if (!videoElement) {
-        stream.getTracks().forEach(track => track.stop());
-        throw new Error('Camera preview not ready. Please retry.');
-      }
-
+      // Attach stream to video element
       videoElement.srcObject = stream;
       cameraStreamRef.current = stream;
 
-      if (typeof videoElement.play === 'function') {
-        await videoElement.play().catch(() => {
-          /* Autoplay might require user gesture; ignore to allow manual play */
-        });
-      }
+      // Wait for video metadata to load
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Camera metadata loading timeout'));
+        }, 5000);
 
-      setIsCameraOpen(true);
+        const onLoadedMetadata = () => {
+          console.log('✅ Video metadata loaded');
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          resolve();
+        };
+
+        const onError = (e: Event) => {
+          console.error('❌ Video error:', e);
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          reject(new Error('Failed to load camera preview'));
+        };
+
+        videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
+        videoElement.addEventListener('error', onError);
+
+        // If already loaded, resolve immediately
+        if (videoElement.readyState >= 1) {
+          console.log('✅ Video already has metadata');
+          clearTimeout(timeout);
+          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
+          videoElement.removeEventListener('error', onError);
+          resolve();
+        }
+      });
+
+      // Start playback
+      console.log('▶️ Starting video playback...');
+      await videoElement.play();
+      
+      console.log('✅ Camera active:', {
+        videoWidth: videoElement.videoWidth,
+        videoHeight: videoElement.videoHeight,
+        readyState: videoElement.readyState
+      });
+
     } catch (err) {
-      console.error('Camera error:', err);
-      let errorMsg = 'Unable to access camera. Please allow permission.';
+      console.error('❌ Camera initialization error:', err);
+      
+      // Clean up on error
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      
+      let errorMsg = 'Unable to access camera';
+      let showAlert = false;
+      
       if (err instanceof DOMException) {
-        if (err.name === 'NotAllowedError') {
-          errorMsg = 'Camera permission blocked. Allow access and retry.';
-        } else if (err.name === 'NotFoundError') {
-          errorMsg = 'No camera device found.';
-        } else if (err.name === 'NotReadableError') {
-          errorMsg = 'Camera is already in use by another application.';
+        switch (err.name) {
+          case 'NotAllowedError':
+          case 'PermissionDeniedError':
+            errorMsg = '🚫 Camera permission denied.\n\nPlease allow camera access in your browser settings and try again.';
+            showAlert = true;
+            break;
+          case 'NotFoundError':
+          case 'DevicesNotFoundError':
+            errorMsg = '📷 No camera device found.\n\nPlease connect a camera and try again.';
+            break;
+          case 'NotReadableError':
+          case 'TrackStartError':
+            errorMsg = '⚠️ Camera is in use by another application.\n\nClose other apps (Zoom, Teams, etc.) and try again.';
+            break;
+          case 'OverconstrainedError':
+            errorMsg = '⚙️ Camera settings incompatible.\n\nYour camera doesn\'t support the required resolution.';
+            break;
+          case 'SecurityError':
+            errorMsg = '🔒 Camera blocked by browser security.\n\nCheck your browser permissions.';
+            break;
+          default:
+            errorMsg = `Camera error: ${err.message}`;
         }
       } else if (err instanceof Error) {
         errorMsg = err.message;
       }
+      
       setDetectionError(errorMsg);
       setIsCameraOpen(false);
+      
+      if (showAlert) {
+        alert('⚠️ Camera Access Required\n\n' + errorMsg);
+      }
     }
   }, []);
 
-  const startCamera = useCallback(async () => {
-    await initCamera();
-  }, [initCamera]);
+  const startCamera = useCallback(() => {
+    console.log('🎬 Opening camera interface...');
+    setDetectionError(null);
+    
+    // Pre-flight checks
+    if (!navigator.mediaDevices?.getUserMedia) {
+      const msg = '❌ Your browser does not support camera access.\n\nPlease use Chrome, Firefox, Edge, or Safari.';
+      setDetectionError(msg);
+      alert(msg);
+      return;
+    }
+    
+    const isSecure = window.isSecureContext || 
+                     window.location.protocol === 'https:' || 
+                     ['localhost', '127.0.0.1'].includes(window.location.hostname);
+    
+    if (!isSecure) {
+      const msg = `⚠️ Camera requires HTTPS or localhost.\n\nCurrent: ${window.location.protocol}//${window.location.host}`;
+      setDetectionError(msg);
+      alert(msg);
+      return;
+    }
+    
+    console.log('✅ Pre-flight checks passed');
+    setIsCameraOpen(true);
+  }, []);
+
+  // Initialize camera when video element becomes available
+  useEffect(() => {
+    if (isCameraOpen && videoRef.current && !cameraStreamRef.current) {
+      console.log('📍 Video element available, initializing camera...');
+      initCamera();
+    }
+  }, [isCameraOpen, initCamera]);
+
+  // Detect faces from video stream when camera is active
+  useEffect(() => {
+    if (!isCameraOpen || !cameraStreamRef.current || !faceDetection.modelsLoaded) {
+      return;
+    }
+
+    console.log('👁️ Starting face detection from video stream...');
+    const intervalId = setInterval(() => {
+      if (videoRef.current) {
+        faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+      }
+    }, 1000); // Detect every second
+
+    return () => {
+      console.log('🛑 Stopping face detection interval');
+      clearInterval(intervalId);
+    };
+  }, [isCameraOpen, faceDetection, videoRef]);
 
   const capturePhoto = () => {
     if (videoRef.current) {
@@ -225,11 +398,22 @@ const MoodAnalyzer: React.FC = () => {
     void faceDetection.loadModels().catch(err => {
       console.error('Failed to preload face detection models:', err);
     });
+    
+    // Cleanup on unmount only
     return () => {
-      stopCamera();
+      console.log('🧹 Component unmounting, cleaning up camera...');
+      const mediaStream = cameraStreamRef.current;
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
       imagePreviewRef.current = null;
     };
-  }, [faceDetection, stopCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount/unmount
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -508,16 +692,72 @@ const MoodAnalyzer: React.FC = () => {
               </p>
 
               {detectionError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-                  <AlertCircle className="text-red-600 flex-shrink-0" />
-                  <div className="text-red-700">{detectionError}</div>
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex gap-3 mb-3">
+                    <AlertCircle className="text-red-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="text-red-700 font-semibold mb-1">Camera Error</div>
+                      <div className="text-red-600 text-sm whitespace-pre-line">{detectionError}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 mt-3">
+                    <button 
+                      onClick={() => {
+                        console.log('🔄 Retry button clicked');
+                        // Stop any existing stream
+                        if (cameraStreamRef.current) {
+                          console.log('🛑 Stopping existing stream');
+                          cameraStreamRef.current.getTracks().forEach(track => track.stop());
+                          cameraStreamRef.current = null;
+                        }
+                        // Reset state
+                        setDetectionError(null);
+                        setIsCameraOpen(false);
+                        // Small delay to ensure state is cleared before retrying
+                        setTimeout(() => {
+                          console.log('🔄 Starting camera after retry');
+                          startCamera();
+                        }, 100);
+                      }}
+                      className="text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
+                    >
+                      🔄 Retry Camera
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setDetectionError(null);
+                      }}
+                      className="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                  
+                  {/* Troubleshooting tips */}
+                  <details className="mt-4 text-sm">
+                    <summary className="cursor-pointer text-red-700 font-semibold hover:text-red-800">
+                      💡 Troubleshooting Tips
+                    </summary>
+                    <div className="mt-2 text-gray-700 space-y-2 bg-white p-3 rounded">
+                      <p>✅ <strong>Check Browser Permissions:</strong> Click the camera/lock icon in the address bar and allow camera access</p>
+                      <p>✅ <strong>Use HTTPS or Localhost:</strong> Camera requires secure connection (you're on: {window.location.protocol}//{window.location.host})</p>
+                      <p>✅ <strong>Close Other Apps:</strong> Make sure no other application is using your camera (Zoom, Teams, Skype, etc.)</p>
+                      <p>✅ <strong>Try Different Browser:</strong> Chrome, Firefox, Edge, and Safari support camera access</p>
+                      <p>✅ <strong>Check System Settings:</strong> Ensure camera is enabled in your OS privacy settings</p>
+                      <p>✅ <strong>Refresh Page:</strong> Sometimes a simple page refresh resolves permission issues</p>
+                    </div>
+                  </details>
                 </div>
               )}
 
               {!image && !isCameraOpen && (
                 <div className="h-64 border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center gap-4 bg-stone-50">
                   <button 
-                    onClick={startCamera}
+                    onClick={() => {
+                      console.log('Open Camera button clicked');
+                      startCamera();
+                    }}
                     className="flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-full font-medium hover:bg-orange-700 transition"
                   >
                     <Camera size={20} /> Open Camera
@@ -532,14 +772,45 @@ const MoodAnalyzer: React.FC = () => {
 
               {isCameraOpen && (
                 <div className="relative h-64 bg-black rounded-xl overflow-hidden">
-                  <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-                  <button 
-                    onClick={capturePhoto}
-                    aria-label="Capture photo"
-                    className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-3 rounded-full shadow-lg hover:bg-stone-100"
-                  >
-                    <Camera size={24} />
-                  </button>
+                  <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                  
+                  {/* Loading indicator while camera initializes */}
+                  {!cameraStreamRef.current && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
+                      <Loader2 className="w-12 h-12 animate-spin mb-3" />
+                      <p className="text-sm">Initializing camera...</p>
+                      <p className="text-xs text-gray-300 mt-2">Please allow camera permission if prompted</p>
+                    </div>
+                  )}
+                  
+                  {/* Camera controls */}
+                  {cameraStreamRef.current && (
+                    <>
+                      {/* Face count indicator */}
+                      {faceCount !== null && (
+                        <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-lg">
+                          {faceCount === 0 ? '😐 No faces detected' : 
+                           faceCount === 1 ? '😊 1 face detected' : 
+                           `👥 ${faceCount} faces detected`}
+                        </div>
+                      )}
+                      
+                      <button 
+                        onClick={capturePhoto}
+                        aria-label="Capture photo"
+                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-4 rounded-full shadow-lg hover:bg-stone-100 transition-all hover:scale-110"
+                      >
+                        <Camera size={28} />
+                      </button>
+                      <button 
+                        onClick={stopCamera}
+                        aria-label="Close camera"
+                        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
+                      >
+                        ✕
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
 

@@ -6,6 +6,7 @@ const auth = require('../middleware/auth');
 
 // Public routes
 router.get('/', festivalController.getAllFestivals);
+router.get('/alerts', festivalController.getAlerts);
 router.get('/search', festivalController.getFestivalsByLocation);
 router.get('/upcoming', festivalController.getUpcomingFestivals);
 

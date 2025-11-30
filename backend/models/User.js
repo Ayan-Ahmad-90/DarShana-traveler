@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -21,6 +21,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 8,
+  },
+  // 🔥 NEW: Username field
+  username: {
+    type: String,
+    default: '',
+    trim: true,
+  },
+  // 🔥 NEW: Username change limit (max 2 times)
+  usernameChangeCount: {
+    type: Number,
+    default: 0,
+  },
+  // 🔥 NEW: User role (user/admin)
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
   },
   profileImage: {
     type: String,
@@ -59,4 +76,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema);

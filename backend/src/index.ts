@@ -51,6 +51,15 @@ app.get('/health', (req: any, res: any) => {
   });
 });
 
+// API health check
+app.get('/api/health', (req: any, res: any) => {
+  console.log('✅ API Health check requested');
+  res.status(200).json({
+    status: 'Backend is running! ✅',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // API Routes
 console.log('\n🔌 Mounting API routes...');
 app.use('/api/routes', routeRoutes);

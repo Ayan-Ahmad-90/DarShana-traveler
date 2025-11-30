@@ -1,421 +1,115 @@
-# Travel Hub Backend API Setup Guide
+# DarShana TypeScript Backend
 
-## Quick Start
+India-first travel APIs backing the DarShana TravelHub. Built with Express + TypeScript + MongoDB, focused on smart discovery, mood-aware planning, and sustainable routing for domestic journeys.
 
-### 1. Install Dependencies
-
-```bash
-cd server
-npm install
+## 📁 Project Structure
+```
+server/
+  src/
+   app.ts                # Express app configuration
+   server.ts             # Entry point
+   config/               # DB, logger, swagger, rate limiter
+   controllers/          # Feature-specific handlers
+   routes/               # REST routes for each module
+   models/               # Mongoose schemas (Destination, Package, User, Review, Blog, ContactMessage)
+   middlewares/          # Error handler, validator, API logger, 404 handler
+   utils/                # Mock data + helpers
+   seeds/seedData.ts     # Dummy data bootstrapper
 ```
 
-### 2. Configure Environment
-
-Create `.env.local` in the `server` directory:
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-
-```env
-# Server
-PORT=3001
-NODE_ENV=development
-
-# Database
-MONGODB_URI=mongodb+srv://username:password@your-cluster.mongodb.net/darshana-travel?retryWrites=true&w=majority
-
-# Authentication
-JWT_SECRET=your_super_secret_key_min_32_characters_for_production
-JWT_EXPIRE=7d
-
-# CORS
-CORS_ORIGIN=http://localhost:5173,https://your-production-url.com
-```
-
-### 3. Start Server
-
-```bash
-# Development (with auto-reload)
-npm run dev
-
-# Production
-npm run build
-npm start
-
-# Watch mode
-npm run dev
-```
-
-Server will run on `http://localhost:3001`
-
-## 📡 API Usage Examples
-
-### Authentication
-
-**Register:**
-```bash
-curl -X POST http://localhost:3001/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "phone": "9876543210",
-    "password": "securepass123",
-    "confirmPassword": "securepass123"
-  }'
-```
-
-**Login:**
-```bash
-curl -X POST http://localhost:3001/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "john@example.com",
-    "password": "securepass123"
-  }'
-```
-
-Response:
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": "user_id",
-    "name": "John Doe",
-    "email": "john@example.com"
-  }
-}
-```
-
-### Flight Search
-
-**Request:**
-```bash
-curl -X GET "http://localhost:3001/api/flights/search?from=Delhi&to=Mumbai&date=2024-01-15&passengers=1" \
-  -H "Content-Type: application/json"
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "count": 4,
-  "data": [
-    {
-      "flightNumber": "IND1234",
-      "airline": "IndiGo",
-      "origin": "Delhi",
-      "destination": "Mumbai",
-      "departureTime": "2024-01-15T06:30:00Z",
-      "arrivalTime": "2024-01-15T08:45:00Z",
-      "duration": "2h 15m",
-      "stops": 0,
-      "price": 5500,
-      "currency": "INR",
-      "availableSeats": 25,
-      "amenities": ["wifi", "meal", "entertainment"],
-      "class": "economy"
-    }
-  ]
-}
-```
-
-### Train Search
-
-**Request:**
-```bash
-curl -X GET "http://localhost:3001/api/trains/search?from=Delhi&to=Mumbai&date=2024-01-15&passengers=1" \
-  -H "Content-Type: application/json"
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "count": 4,
-  "data": [
-    {
-      "trainNumber": "12001",
-      "trainName": "Delhi-Mumbai Rajdhani",
-      "source": "Delhi",
-      "destination": "Mumbai",
-      "trainType": "rajdhani",
-      "duration": "16h 30m",
-      "classes": [
-        {
-          "className": "AC First",
-          "price": 8500,
-          "availableSeats": 20
-        },
-        {
-          "className": "AC 2-Tier",
-          "price": 5200,
-          "availableSeats": 40
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Create Booking
-
-**Request:**
-```bash
-curl -X POST http://localhost:3001/api/bookings \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..." \
-  -d '{
-    "bookingType": "flight",
-    "itemId": "flight_id",
-    "passengers": [
-      {
-        "name": "John Doe",
-        "email": "john@example.com",
-        "phone": "9876543210",
-        "dateOfBirth": "1990-01-01"
-      }
-    ],
-    "totalPrice": 5500,
-    "specialRequests": "Window seat preferred",
-    "insuranceIncluded": false
-  }'
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Booking created successfully",
-  "booking": {
-    "bookingId": "BK-LKH3J2-A9X2C",
-    "userId": "user_id",
-    "bookingType": "flight",
-    "totalPrice": 5500,
-    "passengers": [...],
-    "bookingStatus": "confirmed",
-    "paymentStatus": "pending",
-    "createdAt": "2024-01-10T10:30:00Z"
-  }
-}
-```
-
-### Get User Bookings
-
-**Request:**
-```bash
-curl -X GET http://localhost:3001/api/bookings/my-bookings \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
-```
-
-### Get Travel Suggestions
-
-**Request:**
-```bash
-curl -X GET "http://localhost:3001/api/planner/suggestions?budget=15000&mood=relaxed&weather=sunny&origin=Delhi&destination=Mumbai" \
-  -H "Content-Type: application/json"
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "suggestions": {
-    "recommended_mode": "train",
-    "reasons": [
-      "Good balance of comfort and price",
-      "Relaxed experience preferred"
-    ],
-    "alternatives": ["cab", "flight_economy"],
-    "tips": [
-      "Book for early morning departure",
-      "Enjoy the scenic journey"
-    ]
-  }
-}
-```
-
-## 🧪 Testing
-
-Run tests:
-
-```bash
-npm test                    # Run all tests
-npm run test:watch        # Watch mode
-```
-
-Test files cover:
-- ✅ User registration & login
-- ✅ Flight search
-- ✅ Train search  
-- ✅ Error handling
-- ✅ API health check
-
-## 🔑 Key Features
-
-### Input Validation
-All inputs validated using Joi schemas:
-- Flight search: from, to, date required
-- Booking: passengers, totalPrice required
-- Auth: email format, password strength
-
-### Error Handling
-```json
-{
-  "message": "Validation error",
-  "error": { "details": [...] }
-}
-```
-
-### Pagination & Filtering
-- Mock data returns 4 options per search
-- Easily extendable for real APIs
-
-### Rate Limiting
-Ready to add rate limiting middleware
-
-## 🗄️ Database Models
-
-**User:**
-- Email (unique)
-- Password (hashed)
-- Profile info
-- Preferences
-- Bookings reference
-
-**Flight:**
-- Airline info
-- Departure/arrival times
-- Price & seats
-- Amenities & class
-
-**Booking:**
-- Unique booking ID
-- User & item reference
-- Passenger details
-- Payment status
-- Timestamps
-
-## 🔐 Authentication
-
-Uses JWT for stateless authentication:
-
-1. User logs in → receives token
-2. Frontend stores token in localStorage
-3. Token sent in every request header: `Authorization: Bearer <token>`
-4. Backend validates token
-5. Token expires in 7 days (configurable)
-
-## 🚀 Deployment
-
-### Render (Free Tier)
-
-1. Push code to GitHub
-2. Connect GitHub repo to Render
-3. Set environment variables:
-   - MONGODB_URI
-   - JWT_SECRET
-   - PORT (should be auto-detected)
-   - CORS_ORIGIN
-4. Deploy
-
-Service will be available at: `https://your-service-name.onrender.com`
-
-### Heroku
-
-```bash
-heroku login
-heroku create your-app-name
-heroku config:set MONGODB_URI=...
-git push heroku main
-```
-
-## 📊 Mock Data Structure
-
-By default, searches return mock data:
-
-**Flights:**
-- 4 major airlines (IndiGo, Air India, SpiceJet, Vistara)
-- Random departure/arrival times
-- Price range: ₹3000-11000
-- Different amenities
-
-**Trains:**
-- 4 train types (Shatabdi, Rajdhani, Intercity, Express)
-- Multiple classes per train
-- 3 stations in route
-- Price range: ₹1200-8500
-
-## 🔧 Extending the API
-
-### Adding a New Transport Mode
-
-1. Create model in `/models/{Mode}.ts`
-2. Create controller in `/controllers/{mode}Controller.ts`
-3. Create service in `/services/{mode}Service.ts`
-4. Create routes in `/routes/{mode}Routes.ts`
-5. Add routes to `index.ts`
-
-### Integrating Real Flight API
-
-Replace mock data in `flightService.ts`:
-
-```typescript
-import axios from 'axios';
-
-// Call Amadeus, Skyscanner, or similar API
-const response = await axios.get('https://api.amadeus.com/v1/shopping/flight-offers', {
-  params: {
-    origin: params.from,
-    destination: params.to,
-    departureDate: params.date,
-    adults: params.passengers
-  },
-  headers: {
-    Authorization: `Bearer ${process.env.AMADEUS_API_KEY}`
-  }
-});
-
-// Format and return results
-```
-
-## 📝 Logging
-
-Uses Winston logger:
-- Console output in development
-- File logging available
-
-## 🐛 Common Issues
-
-**Port Already in Use:**
-```bash
-# Kill process on port 3001
-netstat -ano | findstr :3001  # Windows
-kill -9 <PID>
-```
-
-**MongoDB Connection Error:**
-- Check connection string
-- Verify IP whitelist in MongoDB Atlas
-- Test connection: `mongodb+srv://user:pass@cluster.mongodb.net/test`
-
-**CORS Error:**
-- Add frontend URL to CORS_ORIGIN
-- Format: `http://localhost:5173,https://your-domain.com`
-
-## 📚 Additional Resources
-
-- [Express.js Documentation](https://expressjs.com/)
-- [Mongoose Documentation](https://mongoosejs.com/)
-- [JWT Documentation](https://jwt.io/)
-- [Joi Validation](https://joi.dev/)
-
----
-
-**Backend Status:** ✅ Production Ready
-**API Endpoints:** 15+ fully functional
-**Authentication:** JWT + bcryptjs
-**Database:** MongoDB Atlas
+## ⚙️ Setup
+1. **Install dependencies**
+  ```bash
+  cd server
+  npm install
+  ```
+2. **Environment variables**
+  ```bash
+  cp .env.example .env
+  # edit values (Mongo URI, CORS origins, etc.)
+  ```
+3. **Run locally**
+  ```bash
+  npm run dev              # tsx watch mode (http://localhost:3001)
+  npm run build && npm start   # production build
+  ```
+4. **Seed mock data (optional)**
+  ```bash
+  npx ts-node src/seeds/seedData.ts
+  ```
+
+## 🔐 Middleware & Observability
+- Helmet security headers
+- Configurable CORS whitelist
+- Express-rate-limit (per minute)
+- Winston structured logging + custom API logger
+- Joi-powered request validation
+- Centralized error handler + typed ApiError
+- Swagger docs exposed at `/api/docs`
+
+## ✅ Implemented APIs
+| Module | Method | Route | Description |
+| --- | --- | --- | --- |
+| Hero Search | POST | `/api/search/hero` | Smart hero banner recommendations, budget & season suggestions |
+| Journey Planner | POST | `/api/search/journey` | Multi-modal transport options (mock data) |
+| Destinations | GET/GET/:id/POST/PUT | `/api/destinations` | CRUD with Mongo fallback to mock data |
+| Travel Categories | GET | `/api/categories` | Adventure, Beaches, Hills, Pilgrimage, Heritage |
+| Tour Packages | GET/GET/:id/POST | `/api/packages` | Curated itineraries with pricing |
+| Gallery | GET | `/api/gallery` | Moodboards for Indian locales |
+| Special Features | POST | `/api/features/mood` | Mood analyzer suggestions |
+| | POST | `/api/features/green-route` | CO₂-optimized route helper |
+| | POST | `/api/features/budget` | Budget estimator & breakdown |
+| Reviews | GET/POST | `/api/reviews` | Testimonials + DB-backed submissions |
+| Blog | GET/GET/:id | `/api/blogs` | India-only travel guides |
+| Contact Support | POST | `/api/contact` | Capture inquiries + create ticket reference |
+
+Swagger schema + sample payloads available at `/api/docs` once the server runs.
+
+## 🗄️ Models
+- `Destination` – region, seasonality, highlights, gallery, rating.
+- `Package` – slug, duration, INR price, inclusions, itinerary steps.
+- `User` – basic profile + preferences (for future auth).
+- `Review` – rating/comment tied to user/destination.
+- `Blog` – slugged articles with tags + hero image.
+- `ContactMessage` – captured support requests.
+
+## 🌱 Mock Data & Seeding
+`src/utils/mockData.ts` centralizes:
+- Hero banner recommendations & season tips
+- Journey transport combos
+- Travel categories & gallery cards
+- Sample destinations, packages, blogs, reviews
+
+Run `npx ts-node src/seeds/seedData.ts` to dump these into Mongo. APIs automatically fall back to mock arrays if the database is empty, so the frontend keeps working even without seeding.
+
+## 🚀 Render Deployment Guide
+1. Push repo to GitHub.
+2. Create a **Render Web Service** → set root directory to `server`.
+3. Build & start commands:
+  - Build: `npm install && npm run build`
+  - Start: `npm start`
+4. Environment variables to set:
+  - `NODE_ENV=production`
+  - `PORT=10000` (Render auto-injects, but keep fallback)
+  - `MONGODB_URI=<your Atlas connection string>`
+  - `CORS_ORIGIN=https://your-frontend.vercel.app`
+  - `RATE_LIMIT=150`
+  - `LOG_LEVEL=info`
+5. Enable the health check endpoint `/api/health` for Render monitoring.
+
+## 🧪 Useful Commands
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Live reload dev server |
+| `npm run build` | TypeScript compile to `dist/` |
+| `npm start` | Run compiled server |
+| `npm test` | Jest test suite (placeholder) |
+| `npx ts-node src/seeds/seedData.ts` | Seed database with mock data |
+
+## 🔄 Next Integrations
+- Plug hero/journey APIs into real IRCTC/flight partners
+- Connect Mood Analyzer to face-api + Gemini endpoint
+- Expand admin CMS for destinations/packages/reviews
+- Harden auth & RBAC for editors and local guides
+
+> Need another module? Create a controller + route, register it under `/src/routes/index.ts`, and wire a Joi schema. Logging, rate limiting, Swagger, and error handling will automatically cover it. 🚀

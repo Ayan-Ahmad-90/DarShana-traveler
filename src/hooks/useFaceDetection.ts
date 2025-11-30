@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useState, useRef, useCallback } from 'react';
+import type { RefObject } from 'react';
 import * as faceapi from 'face-api.js';
 import type {
   DetectedFace,
@@ -23,6 +24,7 @@ export interface UseFaceDetectionReturnV2 {
   loadingModels: boolean;
   modelsLoaded: boolean;
   error: string | null;
+  faceCount: number | null;
   analyzeImage: (
     image: HTMLImageElement | HTMLVideoElement
   ) => Promise<AnalysisResult | null>;
@@ -30,8 +32,11 @@ export interface UseFaceDetectionReturnV2 {
     imageDataUrl: string
   ) => Promise<AnalysisResult | null>;
   analyzeFromVideo: (
-    video: HTMLVideoElement
+    videoRef: RefObject<HTMLVideoElement>
   ) => Promise<AnalysisResult | null>;
+  detectFacesFromVideo: (
+    videoRef: RefObject<HTMLVideoElement>
+  ) => Promise<number>;
   // expose a manual loader for advanced usage
   loadModels: () => Promise<void>;
 }
@@ -50,6 +55,7 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
   const [loadingModels, setLoadingModels] = useState<boolean>(false);
   const [modelsLoaded, setModelsLoaded] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [faceCount, setFaceCount] = useState<number | null>(null);
   const loadOnceRef = useRef<boolean>(false);
 
   const loadModels = useCallback(async (): Promise<void> => {
@@ -193,6 +199,7 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
 
       console.log(`Detected ${detections.length} face(s)`);
       const faces = detections.map(toDetectedFace);
+      setFaceCount(detections.length);
 
       // Aggregate emotions across detected faces (mean)
       const agg: EmotionScores = faces.reduce(
@@ -267,20 +274,80 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
 
   /**
    * analyzeFromVideo
-   * - Accepts an HTMLVideoElement
-   * - Runs analysis directly
+   * - Accepts a React RefObject<HTMLVideoElement>
+   * - Guards against null ref and runs analysis safely
    */
-  const analyzeFromVideo = useCallback(async (video: HTMLVideoElement): Promise<AnalysisResult | null> => {
-    return analyzeImage(video);
+  const analyzeFromVideo = useCallback(async (videoRef: RefObject<HTMLVideoElement>): Promise<AnalysisResult | null> => {
+    if (!videoRef.current) {
+      console.warn('⚠️ analyzeFromVideo called but videoRef.current is null');
+      setError('Video element not available for analysis');
+      return null;
+    }
+
+    // Ensure video is ready with actual dimensions
+    if (videoRef.current.readyState < 2) {
+      console.warn('⚠️ Video not ready yet (readyState:', videoRef.current.readyState, ')');
+      setError('Video not ready. Please wait for camera to initialize.');
+      return null;
+    }
+
+    if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
+      console.warn('⚠️ Video has no dimensions');
+      setError('Video has no dimensions. Please check camera.');
+      return null;
+    }
+
+    console.log('📹 Analyzing video from ref:', {
+      width: videoRef.current.videoWidth,
+      height: videoRef.current.videoHeight,
+      readyState: videoRef.current.readyState
+    });
+
+    return analyzeImage(videoRef.current);
   }, [analyzeImage]);
+
+  /**
+   * detectFacesFromVideo
+   * - Quick face count detection from video ref
+   * - Returns number of faces detected (used for live preview)
+   */
+  const detectFacesFromVideo = useCallback(async (videoRef: RefObject<HTMLVideoElement>): Promise<number> => {
+    if (!videoRef.current) {
+      console.warn('⚠️ detectFacesFromVideo: videoRef.current is null');
+      setFaceCount(null);
+      return 0;
+    }
+
+    if (!modelsLoaded) {
+      console.log('Models not loaded yet for face detection');
+      return 0;
+    }
+
+    if (videoRef.current.readyState < 2) {
+      return 0;
+    }
+
+    try {
+      const detections = await faceapi.detectAllFaces(videoRef.current);
+      const count = detections?.length || 0;
+      setFaceCount(count);
+      console.log(`👤 Detected ${count} face(s) in video`);
+      return count;
+    } catch (err) {
+      console.error('Face detection error:', err);
+      return 0;
+    }
+  }, [modelsLoaded]);
 
   return {
     loadingModels,
     modelsLoaded,
     error,
+    faceCount,
     analyzeImage,
     analyzeFromImage,
     analyzeFromVideo,
+    detectFacesFromVideo,
     loadModels,
   };
 }

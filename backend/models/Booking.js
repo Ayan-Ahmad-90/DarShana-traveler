@@ -1,35 +1,52 @@
 import mongoose from 'mongoose';
 
-const bookingSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const bookingSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    tripId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Trip',
+    },
+    type: {
+      type: String,
+      enum: ['hotel', 'flight', 'tour', 'combo'],
+      default: 'combo',
+    },
+    customerName: String,
+    customerEmail: String,
+    customerPhone: String,
+    destination: String,
+    checkIn: Date,
+    checkOut: Date,
+    passengers: { type: Number, default: 1 },
+    packageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Package',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'completed', 'failed'],
+      default: 'pending',
+    },
+    bookingReference: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'cancelled'],
+      default: 'pending',
+    },
+    totalCost: Number,
+    currency: { type: String, default: 'USD' },
   },
-  tripId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Trip',
-    required: true,
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending',
-  },
-  bookingReference: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamps: true }
+);
 
-export default mongoose.model('Booking', bookingSchema);
+const Booking = mongoose.model('Booking', bookingSchema);
+export default Booking;
 
