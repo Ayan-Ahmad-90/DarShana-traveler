@@ -19,16 +19,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    chunkSizeWarningLimit: 1000, // Increase limit to 1000 kB to avoid warnings
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Split vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['lucide-react', 'framer-motion'],
-          'map-vendor': ['leaflet'],
-        },
-      },
-    },
   },
 })
+

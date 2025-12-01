@@ -5,112 +5,73 @@ import { env } from './config/environment.js';
 import logger from './utils/logger.js';
 import routeRoutes from './routes/routes.js';
 import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
+import arGuideRoutes from './routes/arGuide.js';
 import guideRoutes from './routes/guides.js';
 import tripPlannerRoutes from './routes/tripPlanner.js';
 
 const app = express();
 
-const allowedOrigins = env.CORS_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean);
+// CORS Configuration
+app.use(cors({
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
-    }
+app.use(express.json({ limit: '50mb' })); // Increase limit for images
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    logger.warn(`🚫 Blocked CORS origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Request logging middleware
-app.use((req: any, res: any, next: any) => {
-  console.log(`\n📨 ${req.method} ${req.path}`);
-  logger.info(`${req.method} ${req.path}`);
+// Request logging
+app.use((req, res, next) => {
+  console.log(`\n ${req.method} ${req.path}`);
   next();
 });
 
-// Health check endpoint
-app.get('/health', (req: any, res: any) => {
-  console.log('✅ Health check requested');
-  res.status(200).json({
-    status: 'ok',
-    service: 'darshana-green-routes',
-    timestamp: new Date().toISOString(),
-  });
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'darshana-green-routes' });
 });
 
-// API health check
-app.get('/api/health', (req: any, res: any) => {
-  console.log('✅ API Health check requested');
-  res.status(200).json({
-    status: 'Backend is running! ✅',
-    timestamp: new Date().toISOString(),
-  });
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'Backend is running! ' });
 });
 
-// API Routes
-console.log('\n🔌 Mounting API routes...');
+// Routes
 app.use('/api/routes', routeRoutes);
-console.log('✅ Mounted: /api/routes');
-
 app.use('/api/mood-analyze', moodAnalyzerRoutes);
-console.log('✅ Mounted: /api/mood-analyze');
-
+app.use('/api/ar-guide', arGuideRoutes);
 app.use('/api/guides', guideRoutes);
-console.log('✅ Mounted: /api/guides');
-
 app.use('/api/trip-planner', tripPlannerRoutes);
-console.log('✅ Mounted: /api/trip-planner');
 
 // 404 handler
-app.use((req: any, res: any) => {
-  logger.warn(`404 Not Found: ${req.method} ${req.path}`);
-  res.status(404).json({
-    success: false,
-    error: 'Route not found',
-  });
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', err);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || 'Internal server error',
-  });
+  console.error(' Unhandled error:', err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
-// Database connection and server startup
+// Start server
 const startServer = async () => {
   try {
-    // Connect to MongoDB
     await connectDatabase();
-    
-    // Start server
     app.listen(env.PORT, () => {
-      logger.info(`🚀 Green Routes Server running on port ${env.PORT}`);
-      logger.info(`📍 Environment: ${env.NODE_ENV}`);
-      logger.info(`🌐 Allowed Origins: ${allowedOrigins.join(', ')}`);
-      logger.info(`🧠 Mood Analyzer Endpoint: http://localhost:${env.PORT}/api/mood-analyze`);
+      console.log(`
+
+   DarShana Travel Backend Started    
+  Port: ${env.PORT}                            
+  URL:  http://localhost:${env.PORT}
+
+      `);
     });
   } catch (error) {
-    logger.error('Failed to start server:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
 startServer();
-
-export default app;

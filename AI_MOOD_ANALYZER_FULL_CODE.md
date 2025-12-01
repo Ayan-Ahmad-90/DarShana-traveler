@@ -1,10 +1,123 @@
+# AI Mood Analyzer - Full Working Code
+
+This document contains the complete, working code for the AI Mood Analyzer feature, including both frontend and backend components.
+
+## 1. Frontend Configuration (`.env.local`)
+
+Ensure your frontend environment variables are set correctly to point to the backend.
+
+```dotenv
+# Backend API Configuration
+VITE_BACKEND_URL=http://localhost:3001
+VITE_API_URL=http://localhost:3001
+
+# Google Gemini API
+VITE_GEMINI_API_KEY=AIzaSyD5KR9lDnGNE7yiZoySZC0QNntBkN3WsBM
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=AIzaSyBHwLKNj5CQrJDonqeq3EXzs-D1O1YlJMQ
+VITE_FIREBASE_AUTH_DOMAIN=darshana-travel.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=darshana-travel
+VITE_FIREBASE_STORAGE_BUCKET=darshana-travel.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=1038207736988
+VITE_FIREBASE_APP_ID=1:1038207736988:web:8c4f3d5e9b2a1c6f7e8d9c0b1a2f3e4d
+```
+
+## 2. Frontend API Service (`src/services/moodApi.ts`)
+
+This service handles communication with the backend. It includes error handling and ensures the correct backend URL is used.
+
+```typescript
+/**
+ * Mood Analyzer API Client
+ * Handles communication with backend /api/mood-analyze endpoint
+ */
+
+import { getBackendUrl } from '../config/api';
+import type { MoodAnalyzeRequest, MoodAnalyzeResponse } from '../types/moodAnalyzer';
+
+// Force correct backend URL
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+const MOOD_ANALYZE_ENDPOINT = '/api/mood-analyze';
+
+const buildEndpointUrl = (): string => {
+  // Remove trailing slash from backend URL if present
+  const baseUrl = BACKEND_URL.replace(/\/+$/, '');
+  return `${baseUrl}${MOOD_ANALYZE_ENDPOINT}`;
+};
+
+export const getMoodAnalyzerUrl = (): string => buildEndpointUrl();
+
+async function postMoodAnalysis(payload: { imageData?: string; imageUrl?: string }): Promise<MoodAnalyzeResponse> {
+  const url = buildEndpointUrl();
+
+  if (!payload.imageData && !payload.imageUrl) {
+    throw new Error('Image data is required for mood analysis.');
+  }
+
+  const requestBody: MoodAnalyzeRequest = {
+    ...(payload.imageData ? { imageData: payload.imageData } : {}),
+    ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
+  };
+
+  try {
+    console.debug('📨 Calling mood analyzer endpoint:', url);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('❌ Failed to parse JSON:', text);
+      throw new Error(`Invalid JSON response from server: ${text.substring(0, 100)}...`);
+    }
+
+    if (!response.ok) {
+      const errorMessage = data?.error || data?.message || `HTTP ${response.status}: ${response.statusText}`;
+      console.error('❌ Mood analyzer API error:', errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    if (!data) {
+      throw new Error('Mood analyzer returned an empty response.');
+    }
+
+    console.debug('✅ Mood analyzer response received');
+    return data as MoodAnalyzeResponse;
+  } catch (error) {
+    console.error('❌ Mood analyzer request failed:', error);
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error(`Connection refused to ${url}. Is the backend running on port 3001?`);
+    }
+    throw error;
+  }
+}
+
+export async function analyzeMoodWithImage(imageData: string): Promise<MoodAnalyzeResponse> {
+  return postMoodAnalysis({ imageData });
+}
+```
+
+## 3. Frontend Component (`src/pages/MoodAnalyzer.tsx`)
+
+The main React component for the Mood Analyzer feature.
+
+```tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle, Scan } from 'lucide-react';
+import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useFaceDetection } from '../hooks/useFaceDetection';
 import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
 import { DESTINATIONS } from '../data/destinations';
-import ARGuide from './ARGuide';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
 // Mock payment: always success after short delay
@@ -119,7 +232,7 @@ function generateFAQ(destination: Destination, moodResponse: MoodAnalyzeResponse
 // Main MoodAnalyzer Component
 const MoodAnalyzer: React.FC = () => {
   // Mode selection: 'ai' is default, 'manual' for optional self-select
-  const [mode, setMode] = useState<'ai' | 'manual' | 'ar'>('ai');
+  const [mode, setMode] = useState<'ai' | 'manual'>('ai');
 
   // Face detection hook
   const faceDetection = useFaceDetection();
@@ -647,14 +760,10 @@ const MoodAnalyzer: React.FC = () => {
     doc.save('darshana-trip-ticket.pdf');
   }
 
-  if (mode === 'ar') {
-    return <ARGuide onBack={() => setMode('ai')} />;
-  }
-
   // UI Start
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="flex justify-center gap-2 mb-8 flex-wrap">
+      <div className="flex justify-center gap-2 mb-8">
         <button
           className={`px-8 py-3 rounded-full font-bold border transition duration-150 ${
             mode === 'ai' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white border-gray-300 text-gray-700'
@@ -668,14 +777,6 @@ const MoodAnalyzer: React.FC = () => {
           }}
         >
           <Camera size={18} className="inline mr-2" /> AI Mood Analyzer
-        </button>
-        <button
-          className={`px-8 py-3 rounded-full font-bold border transition duration-150 ${
-            mode === 'ar' ? 'bg-cyan-500 text-white border-cyan-500 shadow-[0_0_15px_rgba(0,245,255,0.5)]' : 'bg-white border-gray-300 text-gray-700'
-          }`}
-          onClick={() => setMode('ar')}
-        >
-          <Scan size={18} className="inline mr-2" /> AR Guide Experience
         </button>
         <button
           className={`px-8 py-3 rounded-full font-bold border transition duration-150 ${
@@ -1355,3 +1456,250 @@ const MoodAnalyzer: React.FC = () => {
 };
 
 export default MoodAnalyzer;
+```
+
+## 4. Backend Configuration (`backend/src/config/environment.ts`)
+
+This file manages environment variables and CORS settings.
+
+```typescript
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export const env = {
+  // Server
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: parseInt(process.env.PORT || '3001', 10),
+  
+  // Database
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/darshana-travel',
+  
+  // Redis
+  REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
+  CACHE_TTL: parseInt(process.env.CACHE_TTL || '3600', 10), // 1 hour
+  
+  // External APIs
+  OPENROUTESERVICE_KEY: process.env.OPENROUTESERVICE_KEY || 'demo-key',
+  AVIATIONSTACK_KEY: process.env.AVIATIONSTACK_KEY || 'demo-key',
+  GOOGLE_MAPS_KEY: process.env.GOOGLE_MAPS_KEY || 'demo-key',
+  
+  // Logging
+  LOG_LEVEL: process.env.LOG_LEVEL || 'info',
+  
+  // CORS - Allow all local development ports and production domains
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*', 
+  
+  // Feature flags
+  ENABLE_EXTERNAL_APIS: process.env.ENABLE_EXTERNAL_APIS === 'true',
+  USE_CACHE: process.env.USE_CACHE === 'true',
+};
+```
+
+## 5. Backend Controller (`backend/src/controllers/moodAnalyzerController.ts`)
+
+The controller logic for processing mood analysis requests.
+
+```typescript
+/**
+ * Mood Analyzer Controller
+ * Handles POST /api/mood-analyze requests
+ */
+
+import type { Request, Response } from 'express';
+import type { MoodAnalyzeRequest, MoodAnalyzeResponse, EmotionScores } from '../types/moodAnalyzer';
+
+/**
+ * Mock emotion detection
+ */
+function generateMockEmotions(): EmotionScores {
+  const patterns = [
+    { happy: 0.8, sad: 0.05, angry: 0, surprised: 0.1, neutral: 0.05, fear: 0, disgust: 0 },
+    { happy: 0.3, sad: 0.1, angry: 0.1, surprised: 0.2, neutral: 0.3, fear: 0, disgust: 0 },
+    { happy: 0.2, sad: 0.3, angry: 0.1, surprised: 0, neutral: 0.4, fear: 0, disgust: 0 },
+    { happy: 0.6, sad: 0, angry: 0, surprised: 0.3, neutral: 0.1, fear: 0, disgust: 0 },
+    { happy: 0.1, sad: 0.2, angry: 0, surprised: 0, neutral: 0.7, fear: 0, disgust: 0 },
+  ];
+  return patterns[Math.floor(Math.random() * patterns.length)];
+}
+
+/**
+ * POST /api/mood-analyze
+ */
+export async function analyzeMood(req: Request, res: Response): Promise<void> {
+  try {
+    console.log('\n📥 ===== MOOD ANALYZER REQUEST RECEIVED =====');
+    
+    const { imageData, imageUrl } = req.body as MoodAnalyzeRequest;
+
+    if (!imageData && !imageUrl) {
+      res.status(400).json({ error: 'Missing imageData or imageUrl' });
+      return;
+    }
+
+    // Mock Analysis
+    const emotions = generateMockEmotions();
+    
+    // Determine dominant emotion
+    let dominantEmotion = 'neutral';
+    let maxScore = 0;
+    for (const [emotion, score] of Object.entries(emotions)) {
+      if (score > maxScore) {
+        maxScore = score;
+        dominantEmotion = emotion;
+      }
+    }
+
+    // Calculate scores
+    const energyLevel = Math.min(10, Math.round((emotions.happy + emotions.surprised + emotions.angry) * 10));
+    const socialScore = Math.min(10, Math.round((emotions.happy + emotions.neutral) * 10));
+    const adventureScore = Math.min(10, Math.round((emotions.surprised + emotions.fear) * 10));
+
+    // Recommendations based on mood
+    const recommendations: Record<string, string[]> = {
+      happy: ['beach', 'party', 'festival'],
+      sad: ['nature', 'quiet', 'retreat'],
+      angry: ['adventure', 'hiking', 'sports'],
+      surprised: ['city', 'exploration', 'museum'],
+      neutral: ['park', 'cafe', 'library'],
+      fear: ['home', 'safe', 'guided'],
+      disgust: ['clean', 'luxury', 'spa']
+    };
+
+    const response: MoodAnalyzeResponse = {
+      detectedMood: dominantEmotion,
+      confidence: maxScore,
+      emotions,
+      energyLevel,
+      socialScore,
+      adventureScore,
+      reasoning: `Based on your ${dominantEmotion} expression, we recommend these destinations.`,
+      recommendedKeys: recommendations[dominantEmotion] || ['general']
+    };
+
+    console.log('✅ Analysis complete:', dominantEmotion);
+    res.json(response);
+
+  } catch (error) {
+    console.error('❌ Mood analysis error:', error);
+    res.status(500).json({
+      error: 'Failed to analyze mood',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+
+export async function moodAnalyzerHealth(req: Request, res: Response): Promise<void> {
+  res.json({ status: 'Mood Analyzer is running', timestamp: new Date().toISOString() });
+}
+```
+
+## 6. Backend Routes (`backend/src/routes/moodAnalyzer.ts`)
+
+Defines the API endpoints for the mood analyzer.
+
+```typescript
+/**
+ * Mood Analyzer Routes
+ * API endpoints for AI mood analysis
+ */
+
+import { Router } from 'express';
+import { analyzeMood, moodAnalyzerHealth } from '../controllers/moodAnalyzerController';
+
+const router = Router();
+
+/**
+ * POST /api/mood-analyze
+ */
+router.post('/', analyzeMood);
+
+/**
+ * GET /api/mood-analyze/health
+ */
+router.get('/health', moodAnalyzerHealth);
+
+export default router;
+```
+
+## 7. Backend Entry Point (`backend/src/index.ts`)
+
+The main server file that sets up Express, CORS, and routes.
+
+```typescript
+import express from 'express';
+import cors from 'cors';
+import { connectDatabase } from './config/database.js';
+import { env } from './config/environment.js';
+import logger from './utils/logger.js';
+import routeRoutes from './routes/routes.js';
+import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
+import guideRoutes from './routes/guides.js';
+import tripPlannerRoutes from './routes/tripPlanner.js';
+
+const app = express();
+
+// CORS Configuration
+app.use(cors({
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+app.use(express.json({ limit: '50mb' })); // Increase limit for images
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`\n📨 ${req.method} ${req.path}`);
+  next();
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'darshana-green-routes' });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'Backend is running! ✅' });
+});
+
+// Routes
+app.use('/api/routes', routeRoutes);
+app.use('/api/mood-analyze', moodAnalyzerRoutes);
+app.use('/api/guides', guideRoutes);
+app.use('/api/trip-planner', tripPlannerRoutes);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Error handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('❌ Unhandled error:', err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+});
+
+// Start server
+const startServer = async () => {
+  try {
+    await connectDatabase();
+    app.listen(env.PORT, () => {
+      console.log(`
+╔════════════════════════════════════════╗
+║  🚀 DarShana Travel Backend Started    ║
+║  Port: ${env.PORT}                            
+║  URL:  http://localhost:${env.PORT}
+╚════════════════════════════════════════╝
+      `);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
+```

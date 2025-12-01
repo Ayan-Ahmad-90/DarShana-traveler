@@ -15,7 +15,7 @@ import {
   Plane,
   Check
 } from 'lucide-react';
-import type { RouteResult, RouteMode, ModeComparison } from '../../types/greenRoute';
+import type { RouteResult, RouteMode } from '../../types/greenRoute';
 import { getEcoTip } from '../../types/greenRoute';
 
 interface RouteResultCardProps {

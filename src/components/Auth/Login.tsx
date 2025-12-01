@@ -7,7 +7,7 @@ import type { LoginData } from '../../types';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setAuth } = useAuth();
+  const auth = useAuth();
   
   const [formData, setFormData] = useState<LoginData>({
     email: '',
@@ -102,8 +102,14 @@ const Login: React.FC = () => {
           localStorage.removeItem('rememberEmail');
         }
 
-        // Update auth context
-        setAuth(data.token, data.user);
+        // Update auth context (use safe any-cast to handle contexts that may not expose setAuth)
+        if ((auth as any)?.setAuth) {
+          (auth as any).setAuth(data.token, data.user);
+        } else {
+          // Backwards-compatible fallbacks if the context exposes different setters
+          if ((auth as any)?.setToken) (auth as any).setToken(data.token);
+          if ((auth as any)?.setUser) (auth as any).setUser(data.user);
+        }
       }
 
       // Redirect based on role
