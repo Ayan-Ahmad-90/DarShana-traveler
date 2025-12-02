@@ -202,7 +202,12 @@ const Sustainable: React.FC = () => {
       
       // Check if it's a connection refused error
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Connection refused')) {
-        setError('⚠️ Backend server is not running. Please check: 1) Backend is started on port 3001, 2) MongoDB connection is configured, 3) API endpoint is accessible.');
+        const isProd = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        if (isProd) {
+          setError('⚠️ Unable to connect to the server. The backend might be waking up (free tier) or blocked by network policy. Please try again in 30 seconds.');
+        } else {
+          setError('⚠️ Backend server is not running. Please check: 1) Backend is started on port 3001, 2) MongoDB connection is configured, 3) API endpoint is accessible.');
+        }
       } else {
         const isProductionError = window.location.hostname.includes('vercel.app');
         const helpText = isProductionError 
