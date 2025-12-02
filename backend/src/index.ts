@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import express from 'express';
 import cors from 'cors';
 import { connectDatabase } from './config/database.js';
@@ -64,19 +65,22 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Start server
 const startServer = async () => {
   try {
-    await connectDatabase();
+    await connectDatabase().catch(err => {
+      console.error('⚠️ Database connection failed, starting server anyway for diagnostics:', err.message);
+    });
+    
     app.listen(env.PORT, () => {
       console.log(`
 
    DarShana Travel Backend Started    
   Port: ${env.PORT}                            
   URL:  http://localhost:${env.PORT}
+  DB:   ${mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'}
 
       `);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
-    process.exit(1);
   }
 };
 
