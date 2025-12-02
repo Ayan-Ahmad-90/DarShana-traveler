@@ -13,12 +13,16 @@ import safetyRoutes from './routes/safety.js';
 const app = express();
 
 // CORS Configuration
-app.use(cors({
-  origin: true, // Allow all origins dynamically (required for credentials: true)
+const corsOptions = {
+  origin: true, // Allow all origins dynamically
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Enable pre-flight for all routes
 
 app.use(express.json({ limit: '50mb' })); // Increase limit for images
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
