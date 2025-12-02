@@ -8,6 +8,7 @@ import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
 import arGuideRoutes from './routes/arGuide.js';
 import guideRoutes from './routes/guides.js';
 import tripPlannerRoutes from './routes/tripPlanner.js';
+import safetyRoutes from './routes/safety.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use('/api/mood-analyze', moodAnalyzerRoutes);
 app.use('/api/ar-guide', arGuideRoutes);
 app.use('/api/guides', guideRoutes);
 app.use('/api/trip-planner', tripPlannerRoutes);
+app.use('/api/safety', safetyRoutes);
 
 // 404 handler
 app.use((req, res) => {

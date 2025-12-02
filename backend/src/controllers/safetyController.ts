@@ -1,13 +1,17 @@
-import SafetyResource from '../models/SafetyResource.js';
+import { Request, Response } from 'express';
+// @ts-ignore
+import SafetyResource from '../../models/SafetyResource.js';
 
-// In-memory storage for demo purposes (replace with DB in production)
-const activeEmergencies = [];
+// In-memory storage for demo purposes
+const activeEmergencies: any[] = [];
 const liveLocations = new Map();
 
-export const getSafetyResources = async (req, res) => {
+export const getSafetyResources = async (req: Request, res: Response) => {
   try {
     const { region } = req.query;
+    
     // Mock response if DB not connected or empty
+    // @ts-ignore
     if (!SafetyResource) {
        return res.json({
         region: region || 'National',
@@ -18,7 +22,7 @@ export const getSafetyResources = async (req, res) => {
       });
     }
 
-    const resources = await SafetyResource.findOne({ region: new RegExp(region, 'i') });
+    const resources = await SafetyResource.findOne({ region: new RegExp(region as string, 'i') });
     if (!resources) {
       // Return default/national numbers if region not found
       return res.json({
@@ -43,7 +47,7 @@ export const getSafetyResources = async (req, res) => {
   }
 };
 
-export const logEmergency = async (req, res) => {
+export const logEmergency = async (req: Request, res: Response) => {
   try {
     const { type, location, timestamp } = req.body;
     const emergency = {
@@ -58,15 +62,13 @@ export const logEmergency = async (req, res) => {
     activeEmergencies.push(emergency);
     console.log('🚨 EMERGENCY LOGGED:', emergency);
     
-    // In a real app, trigger SMS/Email alerts here
-    
     res.status(201).json({ success: true, message: 'Emergency logged', emergencyId: emergency.id });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: 'Failed to log emergency', error: error.message });
   }
 };
 
-export const updateLiveLocation = async (req, res) => {
+export const updateLiveLocation = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const { location } = req.body;
@@ -79,8 +81,7 @@ export const updateLiveLocation = async (req, res) => {
     console.log(`📍 Location updated for ${userId}:`, location);
     
     res.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: 'Failed to update location', error: error.message });
   }
 };
-

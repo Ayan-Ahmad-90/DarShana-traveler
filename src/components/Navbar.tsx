@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Leaf, Smile, Bot, Calendar, Plane, MoreVertical } from "lucide-react";
+import { Menu, X, Leaf, Smile, Bot, Calendar, Plane, MoreVertical, Shield } from "lucide-react";
 import RightSidebar from "./RightSidebar";
 import { useRightSidebar } from "../hooks/useRightSidebar";
 
@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
     { name: "Home", path: "/" },
     { name: "Mood AI", path: "/mood", icon: Smile },
     { name: "Travel Hub", path: "/travelhub", icon: Plane },  // ✔️ FIXED ROUTE
+    { name: "Safety", path: "/safety-guide", icon: Shield },
     { name: "Cultural Odyssey", path: "/festivals", icon: Calendar },
     { name: "Eco Travel", path: "/sustainable", icon: Leaf },
     { name: "Assistant", path: "/assistant", icon: Bot },

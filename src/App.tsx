@@ -30,10 +30,12 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UIStyleGuide from "./pages/UIStyleGuide";
 import Booking from "./pages/Booking";
-import YatraShayak from "./components/YatraShayak";
+// import YatraShayak from "./components/YatraShayak";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotAuthorized from "./pages/NotAuthorized";
 import GreenRoutePlanner from "./pages/GreenRoutePlanner";
+import SafetyDashboard from "./pages/SafetyDashboard";
+import SafetyGuide from "./pages/SafetyGuide";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -69,6 +71,8 @@ const App: React.FC = () => {
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/green-route-planner" element={<GreenRoutePlanner />} />
+            <Route path="/safety" element={<SafetyDashboard />} />
+            <Route path="/safety-guide" element={<SafetyGuide />} />
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/festival-alerts" element={<FestivalAlerts />} />
             <Route path="/language" element={<LanguageSelector />} />
@@ -96,7 +100,7 @@ const App: React.FC = () => {
         </main>
         {/* Footer */}
         <Footer />
-        <YatraShayak />
+        {/* <YatraShayak /> */}
         <SpeedInsights />
 
       </div>

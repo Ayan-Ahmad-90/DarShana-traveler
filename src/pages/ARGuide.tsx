@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Scan, MapPin, CreditCard, Download, RefreshCw, ChevronRight, X, ArrowLeft } from 'lucide-react';
+import { Scan, MapPin, CreditCard, Download, RefreshCw, X, ArrowLeft } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { useARFaceDetection } from '../hooks/useARFaceDetection';
 import { analyzeARScene } from '../services/arGuideApi';
@@ -25,11 +25,9 @@ const ARGuide: React.FC<ARGuideProps> = ({ onBack }) => {
   const [selectedDest, setSelectedDest] = useState<ARDestination | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showFAQ, setShowFAQ] = useState(false);
   
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Hooks

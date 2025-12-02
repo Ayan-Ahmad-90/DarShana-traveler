@@ -9,7 +9,6 @@ import {
   Leaf, 
   Flame, 
   Search, 
-  RefreshCw,
   ChevronDown,
   Loader2
 } from 'lucide-react';

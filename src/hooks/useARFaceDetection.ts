@@ -3,7 +3,7 @@
  * Extends standard face detection with AR-specific positioning and tracking
  */
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import * as faceapi from 'face-api.js';
 import type { FacePosition } from '../types/arGuide';
 import { useFaceDetection } from './useFaceDetection';

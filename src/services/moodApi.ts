@@ -3,7 +3,6 @@
  * Handles communication with backend /api/mood-analyze endpoint
  */
 
-import { getBackendUrl } from '../config/api';
 import type { MoodAnalyzeRequest, MoodAnalyzeResponse } from '../types/moodAnalyzer';
 
 // Force correct backend URL
