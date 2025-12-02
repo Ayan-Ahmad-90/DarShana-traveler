@@ -291,8 +291,9 @@ const Sustainable: React.FC = () => {
       <div ref={plannerRef} className="bg-white p-6 rounded-xl shadow-sm border border-stone-200 mb-10">
         <form onSubmit={handlePlan} className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full relative">
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Origin</label>
+            <label htmlFor="origin-input" className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Origin</label>
             <input 
+              id="origin-input"
               type="text" 
               value={from}
               onChange={(e) => setFrom(e.target.value)}
@@ -346,8 +347,9 @@ const Sustainable: React.FC = () => {
             </button>
           </div>
           <div className="flex-1 w-full relative">
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Destination</label>
+            <label htmlFor="destination-input" className="block text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Destination</label>
             <input 
+              id="destination-input"
               type="text" 
               value={to}
               onChange={(e) => setTo(e.target.value)}
