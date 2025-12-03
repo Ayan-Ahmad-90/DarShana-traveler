@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
 import HighlightSlider from '../components/HighlightSlider';
 import KathakaliAssistant from "../components/KathakaliAssistant";
-import { useLocation } from "react-router-dom";
 
 const destinations = [
   {

@@ -1,5 +1,5 @@
 import { MessageCircle, Phone, Mail, Send } from 'lucide-react';
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
 
 const supportChannels = [
   { id: 'whatsapp', label: 'WhatsApp Concierge', value: '+91 87918 98194', icon: MessageCircle, action: 'Chat now', link: 'https://wa.me/918791898194' },

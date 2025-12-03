@@ -39,7 +39,6 @@ import SafetyDashboard from "./pages/SafetyDashboard";
 import SafetyGuide from "./pages/SafetyGuide";
 import SafetyModal from "./components/SafetyModal";
 import { Shield } from "lucide-react";
-import KathakaliAssistant from "./components/KathakaliAssistant";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
