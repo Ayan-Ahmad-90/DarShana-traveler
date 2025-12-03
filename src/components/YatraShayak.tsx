@@ -1,14 +1,20 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import { yatraShayakApi } from '../services/api';
 
 const YatraShayak = () => {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [history, setHistory] = useState<{ type: 'user' | 'bot'; text: string }[]>([
     { type: 'bot', text: 'Namaste! I am Yatra Shayak. How can I help you?' },
   ]);
   const [loading, setLoading] = useState(false);
+
+  if (location.pathname === '/festivals') {
+    return null;
+  }
 
   const sendMessage = async () => {
     if (!message.trim()) return;

@@ -10,6 +10,7 @@ import arGuideRoutes from './routes/arGuide.js';
 import guideRoutes from './routes/guides.js';
 import tripPlannerRoutes from './routes/tripPlanner.js';
 import safetyRoutes from './routes/safety.js';
+import bookingRoutes from '../routes/bookings.js';
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/routes', routeRoutes);
 app.use('/api/mood-analyze', moodAnalyzerRoutes);
 app.use('/api/ar-guide', arGuideRoutes);
 app.use('/api/guides', guideRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/trip-planner', tripPlannerRoutes);
 app.use('/api/safety', safetyRoutes);
 

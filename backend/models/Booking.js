@@ -43,6 +43,12 @@ const bookingSchema = new mongoose.Schema(
     },
     totalCost: Number,
     currency: { type: String, default: 'USD' },
+    specialRequests: String,
+    documents: {
+      photo: String,
+      idCard: String,
+      paymentProof: String,
+    },
   },
   { timestamps: true }
 );

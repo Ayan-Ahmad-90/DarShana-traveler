@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { analyzeMood, moodAnalyzerHealth } from '../controllers/moodAnalyzerController';
+import { analyzeMood, moodAnalyzerHealth } from '../controllers/moodAnalyzerController.js';
 
 const router = Router();
 

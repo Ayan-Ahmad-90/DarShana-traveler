@@ -41,7 +41,10 @@ const GallerySection = () => (
     </div>
 
     <div className="mt-6 text-center">
-      <button className="px-5 py-2 rounded-full border border-[#06b6d4] text-[#06b6d4] font-semibold">
+      <button 
+        onClick={() => document.getElementById('map')?.scrollIntoView({ behavior: 'smooth' })}
+        className="px-5 py-2 rounded-full border border-[#06b6d4] text-[#06b6d4] font-semibold hover:bg-[#06b6d4]/10 transition-colors"
+      >
         Watch 360° tours
       </button>
     </div>

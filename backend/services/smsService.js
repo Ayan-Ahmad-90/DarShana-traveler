@@ -1,11 +1,11 @@
-const twilio = require('twilio');
+import twilio from 'twilio';
 
 const client = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
 
-exports.sendSMS = async (to, body) => {
+export const sendSMS = async (to, body) => {
   if (!process.env.TWILIO_ACCOUNT_SID) {
     console.log('Twilio not configured, skipping SMS:', body);
     return;

@@ -1,18 +1,37 @@
-// backend/routes/bookings.js
-const express = require('express');
+import express from 'express';
+import bookingController from '../controllers/bookingController.js';
+import auth from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
+import { bookingLimiter } from '../middleware/rateLimiter.js';
+
 const router = express.Router();
-const bookingController = require('../controllers/bookingController');
-const auth = require('../middleware/auth');
-const { bookingLimiter } = require('../middleware/rateLimiter');
 
 // Public routes
 router.get('/shared/:slug', bookingController.getSharedTrip);
 
 // All booking routes require authentication
-router.use(auth);
+// router.use(auth); // Temporarily disabled for testing public booking flow if needed, but user said "email bhi ok sa fill kr ke" which implies guest booking might be needed. 
+// However, the user said "My trip option hai usmein uski trip add ho jaye", which implies a user account.
+// I will keep auth but make sure the frontend handles it. Wait, the user said "booking page open ho signin or sign up nhi".
+// This means the booking creation might happen as a guest, OR we create a shadow user?
+// For now, let's assume the user is logged in OR we allow guest bookings.
+// If I remove `router.use(auth)`, I need to handle `req.userId` manually in controller.
+// Let's keep it simple: If token exists, use it. If not, maybe create a temp user?
+// Actually, the previous request was to allow access to /booking without login.
+// So the backend MUST allow unauthenticated requests for creation.
 
-// Create booking
+// Create booking (Public allowed)
 router.post('/', bookingLimiter, bookingController.createBooking);
+
+// Upload documents (Public allowed if we pass bookingId)
+router.post('/:bookingId/documents', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'idCard', maxCount: 1 },
+  { name: 'paymentProof', maxCount: 1 }
+]), bookingController.uploadDocuments);
+
+// Authenticated routes
+router.use(auth);
 
 // Get user bookings
 router.get('/', bookingController.getUserBookings);
@@ -26,4 +45,4 @@ router.post('/:bookingId/share', bookingController.shareTrip);
 // Cancel booking
 router.delete('/:bookingId', bookingController.cancelBooking);
 
-module.exports = router;
+export default router;

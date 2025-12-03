@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Loader, AlertCircle, X } from 'lucide-react';
+import { Calendar, Loader, AlertCircle, X, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { bookingApi } from '../services/api';
 
@@ -143,6 +143,14 @@ const MyBookings = () => {
                     <button className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-colors">
                       View Details
                     </button>
+                    {booking.bookingStatus === 'confirmed' && (
+                      <button
+                        onClick={() => window.print()}
+                        className="flex-1 border border-blue-600 text-blue-600 hover:bg-blue-50 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download size={18} /> Ticket
+                      </button>
+                    )}
                     {booking.bookingStatus !== 'cancelled' && (
                       <button
                         onClick={() => handleCancelBooking(booking.bookingId)}

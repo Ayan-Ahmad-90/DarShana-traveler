@@ -325,7 +325,7 @@ const BecomeGuide: React.FC = () => {
             name="phone"
             value={formData.phone || ''}
             onChange={handleInputChange}
-            placeholder="+91-98765-43210"
+            placeholder="+91 87918 98194"
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 ${
               errors.phone ? 'border-red-500' : 'border-stone-300'
             }`}

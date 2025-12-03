@@ -1,14 +1,13 @@
-// backend/controllers/bookingController.js
-const Booking = require('../models/Booking');
-const Trip = require('../models/Trip');
-const Notification = require('../models/Notification');
-const User = require('../models/User');
-const sendEmail = require('../services/emailService');
-const { sendSMS } = require('../services/smsService');
-const { createOrder, verifyPayment } = require('../services/paymentService');
+import Booking from '../models/Booking.js';
+import Trip from '../models/Trip.js';
+import Notification from '../models/Notification.js';
+import User from '../models/User.js';
+import sendEmail from '../services/emailService.js';
+import { sendSMS } from '../services/smsService.js';
+import { createOrder, verifyPayment } from '../services/paymentService.js';
 
 // Create booking
-exports.createBooking = async (req, res) => {
+export const createBooking = async (req, res) => {
   try {
     const { destination, startDate, endDate, travelers, transport, totalCost } = req.body;
 
@@ -100,7 +99,7 @@ exports.createBooking = async (req, res) => {
 };
 
 // Get user bookings
-exports.getUserBookings = async (req, res) => {
+export const getUserBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.userId })
       .populate('tripId')
@@ -113,7 +112,7 @@ exports.getUserBookings = async (req, res) => {
 };
 
 // Process payment
-exports.processPayment = async (req, res) => {
+export const processPayment = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -154,7 +153,7 @@ exports.processPayment = async (req, res) => {
 };
 
 // Cancel booking
-exports.cancelBooking = async (req, res) => {
+export const cancelBooking = async (req, res) => {
   try {
     const { bookingId } = req.params;
 
@@ -177,7 +176,7 @@ exports.cancelBooking = async (req, res) => {
 };
 
 // Share trip
-exports.shareTrip = async (req, res) => {
+export const shareTrip = async (req, res) => {
   try {
     const { bookingId } = req.params;
     const booking = await Booking.findById(bookingId).populate('tripId');
@@ -198,7 +197,7 @@ exports.shareTrip = async (req, res) => {
 };
 
 // Get shared trip
-exports.getSharedTrip = async (req, res) => {
+export const getSharedTrip = async (req, res) => {
   try {
     const { slug } = req.params;
     const trip = await Trip.findOne({ shareSlug: slug });
@@ -217,5 +216,59 @@ exports.getSharedTrip = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch trip', error: error.message });
+  }
+};
+
+// Upload documents
+export const uploadDocuments = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Check if files were uploaded
+    if (req.files) {
+      if (req.files.photo) booking.documents.photo = req.files.photo[0].path;
+      if (req.files.idCard) booking.documents.idCard = req.files.idCard[0].path;
+      if (req.files.paymentProof) booking.documents.paymentProof = req.files.paymentProof[0].path;
+    }
+
+    booking.status = 'confirmed'; // Auto-confirm after docs upload for now
+    await booking.save();
+
+    // Update Trip status as well
+    if (booking.tripId) {
+      await Trip.findByIdAndUpdate(booking.tripId, { status: 'confirmed' });
+    }
+
+    // Send Notifications
+    try {
+      // Email Notification
+      if (booking.customerEmail) {
+        await sendEmail({
+          email: booking.customerEmail,
+          subject: 'Booking Confirmed - DarShana Travel',
+          message: `Dear ${booking.customerName},\n\nYour booking to ${booking.destination} has been confirmed!\n\nBooking Reference: ${booking.bookingReference}\n\nThank you for choosing DarShana Travel.`,
+        });
+      }
+
+      // SMS Notification
+      if (booking.customerPhone) {
+        await sendSMS(
+          booking.customerPhone,
+          `DarShana: Booking Confirmed! Ref: ${booking.bookingReference}. Enjoy your trip to ${booking.destination}.`
+        );
+      }
+    } catch (notifyError) {
+      console.error('Notification failed:', notifyError);
+    }
+
+    res.json({ message: 'Documents uploaded successfully', booking });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ message: 'Failed to upload documents', error: error.message });
   }
 };

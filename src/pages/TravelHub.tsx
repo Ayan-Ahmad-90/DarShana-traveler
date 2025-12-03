@@ -7,7 +7,6 @@ import TourPackagesSection from '../components/travelhub/TourPackagesSection';
 import GallerySection from '../components/travelhub/GallerySection';
 import ReviewsSection from '../components/travelhub/ReviewsSection';
 import BlogHighlightsSection from '../components/travelhub/BlogHighlightsSection';
-import InteractiveMapSection from '../components/travelhub/InteractiveMapSection';
 import ContactSupportSection from '../components/travelhub/ContactSupportSection';
 import SpecialFeaturesSection from '../components/travelhub/SpecialFeaturesSection';
 import RouteMapSection from '../components/travelhub/RouteMapSection';
@@ -15,6 +14,8 @@ import RouteMapSection from '../components/travelhub/RouteMapSection';
 const TravelHub = () => {
   const handleHeroSearch = (payload: HeroSearchPayload) => {
     console.log('Hero search:', payload);
+    // For now, scroll to packages as a result of search
+    document.getElementById('packages')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToDestinations = useCallback(() => {
@@ -74,7 +75,24 @@ const TravelHub = () => {
         <TourPackagesSection />
         <GallerySection />
         <SpecialFeaturesSection />
-        <InteractiveMapSection />
+        
+        <section id="map" className="pt-16">
+          <div className="text-center space-y-3 mb-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Interactive map</p>
+            <h2 className="text-3xl font-semibold text-[#0f172a]">Explore India on hover</h2>
+          </div>
+          <div className="rounded-3xl overflow-hidden border border-slate-100 shadow-sm">
+            <iframe 
+              title="TravelHub Destinations Map" 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30711283.003947686!2d64.43760646358283!3d20.01140817566828!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30635ff06b92b791%3A0xd78c4fa1854213a6!2sIndia!5e0!3m2!1sen!2sin!4v1689612345678!5m2!1sen!2sin" 
+              className="h-[420px] w-full" 
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </section>
+
         <ReviewsSection />
         <BlogHighlightsSection />
         <ContactSupportSection />

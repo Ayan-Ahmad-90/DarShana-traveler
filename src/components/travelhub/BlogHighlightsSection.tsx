@@ -46,7 +46,12 @@ const BlogHighlightsSection = () => (
               </span>
             ))}
           </div>
-          <button className="text-[#06b6d4] font-semibold text-sm">Read guide →</button>
+          <button 
+            onClick={() => alert(`Reading: ${post.title}\n(Full article coming soon!)`)}
+            className="text-[#06b6d4] font-semibold text-sm hover:underline text-left"
+          >
+            Read guide →
+          </button>
         </article>
       ))}
     </div>

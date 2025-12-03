@@ -46,7 +46,7 @@ const Footer: React.FC = () => {
           <h3 className="text-white font-semibold mb-4">Contact Us</h3>
           <ul className="space-y-3 text-sm">
             <li className="flex items-center gap-2"><MapPin size={16} className="text-primary-400" /> Lucknow, India</li>
-            <li className="flex items-center gap-2"><Phone size={16} className="text-primary-400" /> +91 98765 43210</li>
+            <li className="flex items-center gap-2"><Phone size={16} className="text-primary-400" /> +91 87918 98194, +91 93685 68267</li>
             <li className="flex items-center gap-2"><Mail size={16} className="text-primary-400" /> hello@darshana.travel</li>
           </ul>
         </div>

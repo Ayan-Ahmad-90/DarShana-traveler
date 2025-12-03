@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { analyzeARScene } from '../controllers/arGuideController';
+import { analyzeARScene } from '../controllers/arGuideController.js';
 
 const router = Router();
 
