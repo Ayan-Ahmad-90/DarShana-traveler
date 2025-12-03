@@ -39,6 +39,7 @@ import SafetyDashboard from "./pages/SafetyDashboard";
 import SafetyGuide from "./pages/SafetyGuide";
 import SafetyModal from "./components/SafetyModal";
 import { Shield } from "lucide-react";
+import KathakaliAssistant from "./components/KathakaliAssistant";
 
 // Auto scroll to top when route changes
 const ScrollToTop: React.FC = () => {
@@ -49,6 +50,25 @@ const ScrollToTop: React.FC = () => {
   }, [pathname]);
 
   return null;
+};
+
+const GlobalSafetyButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const location = useLocation();
+  // Hide on festivals page
+  if (location.pathname === '/festivals') return null;
+
+  return (
+    <button
+      onClick={onClick}
+      className="fixed bottom-6 right-6 z-[90] bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group animate-pulse"
+      title="Emergency Safety Dashboard"
+    >
+      <Shield className="w-7 h-7" />
+      <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+        Safety SOS
+      </span>
+    </button>
+  );
 };
 
 
@@ -110,16 +130,7 @@ const App: React.FC = () => {
         <Analytics />
 
         {/* Safety Floating Button */}
-        <button
-          onClick={() => setIsSafetyOpen(true)}
-          className="fixed bottom-6 right-6 z-[90] bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group animate-pulse"
-          title="Emergency Safety Dashboard"
-        >
-          <Shield className="w-7 h-7" />
-          <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            Safety SOS
-          </span>
-        </button>
+        <GlobalSafetyButton onClick={() => setIsSafetyOpen(true)} />
 
         <SafetyModal isOpen={isSafetyOpen} onClose={() => setIsSafetyOpen(false)} />
 

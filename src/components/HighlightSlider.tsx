@@ -10,7 +10,7 @@ export interface HighlightItem {
   badge?: string;
   type: 'destination' | 'festival' | 'season' | 'experience';
   link?: string;
-  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light';
+  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light' | 'green';
 }
 
 interface HighlightSliderProps {
@@ -25,7 +25,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Jaipur',
     description: 'Royal Pink City',
     badge: 'Must Visit',
-    icon: <MapPin size={20} />,
+    icon: <MapPin size={16} />,
     type: 'destination',
     link: '/destinations/jaipur',
     color: 'blue',
@@ -35,7 +35,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: "Kerala",
     description: "God's Own Country",
     badge: 'Paradise',
-    icon: <Wind size={20} />,
+    icon: <Wind size={16} />,
     type: 'destination',
     link: '/destinations/kerala',
     color: 'slate',
@@ -45,7 +45,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Taj Mahal',
     description: 'Symbol of Love',
     badge: 'Heritage',
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={16} />,
     type: 'destination',
     link: '/destinations/agra',
     color: 'neutral',
@@ -55,7 +55,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Diwali Festival',
     description: 'Festival of Lights',
     badge: 'Nov–Dec',
-    icon: <Calendar size={20} />,
+    icon: <Calendar size={16} />,
     type: 'festival',
     link: '/festivals/diwali',
     color: 'blue',
@@ -65,7 +65,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Manali',
     description: 'Mountain Adventure',
     badge: 'Popular',
-    icon: <Mountain size={20} />,
+    icon: <Mountain size={16} />,
     type: 'destination',
     link: '/destinations/manali',
     color: 'accent',
@@ -75,7 +75,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Goa',
     description: 'Beach Escape',
     badge: 'Relaxation',
-    icon: <Wind size={20} />,
+    icon: <Wind size={16} />,
     type: 'destination',
     link: '/destinations/goa',
     color: 'slate',
@@ -85,7 +85,7 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Holi Festival',
     description: 'Colors of Joy',
     badge: 'Mar–Apr',
-    icon: <Calendar size={20} />,
+    icon: <Calendar size={16} />,
     type: 'festival',
     link: '/festivals/holi',
     color: 'neutral',
@@ -95,17 +95,17 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Shimla',
     description: 'Hill Station Beauty',
     badge: 'Scenic',
-    icon: <Mountain size={20} />,
+    icon: <Mountain size={16} />,
     type: 'destination',
     link: '/destinations/shimla',
-    color: 'light',
+    color: 'blue',
   },
   {
     id: 'varanasi',
     title: 'Varanasi',
     description: 'Spiritual Journey',
     badge: 'Sacred',
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={16} />,
     type: 'destination',
     link: '/destinations/varanasi',
     color: 'accent',
@@ -176,23 +176,23 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
       />
 
       {/* Content */}
-      <div className="relative z-10 py-3 sm:py-4 px-3 sm:px-6 lg:px-8">
+      <div className="relative z-10 py-1 sm:py-2 px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-2 flex items-center gap-2 px-2">
-          <div className="w-1 h-4 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
-          <span className="text-xs font-bold tracking-widest uppercase text-orange-400">
+        <div className="mb-1 flex items-center gap-2 px-2">
+          <div className="w-1 h-3 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
+          <span className="text-[10px] font-bold tracking-widest uppercase text-orange-400">
             ✈️ Explore Destinations
           </span>
         </div>
 
         {/* Slider */}
         <div
-          className="w-full overflow-hidden rounded-2xl px-1"
+          className="w-full overflow-hidden rounded-xl px-1"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 sm:gap-6 lg:gap-8 items-center py-1.5"
+            className="flex gap-3 sm:gap-4 lg:gap-6 items-center py-1"
             style={{
               animation: isPaused
                 ? 'none'
@@ -214,13 +214,13 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
                 <button
                   key={`${item.id}-${idx}`}
                   onClick={() => handleItemClick(item)}
-                  className="group relative flex flex-col sm:flex-row items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
+                  className="group relative flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
                   style={{
                     background: gradient,
                     boxShadow: `
-                      0 12px 32px ${shadowColor},
+                      0 8px 20px ${shadowColor},
                       inset 0 1px 2px rgba(255, 255, 255, 0.25),
-                      0 0 20px ${shadowColor}
+                      0 0 15px ${shadowColor}
                     `,
                     backdropFilter: 'blur(4px)',
                   }}
@@ -230,7 +230,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
                 >
                   {/* Hover glow */}
                   <div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
                       background:
                         'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%)',
@@ -240,7 +240,7 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
 
                   {/* Badge */}
                   {item.badge && (
-                    <div className="absolute -top-2 -right-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white/90 border border-white/20">
+                    <div className="absolute -top-1.5 -right-1 px-1.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] font-bold text-white/90 border border-white/20">
                       {item.badge}
                     </div>
                   )}
@@ -252,24 +252,24 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
 
                   {/* Desktop text */}
                   <div className="hidden sm:flex flex-col items-start">
-                    <span className="text-sm sm:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                    <span className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
                       {item.title}
                     </span>
                     {item.description && (
-                      <span className="text-xs text-white/70 group-hover:text-white/90 transition-colors duration-300">
+                      <span className="text-[10px] text-white/70 group-hover:text-white/90 transition-colors duration-300">
                         {item.description}
                       </span>
                     )}
                   </div>
 
                   {/* Mobile text */}
-                  <span className="text-xs sm:hidden font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                  <span className="text-[10px] sm:hidden font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
                     {item.title}
                   </span>
 
                   {/* Sparkles on hover */}
                   <Sparkles
-                    size={16}
+                    size={12}
                     className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0 text-white/80 ml-auto hidden sm:block"
                   />
                 </button>

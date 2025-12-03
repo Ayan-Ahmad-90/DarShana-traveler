@@ -3,6 +3,8 @@ import { ArrowRight, Star, ShieldCheck, CreditCard, Train, Anchor, Mountain,Home
 import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
 import HighlightSlider from '../components/HighlightSlider';
+import KathakaliAssistant from "../components/KathakaliAssistant";
+import { useLocation } from "react-router-dom";
 
 const destinations = [
   {
@@ -46,18 +48,20 @@ const services = [
 const Home: React.FC = () => {
   return (
     <div className="flex flex-col">
-      {/* Hero Section */}
-      <HeroSection />
+     
 
       {/* Highlight Slider */}
       <HighlightSlider />
 
+      {/* Hero Section */}
+      <HeroSection />
      
-
       {/* Stats Section */}
       <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-10">
         
       </section>
+
+      <KathakaliAssistant />
 
       {/* Featured Destinations */}
       <section className="py-24 max-w-7xl mx-auto px-4 w-full">
@@ -129,6 +133,7 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
 
       {/* Payment & Safety */}
       <section className="py-16 bg-gradient-to-r from-white via-slate-50 to-white border-t-2 border-slate-200">

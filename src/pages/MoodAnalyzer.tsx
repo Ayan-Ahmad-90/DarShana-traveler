@@ -1508,7 +1508,6 @@ const MoodAnalyzer: React.FC = () => {
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             Secure & Private. Analysis happens locally on your device.
           </p>
-          <p className="opacity-75">Powered by TensorFlow.js & Face-api.js • Made with ❤️ for India</p>
         </div>
       </div>
     </div>
