@@ -1,21 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import { Loader2, CameraOff } from 'lucide-react';
 
 interface MoodCameraLoaderProps {
   onStreamReady?: (stream: MediaStream) => void;
   onError?: (error: string) => void;
   className?: string;
+  children?: React.ReactNode;
 }
 
-const MoodCameraLoader: React.FC<MoodCameraLoaderProps> = ({ 
+const MoodCameraLoader = forwardRef<HTMLVideoElement, MoodCameraLoaderProps>(({ 
   onStreamReady, 
   onError,
-  className = "" 
-}) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  className = "",
+  children
+}, ref) => {
+  const internalVideoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  useImperativeHandle(ref, () => internalVideoRef.current as HTMLVideoElement);
 
   useEffect(() => {
     let mounted = true;
@@ -63,12 +67,12 @@ const MoodCameraLoader: React.FC<MoodCameraLoaderProps> = ({
 
         streamRef.current = stream;
         
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+        if (internalVideoRef.current) {
+          internalVideoRef.current.srcObject = stream;
           // Wait for video to be ready to play
-          videoRef.current.onloadedmetadata = () => {
+          internalVideoRef.current.onloadedmetadata = () => {
             if (mounted) {
-              videoRef.current?.play().catch(e => console.error("Play error:", e));
+              internalVideoRef.current?.play().catch(e => console.error("Play error:", e));
               setIsLoading(false);
               onStreamReady?.(stream);
             }
@@ -106,7 +110,7 @@ const MoodCameraLoader: React.FC<MoodCameraLoaderProps> = ({
     <div className={`relative bg-black rounded-2xl overflow-hidden aspect-video flex items-center justify-center ${className}`}>
       {/* Video Element */}
       <video 
-        ref={videoRef}
+        ref={internalVideoRef}
         autoPlay 
         playsInline 
         muted
@@ -137,8 +141,13 @@ const MoodCameraLoader: React.FC<MoodCameraLoaderProps> = ({
           </button>
         </div>
       )}
+
+      {/* Children Overlays */}
+      {!isLoading && !error && children}
     </div>
   );
-};
+});
+
+MoodCameraLoader.displayName = 'MoodCameraLoader';
 
 export default MoodCameraLoader;

@@ -1,16 +1,63 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle, Scan, Sparkles, Zap, Users, Mountain, ArrowRight, Shield } from 'lucide-react';
+import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle, Scan, Sparkles, Zap, Users, Mountain, ArrowRight, Shield, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import jsPDF from 'jspdf';
 import { useFaceDetection } from '../hooks/useFaceDetection';
 import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
 import { DESTINATIONS } from '../data/destinations';
 import ARGuide from './ARGuide';
+import MoodCameraLoader from '../components/MoodCameraLoader';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
-// Mock payment: always success after short delay
-async function makePayment(_amount: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 1500));
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+// Razorpay Payment Integration
+async function makePayment(amount: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!window.Razorpay) {
+      console.error("Razorpay SDK not loaded");
+      // Fallback for development if script fails to load
+      setTimeout(resolve, 1500);
+      return;
+    }
+
+    const options = {
+      key: "rzp_test_YOUR_KEY_HERE", // Replace with your actual Razorpay Test Key
+      amount: amount * 100, // Amount in paise
+      currency: "INR",
+      name: "DarShana Travel",
+      description: "AI Trip Booking",
+      image: "/vite.svg", // Use a valid logo path
+      handler: function (_response: any) {
+        resolve();
+      },
+      prefill: {
+        name: "Traveler",
+        email: "traveler@darshana.com",
+        contact: "9999999999"
+      },
+      theme: {
+        color: "#ea580c" // Orange-600
+      },
+      modal: {
+        ondismiss: function() {
+          reject(new Error("Payment cancelled by user"));
+        }
+      }
+    };
+
+    try {
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+    } catch (error) {
+      console.error("Razorpay initialization failed:", error);
+      reject(error);
+    }
+  });
 }
 
 const STEPS = [
@@ -103,15 +150,15 @@ function generateFAQ(destination: Destination, moodResponse: MoodAnalyzeResponse
 
   return [
     {
-      question: "AI ne ye jagah kyun choose ki? (Why AI chose this place?)",
+      question: "Why AI chose this place?",
       answer: `Based on your mood analysis with ${moodResponse.energyLevel} energy level and ${moodResponse.adventureScore} adventure score, ${destination.title} is perfect because it offers ${matchedTags || destination.tags.join(", ")}. Your emotional state matches this destination's vibe perfectly!`,
     },
     {
-      question: "Yaha jaa kar kaisa experience milega? (What experience will I get?)",
+      question: "What experience will I get?",
       answer: `${destination.title} offers incredible experiences in ${destination.tags.slice(0, 2).join(" and ")}. Whether you're looking for adventure, relaxation, or cultural immersion, this place delivers. Best time to visit: ${destination.bestTime || "Year-round"}`,
     },
     {
-      question: "Agar mujhe different type ki jagah chahiye? (Want a different place?)",
+      question: "Want a different place?",
       answer: `No problem! Try another expression or use Manual Mode for complete control over destination selection. Each mood change gives you fresh recommendations!`,
     },
   ];
@@ -163,210 +210,26 @@ const MoodAnalyzer: React.FC = () => {
 
   // Handlers for AI flow
   const stopCamera = useCallback(() => {
-    console.log('🛑 Stopping camera...');
-    
-    // Stop all media tracks
-    const mediaStream = cameraStreamRef.current;
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => {
-        track.stop();
-        console.log('⏹️ Stopped track:', track.kind);
-      });
-      cameraStreamRef.current = null;
-    }
-    
-    // Clear video element
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-      videoRef.current.load(); // Reset video element
-    }
-    
     setIsCameraOpen(false);
-    console.log('✅ Camera stopped and cleaned up');
+    setFaceCount(null);
+    setCountdown(null);
+    cameraStreamRef.current = null;
   }, []);
 
-  const initCamera = useCallback(async () => {
-    console.log('🎥 Initializing camera...');
+  const handleStreamReady = useCallback((stream: MediaStream) => {
+    cameraStreamRef.current = stream;
     setDetectionError(null);
+  }, []);
 
-    // Guard: ensure videoRef.current exists
-    const videoElement = videoRef.current;
-    if (!videoElement) {
-      console.error('❌ Video element ref is null - cannot initialize camera');
-      setDetectionError('Camera preview element not ready. Please try again.');
-      setIsCameraOpen(false);
-      return;
-    }
-
-    // Browser support check
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      console.error('❌ Browser does not support getUserMedia');
-      setDetectionError('Your browser does not support camera access. Please use Chrome, Firefox, Edge, or Safari.');
-      setIsCameraOpen(false);
-      return;
-    }
-
-    // Secure context check
-    const isSecureContext = window.isSecureContext || 
-                           window.location.protocol === 'https:' || 
-                           window.location.hostname === 'localhost' || 
-                           window.location.hostname === '127.0.0.1';
-    
-    if (!isSecureContext) {
-      console.error('❌ Not running on secure context');
-      setDetectionError(`Camera requires HTTPS or localhost. Current: ${window.location.protocol}//${window.location.host}`);
-      setIsCameraOpen(false);
-      return;
-    }
-
-    try {
-      console.log('📹 Requesting camera permission...');
-      
-      // Request camera stream
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          width: { ideal: 640, max: 1280 }, 
-          height: { ideal: 480, max: 720 }, 
-          facingMode: 'user' 
-        },
-        audio: false,
-      });
-      
-      console.log('✅ Camera permission granted!');
-      console.log('📊 Stream active:', stream.active, 'Tracks:', stream.getTracks().length);
-
-      // Attach stream to video element
-      videoElement.srcObject = stream;
-      cameraStreamRef.current = stream;
-
-      // Wait for video metadata to load
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('Camera metadata loading timeout'));
-        }, 5000);
-
-        const onLoadedMetadata = () => {
-          console.log('✅ Video metadata loaded');
-          clearTimeout(timeout);
-          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
-          videoElement.removeEventListener('error', onError);
-          resolve();
-        };
-
-        const onError = (e: Event) => {
-          console.error('❌ Video error:', e);
-          clearTimeout(timeout);
-          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
-          videoElement.removeEventListener('error', onError);
-          reject(new Error('Failed to load camera preview'));
-        };
-
-        videoElement.addEventListener('loadedmetadata', onLoadedMetadata);
-        videoElement.addEventListener('error', onError);
-
-        // If already loaded, resolve immediately
-        if (videoElement.readyState >= 1) {
-          console.log('✅ Video already has metadata');
-          clearTimeout(timeout);
-          videoElement.removeEventListener('loadedmetadata', onLoadedMetadata);
-          videoElement.removeEventListener('error', onError);
-          resolve();
-        }
-      });
-
-      // Start playback
-      console.log('▶️ Starting video playback...');
-      await videoElement.play();
-      
-      console.log('✅ Camera active:', {
-        videoWidth: videoElement.videoWidth,
-        videoHeight: videoElement.videoHeight,
-        readyState: videoElement.readyState
-      });
-
-    } catch (err) {
-      console.error('❌ Camera initialization error:', err);
-      
-      // Clean up on error
-      if (cameraStreamRef.current) {
-        cameraStreamRef.current.getTracks().forEach(track => track.stop());
-        cameraStreamRef.current = null;
-      }
-      
-      let errorMsg = 'Unable to access camera';
-      let showAlert = false;
-      
-      if (err instanceof DOMException) {
-        switch (err.name) {
-          case 'NotAllowedError':
-          case 'PermissionDeniedError':
-            errorMsg = '🚫 Camera permission denied.\n\nPlease allow camera access in your browser settings and try again.';
-            showAlert = true;
-            break;
-          case 'NotFoundError':
-          case 'DevicesNotFoundError':
-            errorMsg = '📷 No camera device found.\n\nPlease connect a camera and try again.';
-            break;
-          case 'NotReadableError':
-          case 'TrackStartError':
-            errorMsg = '⚠️ Camera is in use by another application.\n\nClose other apps (Zoom, Teams, etc.) and try again.';
-            break;
-          case 'OverconstrainedError':
-            errorMsg = '⚙️ Camera settings incompatible.\n\nYour camera doesn\'t support the required resolution.';
-            break;
-          case 'SecurityError':
-            errorMsg = '🔒 Camera blocked by browser security.\n\nCheck your browser permissions.';
-            break;
-          default:
-            errorMsg = `Camera error: ${err.message}`;
-        }
-      } else if (err instanceof Error) {
-        errorMsg = err.message;
-      }
-      
-      setDetectionError(errorMsg);
-      setIsCameraOpen(false);
-      
-      if (showAlert) {
-        alert('⚠️ Camera Access Required\n\n' + errorMsg);
-      }
-    }
+  const handleCameraError = useCallback((error: string) => {
+    setDetectionError(error);
+    setIsCameraOpen(false);
   }, []);
 
   const startCamera = useCallback(() => {
-    console.log('🎬 Opening camera interface...');
-    setDetectionError(null);
-    
-    // Pre-flight checks
-    if (!navigator.mediaDevices?.getUserMedia) {
-      const msg = '❌ Your browser does not support camera access.\n\nPlease use Chrome, Firefox, Edge, or Safari.';
-      setDetectionError(msg);
-      alert(msg);
-      return;
-    }
-    
-    const isSecure = window.isSecureContext || 
-                     window.location.protocol === 'https:' || 
-                     ['localhost', '127.0.0.1'].includes(window.location.hostname);
-    
-    if (!isSecure) {
-      const msg = `⚠️ Camera requires HTTPS or localhost.\n\nCurrent: ${window.location.protocol}//${window.location.host}`;
-      setDetectionError(msg);
-      alert(msg);
-      return;
-    }
-    
-    console.log('✅ Pre-flight checks passed');
     setIsCameraOpen(true);
+    setDetectionError(null);
   }, []);
-
-  // Initialize camera when video element becomes available
-  useEffect(() => {
-    if (isCameraOpen && videoRef.current && !cameraStreamRef.current) {
-      console.log('📍 Video element available, initializing camera...');
-      initCamera();
-    }
-  }, [isCameraOpen, initCamera]);
 
   const capturePhoto = useCallback(() => {
     if (videoRef.current) {
@@ -382,13 +245,13 @@ const MoodAnalyzer: React.FC = () => {
 
   // Detect faces from video stream when camera is active
   useEffect(() => {
-    if (!isCameraOpen || !cameraStreamRef.current || !faceDetection.modelsLoaded) {
+    if (!isCameraOpen || !faceDetection.modelsLoaded) {
       return;
     }
 
     console.log('👁️ Starting face detection from video stream...');
     const intervalId = setInterval(async () => {
-      if (videoRef.current && !isDetectingRef.current) {
+      if (videoRef.current && !isDetectingRef.current && !videoRef.current.paused && !videoRef.current.ended) {
         isDetectingRef.current = true;
         try {
           const count = await faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
@@ -409,11 +272,13 @@ const MoodAnalyzer: React.FC = () => {
             faceDetectionStartTimeRef.current = null;
             setCountdown(null);
           }
+        } catch (e) {
+           console.error("Face detection error", e);
         } finally {
           isDetectingRef.current = false;
         }
       }
-    }, 100); // Fast scan: Check every 100ms, but prevent overlap
+    }, 200); // Slightly slower scan to reduce load
 
     return () => {
       console.log('🛑 Stopping face detection interval');
@@ -621,8 +486,12 @@ const MoodAnalyzer: React.FC = () => {
   }, [image, isAutoAnalyzing, loading]);
 
   async function payAI() {
+    if (!result || selectedDestinationIdx === null) return;
+
     setIsPayingAI(true);
-    const amount = 6500;
+    const dest = result.recommendations[selectedDestinationIdx];
+    const amount = (dest.pricePerDay || 2500) * 3; // Base price for 3 days
+
     try {
       await makePayment(amount);
       setIsPayingAI(false);
@@ -637,7 +506,7 @@ const MoodAnalyzer: React.FC = () => {
     if (!result) return;
     const dest = result.recommendations[selectedDestinationIdx ?? 0];
     const doc = new jsPDF();
-    const amount = 6500;
+    const amount = (dest.pricePerDay || 2500) * 3;
     doc.setFontSize(16);
     doc.text(`✈️ DarShana AI Trip Ticket`, 10, 20);
     doc.setFontSize(12);
@@ -851,9 +720,12 @@ const MoodAnalyzer: React.FC = () => {
                     )}
 
                     {isCameraOpen && (
-                      <div className="relative h-96 bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-orange-100">
-                        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1]" />
-                        
+                      <MoodCameraLoader
+                        ref={videoRef}
+                        onStreamReady={handleStreamReady}
+                        onError={handleCameraError}
+                        className="h-96 shadow-2xl ring-4 ring-orange-100"
+                      >
                         {/* Scanning Animation */}
                         <motion.div 
                           animate={{ top: ['0%', '100%', '0%'] }}
@@ -861,49 +733,39 @@ const MoodAnalyzer: React.FC = () => {
                           className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-70 z-10"
                         />
                         
-                        {!cameraStreamRef.current && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white backdrop-blur-sm z-20">
-                            <Loader2 className="w-12 h-12 animate-spin mb-4 text-orange-500" />
-                            <p className="font-medium">Initializing camera...</p>
+                        {/* Face Count & Controls */}
+                        {faceCount !== null && (
+                          <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20 flex items-center gap-2 z-20">
+                            <Users size={16} className="text-orange-400" />
+                            {faceCount === 0 ? 'No faces' : `${faceCount} face${faceCount > 1 ? 's' : ''} detected`}
+                          </div>
+                        )}
+
+                        {countdown !== null && countdown > 0 && (
+                          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center">
+                            <div className="text-9xl font-bold text-white drop-shadow-2xl animate-pulse">
+                              {countdown}
+                            </div>
+                            <div className="text-white text-xl font-semibold mt-4 text-center drop-shadow-md bg-black/30 px-4 py-1 rounded-full backdrop-blur-sm">
+                              Auto-analyzing...
+                            </div>
                           </div>
                         )}
                         
-                        {cameraStreamRef.current && (
-                          <>
-                            {faceCount !== null && (
-                              <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20 flex items-center gap-2">
-                                <Users size={16} className="text-orange-400" />
-                                {faceCount === 0 ? 'No faces' : `${faceCount} face${faceCount > 1 ? 's' : ''} detected`}
-                              </div>
-                            )}
-
-                            {countdown !== null && countdown > 0 && (
-                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center">
-                                <div className="text-9xl font-bold text-white drop-shadow-2xl animate-pulse">
-                                  {countdown}
-                                </div>
-                                <div className="text-white text-xl font-semibold mt-4 text-center drop-shadow-md bg-black/30 px-4 py-1 rounded-full backdrop-blur-sm">
-                                  Auto-analyzing...
-                                </div>
-                              </div>
-                            )}
-                            
-                            <button 
-                              onClick={capturePhoto}
-                              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-200 border-4 border-orange-500"
-                            >
-                              <div className="w-16 h-16 bg-orange-500 rounded-full border-4 border-white"></div>
-                            </button>
-                            
-                            <button 
-                              onClick={stopCamera}
-                              className="absolute top-6 right-6 bg-black/50 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500/80 transition-colors border border-white/20"
-                            >
-                              <Scan size={20} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                        <button 
+                          onClick={capturePhoto}
+                          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-200 border-4 border-orange-500 z-20"
+                        >
+                          <div className="w-16 h-16 bg-orange-500 rounded-full border-4 border-white"></div>
+                        </button>
+                        
+                        <button 
+                          onClick={stopCamera}
+                          className="absolute top-6 right-6 bg-black/50 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500/80 transition-colors border border-white/20 z-20"
+                        >
+                          <Scan size={20} />
+                        </button>
+                      </MoodCameraLoader>
                     )}
 
                     {image && (
@@ -1028,74 +890,89 @@ const MoodAnalyzer: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* FAQ Section */}
+                    {/* Destination Details & FAQ Section */}
                     {selectedDestinationIdx !== null && (
-                      <motion.div 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="bg-blue-50/50 border border-blue-100 rounded-3xl p-8 mb-10"
-                      >
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                            <Sparkles size={24} />
-                          </div>
-                          <h4 className="font-bold text-xl text-blue-900">AI Reasoning & Insights</h4>
-                        </div>
-                        
-                        {(() => {
-                          const faqs = generateFAQ(result.recommendations[selectedDestinationIdx], {
-                            detectedMood: result.detectedMood,
-                            confidence: result.confidence,
-                            emotions: result.emotions,
-                            energyLevel: result.energyLevel,
-                            socialScore: result.socialScore,
-                            adventureScore: result.adventureScore,
-                            reasoning: result.reasoning,
-                            recommendedKeys: [],
-                          } as any);
-
-                          return (
-                            <div className="space-y-4">
-                              {faqs.map((faq, idx) => (
-                                <motion.div 
-                                  key={idx}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: idx * 0.1 }}
-                                >
-                                  <button
-                                    onClick={() => setSelectedFAQIndex(selectedFAQIndex === idx ? -1 : idx)}
-                                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
-                                      selectedFAQIndex === idx 
-                                        ? 'bg-white shadow-md border-l-4 border-blue-500' 
-                                        : 'bg-white/50 hover:bg-white hover:shadow-sm'
-                                    }`}
-                                  >
-                                    <div className="font-semibold text-gray-800 flex items-center justify-between">
-                                      <span>{faq.question}</span>
-                                      <ArrowRight size={16} className={`transform transition-transform ${selectedFAQIndex === idx ? 'rotate-90 text-blue-500' : 'text-gray-400'}`} />
-                                    </div>
-                                    <AnimatePresence>
-                                      {selectedFAQIndex === idx && (
-                                        <motion.div 
-                                          initial={{ height: 0, opacity: 0 }}
-                                          animate={{ height: 'auto', opacity: 1 }}
-                                          exit={{ height: 0, opacity: 0 }}
-                                          className="overflow-hidden"
-                                        >
-                                          <div className="pt-3 text-gray-600 text-sm leading-relaxed border-t border-gray-100 mt-3">
-                                            {faq.answer}
-                                          </div>
-                                        </motion.div>
-                                      )}
-                                    </AnimatePresence>
-                                  </button>
-                                </motion.div>
-                              ))}
+                      <div className="space-y-8 mb-10">
+                        {/* Detailed View Card */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
+                        >
+                          <div className="relative h-64 md:h-80">
+                            <img 
+                              src={result.recommendations[selectedDestinationIdx].img} 
+                              alt={result.recommendations[selectedDestinationIdx].title} 
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8">
+                              <div className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full w-fit mb-2">
+                                {result.recommendations[selectedDestinationIdx].label}
+                              </div>
+                              <h2 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                                {result.recommendations[selectedDestinationIdx].title}
+                              </h2>
+                              <p className="text-white/90 text-lg flex items-center gap-2">
+                                <MapPin size={18} /> {result.recommendations[selectedDestinationIdx].state}
+                              </p>
                             </div>
-                          );
-                        })()}
-                      </motion.div>
+                          </div>
+                          
+                          <div className="p-8">
+                            <div className="flex flex-wrap gap-4 mb-6">
+                              <div className="bg-orange-50 px-4 py-3 rounded-xl flex-1 min-w-[140px]">
+                                <div className="text-orange-500 text-xs font-bold uppercase mb-1">Best Time</div>
+                                <div className="font-semibold text-gray-800">{result.recommendations[selectedDestinationIdx].bestTime || "Year-round"}</div>
+                              </div>
+                              <div className="bg-blue-50 px-4 py-3 rounded-xl flex-1 min-w-[140px]">
+                                <div className="text-blue-500 text-xs font-bold uppercase mb-1">Price Per Day</div>
+                                <div className="font-semibold text-gray-800">₹{result.recommendations[selectedDestinationIdx].pricePerDay || 2500}</div>
+                              </div>
+                              <div className="bg-green-50 px-4 py-3 rounded-xl flex-1 min-w-[140px]">
+                                <div className="text-green-500 text-xs font-bold uppercase mb-1">Match Score</div>
+                                <div className="font-semibold text-gray-800">{(result.confidence * 100).toFixed(0)}%</div>
+                              </div>
+                            </div>
+
+                            <p className="text-gray-600 text-lg leading-relaxed mb-8">
+                              {result.recommendations[selectedDestinationIdx].description}
+                            </p>
+
+                            <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-6">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                                  <Sparkles size={20} />
+                                </div>
+                                <h4 className="font-bold text-lg text-blue-900">AI Insights</h4>
+                              </div>
+                              
+                              {(() => {
+                                const faqs = generateFAQ(result.recommendations[selectedDestinationIdx], {
+                                  detectedMood: result.detectedMood,
+                                  confidence: result.confidence,
+                                  emotions: result.emotions,
+                                  energyLevel: result.energyLevel,
+                                  socialScore: result.socialScore,
+                                  adventureScore: result.adventureScore,
+                                  reasoning: result.reasoning,
+                                  recommendedKeys: [],
+                                } as any);
+
+                                return (
+                                  <div className="space-y-3">
+                                    {faqs.map((faq, idx) => (
+                                      <div key={idx} className="bg-white/60 rounded-xl p-4 hover:bg-white transition-colors">
+                                        <div className="font-semibold text-gray-800 mb-2 text-sm">{faq.question}</div>
+                                        <div className="text-gray-600 text-sm leading-relaxed">{faq.answer}</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        </motion.div>
+                      </div>
                     )}
 
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -1123,7 +1000,7 @@ const MoodAnalyzer: React.FC = () => {
                           </>
                         ) : (
                           <>
-                            Book Now • ₹6,500 <ArrowRight size={20} />
+                            Book Now • ₹{selectedDestinationIdx !== null ? ((result.recommendations[selectedDestinationIdx].pricePerDay || 2500) * 3).toLocaleString() : '0'} <ArrowRight size={20} />
                           </>
                         )}
                       </button>

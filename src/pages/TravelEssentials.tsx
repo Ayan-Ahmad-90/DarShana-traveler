@@ -1,5 +1,6 @@
 import { Award, ChevronRight, Clock, DollarSign, Filter, MapPin, MapPinned, Search, Star, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import TransportTabs from '../components/TransportTabs';
 
 // TypeScript Interfaces
 interface Transport {
@@ -417,6 +418,7 @@ const TravelEssentials: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'transport' | 'stay' | 'food'>('food');
   const [selectedCity, setSelectedCity] = useState('');
   const [filteredFood, setFilteredFood] = useState<LocalFood[]>(localFoodDatabase);
+  const [selectedTransportMode, setSelectedTransportMode] = useState('flights');
 
   const cities = [...new Set(localFoodDatabase.map(f => f.city))].sort();
 
@@ -503,11 +505,15 @@ const TravelEssentials: React.FC = () => {
         {/* Transport Tab */}
         {activeTab === 'transport' && (
           <div>
+            <TransportTabs 
+              selectedTransport={selectedTransportMode} 
+              onSelectTransport={setSelectedTransportMode} 
+            />
             <UnifiedSearchBar
               placeholder="Search from, to, or transport type..."
               onSearch={handleSearch}
             />
-            <div className="space-y-5">
+            <div className="space-y-5 mt-8">
               {sampleTransport.map(transport => (
                 <TransportCard key={transport.id} transport={transport} onBook={handleBook} />
               ))}

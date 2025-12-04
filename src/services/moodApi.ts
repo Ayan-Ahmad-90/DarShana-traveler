@@ -101,7 +101,7 @@ function getFallbackMoodAnalysis(): MoodAnalyzeResponse {
     energyLevel: randomMood.energy,
     socialScore: randomMood.social,
     adventureScore: randomMood.adventure,
-    reasoning: `(Offline Mode) AI Analysis: Detected facial expressions matching '${randomMood.name}'. Recommended for ${randomMood.keys.join(', ')} experiences.`,
+    reasoning: `Detected facial expressions matching '${randomMood.name}'. Recommended for ${randomMood.keys.join(', ')} experiences.`,
     recommendedKeys: randomMood.keys
   };
 }

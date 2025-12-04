@@ -24,7 +24,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "ladakh",
     title: "Ladakh, J&K",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3woq6h8Tm",
     label: "Adventure",
     tags: ["Trekking", "Motorcycle Tours", "Camping"],
     mood: [2, 4],
@@ -39,7 +39,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "rishikesh",
     title: "Rishikesh, Uttarakhand",
-    img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/1IDhaQ710",
     label: "Spiritual",
     tags: ["Yoga", "River Rafting", "Temple Visits"],
     mood: [1, 5],
@@ -54,7 +54,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "goa",
     title: "Goa Beaches",
-    img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7tjp3lCRU",
     label: "Relaxation",
     tags: ["Beach", "Water Sports", "Nightlife"],
     mood: [0, 6],
@@ -69,7 +69,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "varanasi",
     title: "Varanasi, UP",
-    img: "https://images.unsplash.com/photo-1517154421773-6b0b64e2b1c1?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6eTALXowH",
     label: "Culture",
     tags: ["Ganga Aarti", "Temples", "Ghats"],
     mood: [1, 4],
@@ -84,7 +84,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "jaipur",
     title: "Jaipur, Rajasthan",
-    img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7CER9yfR1",
     label: "Heritage",
     tags: ["Palaces", "Forts", "Food"],
     mood: [0, 2],
@@ -99,7 +99,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kerala",
     title: "Kerala Backwaters",
-    img: "https://images.unsplash.com/photo-1469022563428-4c0ae6a8f0c5?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/2ILHcCJk5",
     label: "Nature",
     tags: ["Houseboat", "Ayurveda", "Lakes"],
     mood: [1, 4],
@@ -114,7 +114,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mumbai",
     title: "Mumbai",
-    img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/37ziqQlrw",
     label: "Urban Life",
     tags: ["Nightlife", "Bollywood", "Street Food"],
     mood: [0, 6],
@@ -129,7 +129,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kolkata",
     title: "Kolkata",
-    img: "https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/I3A9Nkx8b",
     label: "Culture",
     tags: ["Festivals", "Colonial Heritage", "Food"],
     mood: [5, 6],
@@ -144,7 +144,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "agra",
     title: "Agra, Taj Mahal",
-    img: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3hfZ3W0pT",
     label: "Monument",
     tags: ["Architecture", "History", "UNESCO World Heritage"],
     mood: [2, 4],
@@ -159,7 +159,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "shimla",
     title: "Shimla, Himachal",
-    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3P8CWwXUw",
     label: "Hill Station",
     tags: ["Snow", "Toy Train", "Mall Road"],
     mood: [0, 4],
@@ -174,7 +174,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "manali",
     title: "Manali, Himachal",
-    img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/4kgApWjxS",
     label: "Adventure",
     tags: ["Paragliding", "Snow", "Hiking"],
     mood: [2, 4],
@@ -189,7 +189,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "darjeeling",
     title: "Darjeeling, West Bengal",
-    img: "https://images.unsplash.com/photo-1519961644764-5c3457c11ecc?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/52ftiWVLl",
     label: "Tea Gardens",
     tags: ["Toy Train", "Mountain Views", "Tea Estate"],
     mood: [1, 4],
@@ -204,7 +204,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "ooty",
     title: "Ooty, Tamil Nadu",
-    img: "https://images.unsplash.com/photo-1509006282699-9b13d1f8b1fd?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/19k661Qzs",
     label: "Nature",
     tags: ["Botanical Gardens", "Mountain Train", "Lakes"],
     mood: [1, 3],
@@ -219,7 +219,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "hampi",
     title: "Hampi, Karnataka",
-    img: "https://images.unsplash.com/photo-1528731708534-816fe59f90b7?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/PQPJ08Y9V",
     label: "Heritage",
     tags: ["Ancient Temples", "Ruins", "UNESCO Site"],
     mood: [4, 5],
@@ -234,7 +234,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "andaman",
     title: "Andaman Islands",
-    img: "https://images.unsplash.com/photo-1444065381814-865dc9da92c0?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6knWrblS8",
     label: "Beach",
     tags: ["Scuba Diving", "Snorkeling", "Islands"],
     mood: [0, 5],
@@ -249,7 +249,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "leh",
     title: "Leh, Ladakh",
-    img: "https://images.unsplash.com/photo-1495433324511-bf8e92934d90?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3dFZc1cwb",
     label: "Mountains",
     tags: ["Monasteries", "Adventure", "Pangong Lake"],
     mood: [2, 4],
@@ -264,7 +264,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "sikkim",
     title: "Sikkim",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5LFPZFVV2",
     label: "Nature",
     tags: ["Monasteries", "Lakes", "Himalayan Views"],
     mood: [1, 4],
@@ -279,7 +279,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "pushkar",
     title: "Pushkar, Rajasthan",
-    img: "https://images.unsplash.com/photo-1526401485004-3e7b5c7a2c1e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5HF0eWQQP",
     label: "Festival",
     tags: ["Camel Fair", "Sacred Lake", "Temples"],
     mood: [3, 5],
@@ -294,7 +294,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "udaipur",
     title: "Udaipur, Rajasthan",
-    img: "https://images.unsplash.com/photo-1465101178521-df5cfbed3b09?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5QRAvIpOv",
     label: "Romantic",
     tags: ["Lakes", "Palaces", "Culture"],
     mood: [0, 5],
@@ -309,7 +309,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mysore",
     title: "Mysore, Karnataka",
-    img: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6clwgnUVX",
     label: "Culture",
     tags: ["Palace", "Dasara Festival", "Zoo"],
     mood: [1, 6],
@@ -324,7 +324,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "puducherry",
     title: "Puducherry",
-    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3uHsUfXDc",
     label: "Beach",
     tags: ["French Town", "Beaches", "Auroville"],
     mood: [0, 5],
@@ -339,7 +339,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mahabaleshwar",
     title: "Mahabaleshwar, Maharashtra",
-    img: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6dLW33ehT",
     label: "Nature",
     tags: ["Strawberry Farms", "Sunrise Views", "Forest"],
     mood: [1, 5],
@@ -354,7 +354,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "dharamsala",
     title: "Dharamsala, Himachal",
-    img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/33I8JzwlR",
     label: "Spiritual",
     tags: ["Monasteries", "Trekking", "Tea Gardens"],
     mood: [1, 4],
@@ -369,7 +369,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "haridwar",
     title: "Haridwar, Uttarakhand",
-    img: "https://images.unsplash.com/photo-1433878455169-4698b20b6be9?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7fHrZzik6",
     label: "Spiritual",
     tags: ["Ganga Aarti", "Temples", "Kumbh Mela"],
     mood: [4, 5],
@@ -384,7 +384,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "jaisalmer",
     title: "Jaisalmer, Rajasthan",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7j9XacxlS",
     label: "Desert",
     tags: ["Camel Safari", "Forts", "Sand Dunes"],
     mood: [2, 4],
@@ -399,7 +399,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "khajuraho",
     title: "Khajuraho, MP",
-    img: "https://images.unsplash.com/photo-1528731708534-816fe59f90b7?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3h9d6BU9n",
     label: "Heritage",
     tags: ["Temples", "Sculpture Art", "UNESCO Site"],
     mood: [3, 5],
@@ -414,7 +414,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "coorg",
     title: "Coorg, Karnataka",
-    img: "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3gJBzixfk",
     label: "Nature",
     tags: ["Coffee Farms", "Hills", "River Rafting"],
     mood: [1, 4],
@@ -429,7 +429,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kanchenjunga",
     title: "Kanchenjunga National Park, Sikkim",
-    img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/2pZFPNhi7",
     label: "Wildlife",
     tags: ["Himalayan Views", "Trekking", "Nature Trails"],
     mood: [2, 4],
@@ -444,7 +444,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "sundarbans",
     title: "Sundarbans, West Bengal",
-    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6UIVlfU8n",
     label: "Wildlife",
     tags: ["Mangroves", "Tiger Reserve", "Boat Safari"],
     mood: [2, 4],
@@ -459,7 +459,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "auli",
     title: "Auli, Uttarakhand",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3IctDsQPN",
     label: "Snow",
     tags: ["Skiing", "Mountains", "Nature"],
     mood: [2, 4],
@@ -474,7 +474,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kutch",
     title: "Kutch, Gujarat",
-    img: "https://images.unsplash.com/photo-1526401485004-3e7b5c7a2c1e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/4z4izmlSA",
     label: "Festival",
     tags: ["Rann Utsav", "White Desert", "Culture"],
     mood: [3, 5],
@@ -489,7 +489,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "amritsar",
     title: "Amritsar, Punjab",
-    img: "https://images.unsplash.com/photo-1465101178521-df5cfbed3b09?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/313RWW92q",
     label: "Spiritual",
     tags: ["Golden Temple", "Wagah Border", "Punjabi Food"],
     mood: [4, 5],
@@ -504,7 +504,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "bodh-gaya",
     title: "Bodh Gaya, Bihar",
-    img: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6IYhJN5i7",
     label: "Spiritual",
     tags: ["Buddhist Temple", "Meditation", "Heritage"],
     mood: [4, 5],
@@ -519,7 +519,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "tawang",
     title: "Tawang, Arunachal Pradesh",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7vI9sMUM2",
     label: "Mountains",
     tags: ["Monasteries", "Himalayan Views", "Culture"],
     mood: [2, 4],
@@ -534,7 +534,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "munnar",
     title: "Munnar, Kerala",
-    img: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5BzKZlpyj",
     label: "Nature",
     tags: ["Tea Gardens", "Hiking", "Waterfalls"],
     mood: [1, 4],
@@ -549,7 +549,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "gangtok",
     title: "Gangtok, Sikkim",
-    img: "https://images.unsplash.com/photo-1519961644764-5c3457c11ecc?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/539jRIRGN",
     label: "Mountains",
     tags: ["Culture", "Monuments", "Nature"],
     mood: [0, 4],
@@ -564,7 +564,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "puri",
     title: "Puri, Odisha",
-    img: "https://images.unsplash.com/photo-1528731708534-816fe59f90b7?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/2HDWUQlfs",
     label: "Festival",
     tags: ["Jagannath Temple", "Beach", "Culture"],
     mood: [3, 5],
@@ -579,7 +579,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "ranthambore",
     title: "Ranthambore National Park",
-    img: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/1E20b68Rj",
     label: "Wildlife",
     tags: ["Tiger Safari", "Jungle", "Nature"],
     mood: [2, 4],
@@ -594,7 +594,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kaziranga",
     title: "Kaziranga National Park",
-    img: "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5LNmJtSOT",
     label: "Wildlife",
     tags: ["Rhino Safari", "Bird Watching", "Nature"],
     mood: [2, 3],
@@ -609,7 +609,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mount-abu",
     title: "Mount Abu, Rajasthan",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6WdtnfI8W",
     label: "Hill Station",
     tags: ["Boating", "Dilwara Temples", "Viewpoint"],
     mood: [1, 4],
@@ -624,7 +624,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "jodhpur",
     title: "Jodhpur, Rajasthan",
-    img: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/4XFNT0R2i",
     label: "Heritage",
     tags: ["Blue City", "Forts", "Palaces"],
     mood: [2, 5],
@@ -639,7 +639,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "chennai",
     title: "Chennai, Tamil Nadu",
-    img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/62drxiuHs",
     label: "Urban",
     tags: ["Beach", "Culture", "Temples"],
     mood: [0, 5],
@@ -654,7 +654,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "hyderabad",
     title: "Hyderabad, Telangana",
-    img: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7GsfZuAbU",
     label: "Culture",
     tags: ["Birla Mandir", "Charminar", "Cuisine"],
     mood: [1, 6],
@@ -669,7 +669,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "kodaikanal",
     title: "Kodaikanal, Tamil Nadu",
-    img: "https://images.unsplash.com/photo-1509006282699-9b13d1f8b1fd?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/2ykDQJFqJ",
     label: "Nature",
     tags: ["Lake", "Forest", "Hiking"],
     mood: [2, 3],
@@ -684,7 +684,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "alleppey",
     title: "Alleppey, Kerala",
-    img: "https://images.unsplash.com/photo-1465101178521-df5cfbed3b09?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/5racSe4iH",
     label: "Backwaters",
     tags: ["Houseboat", "Canals", "Ayurveda"],
     mood: [1, 5],
@@ -699,7 +699,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "spiti-valley",
     title: "Spiti Valley, Himachal",
-    img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/7BjPUaRQg",
     label: "Adventure",
     tags: ["Road Trip", "Buddhist Monasteries", "Lakes"],
     mood: [2, 4],
@@ -714,7 +714,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "tirupati",
     title: "Tirupati, Andhra Pradesh",
-    img: "https://images.unsplash.com/photo-1528731708534-816fe59f90b7?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/10IWIhapE",
     label: "Spiritual",
     tags: ["Balaji Temple", "Religious", "Heritage"],
     mood: [4, 5],
@@ -729,7 +729,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "matheran",
     title: "Matheran, Maharashtra",
-    img: "https://images.unsplash.com/photo-1469022563428-4c0ae6a8f0c5?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/3KHIP7zAB",
     label: "Nature",
     tags: ["Forest", "Hiking", "Toy Train"],
     mood: [1, 5],
@@ -744,7 +744,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "lakshadweep",
     title: "Lakshadweep Islands",
-    img: "https://images.unsplash.com/photo-1444065381814-865dc9da92c0?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/6B9R0Qpv4",
     label: "Beach",
     tags: ["Snorkeling", "Scuba Diving", "Islands"],
     mood: [0, 5],
@@ -759,7 +759,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "rameswaram",
     title: "Rameswaram, Tamil Nadu",
-    img: "https://images.unsplash.com/photo-1509006282699-9b13d1f8b1fd?auto=format&fit=crop&w=400&q=80",
+    img: "https://pin.it/47RBOKgpN",
     label: "Spiritual",
     tags: ["Temple", "Beach", "Heritage"],
     mood: [4, 5],
