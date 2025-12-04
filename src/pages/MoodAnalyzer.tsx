@@ -132,6 +132,7 @@ const MoodAnalyzer: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const imagePreviewRef = useRef<HTMLImageElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const isDetectingRef = useRef(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [aiStep, setAIStep] = useState<number>(0); // 0: input, 1: recommendations shown
   const [isPayingAI, setIsPayingAI] = useState(false);
@@ -371,11 +372,16 @@ const MoodAnalyzer: React.FC = () => {
     }
 
     console.log('👁️ Starting face detection from video stream...');
-    const intervalId = setInterval(() => {
-      if (videoRef.current) {
-        faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+    const intervalId = setInterval(async () => {
+      if (videoRef.current && !isDetectingRef.current) {
+        isDetectingRef.current = true;
+        try {
+          await faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+        } finally {
+          isDetectingRef.current = false;
+        }
       }
-    }, 1000); // Detect every second
+    }, 100); // Fast scan: Check every 100ms, but prevent overlap
 
     return () => {
       console.log('🛑 Stopping face detection interval');
@@ -823,7 +829,7 @@ const MoodAnalyzer: React.FC = () => {
                         />
                         
                         {!cameraStreamRef.current && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white backdrop-blur-sm">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white backdrop-blur-sm z-20">
                             <Loader2 className="w-12 h-12 animate-spin mb-4 text-orange-500" />
                             <p className="font-medium">Initializing camera...</p>
                           </div>
@@ -906,9 +912,10 @@ const MoodAnalyzer: React.FC = () => {
                       <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-orange-200 rounded-full opacity-20 blur-2xl"></div>
                       <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                         <div className="text-6xl bg-white p-6 rounded-full shadow-lg">
-                          {result.detectedMood === 'Happy' ? '😊' : 
-                           result.detectedMood === 'Sad' ? '😢' : 
-                           result.detectedMood === 'Surprised' ? '😮' : '😐'}
+                          {result.detectedMood.includes('Happy') ? '😊' : 
+                           result.detectedMood.includes('Sad') ? '😢' : 
+                           result.detectedMood.includes('Surprised') ? '😮' : 
+                           result.detectedMood.includes('Calm') ? '😌' : '😐'}
                         </div>
                         <div className="flex-1 text-center md:text-left">
                           <h3 className="font-bold text-orange-900 text-3xl mb-2 font-serif">
@@ -968,6 +975,9 @@ const MoodAnalyzer: React.FC = () => {
                                   </span>
                                 ))}
                               </div>
+                              <div className="mt-4 w-full py-2 bg-orange-50 text-orange-600 rounded-lg text-center font-semibold text-sm group-hover:bg-orange-100 transition-colors">
+                                View Details
+                              </div>
                             </div>
                           </motion.button>
                         ))}
@@ -985,7 +995,7 @@ const MoodAnalyzer: React.FC = () => {
                           <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
                             <Sparkles size={24} />
                           </div>
-                          <h4 className="font-bold text-xl text-blue-900">Why this destination?</h4>
+                          <h4 className="font-bold text-xl text-blue-900">AI Reasoning & Insights</h4>
                         </div>
                         
                         {(() => {

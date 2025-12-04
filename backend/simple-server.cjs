@@ -32,27 +32,38 @@ app.post('/api/mood-analyze', (req, res) => {
       });
     }
 
-    // Mock emotion detection
+    // Mock emotion detection with random variation
+    const moods = [
+      { name: 'Happy & Excited', energy: 8, social: 9, adventure: 7, keys: ['Nightlife', 'Street Food', 'Beach'] },
+      { name: 'Calm & Peaceful', energy: 3, social: 2, adventure: 2, keys: ['Yoga', 'Temples', 'Nature'] },
+      { name: 'Adventurous', energy: 9, social: 6, adventure: 10, keys: ['Trekking', 'Paragliding', 'Snow'] },
+      { name: 'Romantic', energy: 5, social: 4, adventure: 3, keys: ['Houseboat', 'Palaces', 'Lakes'] },
+      { name: 'Cultural', energy: 4, social: 7, adventure: 4, keys: ['History', 'Architecture', 'Festivals'] }
+    ];
+
+    // Pick a random mood for demo purposes (or based on simple image hash if we wanted consistency)
+    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+
     const mockEmotions = {
-      happy: 0.8,
+      happy: randomMood.name.includes('Happy') ? 0.8 : 0.1,
       sad: 0.05,
       angry: 0.0,
-      surprised: 0.1,
-      neutral: 0.05,
+      surprised: randomMood.name.includes('Adventurous') ? 0.6 : 0.1,
+      neutral: randomMood.name.includes('Calm') ? 0.8 : 0.1,
       fear: 0.0,
       disgust: 0.0
     };
 
     // Response
     const response = {
-      detectedMood: 'Happy & Excited',
-      confidence: 0.87,
+      detectedMood: randomMood.name,
+      confidence: 0.85 + Math.random() * 0.1,
       emotions: mockEmotions,
-      energyLevel: 8,
-      socialScore: 7,
-      adventureScore: 6,
-      reasoning: 'Detected 1 face with happy expression. User appears energetic and ready for social experiences.',
-      recommendedKeys: ['adventure', 'culture', 'social', 'nature']
+      energyLevel: randomMood.energy,
+      socialScore: randomMood.social,
+      adventureScore: randomMood.adventure,
+      reasoning: `AI Analysis: Detected facial expressions matching '${randomMood.name}'. Recommended for ${randomMood.keys.join(', ')} experiences.`,
+      recommendedKeys: randomMood.keys
     };
 
     console.log('✅ Mood analysis complete');
