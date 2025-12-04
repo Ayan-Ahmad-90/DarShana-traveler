@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema({
   userId: {
@@ -30,5 +30,5 @@ const notificationSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model('Notification', notificationSchema);
 

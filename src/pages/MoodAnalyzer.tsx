@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle, Scan, Sparkles, Zap, Users, Mountain, ArrowRight, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import jsPDF from 'jspdf';
 import { useFaceDetection } from '../hooks/useFaceDetection';
 import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
 import { DESTINATIONS } from '../data/destinations';
+import ARGuide from './ARGuide';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
 // Mock payment: always success after short delay
@@ -118,7 +120,7 @@ function generateFAQ(destination: Destination, moodResponse: MoodAnalyzeResponse
 // Main MoodAnalyzer Component
 const MoodAnalyzer: React.FC = () => {
   // Mode selection: 'ai' is default, 'manual' for optional self-select
-  const [mode, setMode] = useState<'ai' | 'manual'>('ai');
+  const [mode, setMode] = useState<'ai' | 'manual' | 'ar'>('ai');
 
   // Face detection hook
   const faceDetection = useFaceDetection();
@@ -646,696 +648,867 @@ const MoodAnalyzer: React.FC = () => {
     doc.save('darshana-trip-ticket.pdf');
   }
 
+  if (mode === 'ar') {
+    return <ARGuide onBack={() => setMode('ai')} />;
+  }
+
   // UI Start
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="flex justify-center gap-2 mb-8">
-        <button
-          className={`px-8 py-3 rounded-full font-bold border transition duration-150 ${
-            mode === 'ai' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white border-gray-300 text-gray-700'
-          }`}
-          onClick={() => {
-            setMode('ai');
-            setAIStep(0);
-            clearCapturedImage();
-            setPaidAI(false);
-            setIsPayingAI(false);
-          }}
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
         >
-          <Camera size={18} className="inline mr-2" /> AI Mood Analyzer
-        </button>
-        <button
-          className={`px-8 py-3 rounded-full font-bold border transition duration-150 ${
-            mode === 'manual' ? 'bg-teal-700 text-white border-teal-700' : 'bg-white border-gray-300 text-gray-700'
-          }`}
-          onClick={() => {
-            setMode('manual');
-            setStep(0);
-            setMood(null);
-            setEnergy(5);
-            setSocial(5);
-            setAdventure(5);
-          }}
-        >
-          <span role="img" aria-label="mood">😊</span> Manual Selection
-        </button>
-      </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-teal-600 mb-4 font-serif tracking-tight">
+            Discover Your Perfect Journey
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Let our AI analyze your mood or customize your preferences to find the destination that speaks to your soul.
+          </p>
+        </motion.div>
 
-      {mode === 'ai' ? (
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-stone-100">
-          {/* AI Analyzer steps */}
-          {aiStep === 0 && (
-            <div>
-              <div className="font-bold text-2xl mb-3 text-center">🤖 AI Mood Travel Matcher</div>
-              <p className="text-stone-600 text-center mb-6">
-                Let our AI analyze your facial expression and recommend the perfect Indian destination for your current state of mind.
-              </p>
-
-              {detectionError && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <div className="flex gap-3 mb-3">
-                    <AlertCircle className="text-red-600 flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="text-red-700 font-semibold mb-1">Camera Error</div>
-                      <div className="text-red-600 text-sm whitespace-pre-line">{detectionError}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-3">
-                    <button 
-                      onClick={() => {
-                        console.log('🔄 Retry button clicked');
-                        // Stop any existing stream
-                        if (cameraStreamRef.current) {
-                          console.log('🛑 Stopping existing stream');
-                          cameraStreamRef.current.getTracks().forEach(track => track.stop());
-                          cameraStreamRef.current = null;
-                        }
-                        // Reset state
-                        setDetectionError(null);
-                        setIsCameraOpen(false);
-                        // Small delay to ensure state is cleared before retrying
-                        setTimeout(() => {
-                          console.log('🔄 Starting camera after retry');
-                          startCamera();
-                        }, 100);
-                      }}
-                      className="text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
-                    >
-                      🔄 Retry Camera
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setDetectionError(null);
-                      }}
-                      className="text-sm bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition font-medium"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                  
-                  {/* Troubleshooting tips */}
-                  <details className="mt-4 text-sm">
-                    <summary className="cursor-pointer text-red-700 font-semibold hover:text-red-800">
-                      💡 Troubleshooting Tips
-                    </summary>
-                    <div className="mt-2 text-gray-700 space-y-2 bg-white p-3 rounded">
-                      <p>✅ <strong>Check Browser Permissions:</strong> Click the camera/lock icon in the address bar and allow camera access</p>
-                      <p>✅ <strong>Use HTTPS or Localhost:</strong> Camera requires secure connection (you're on: {window.location.protocol}//{window.location.host})</p>
-                      <p>✅ <strong>Close Other Apps:</strong> Make sure no other application is using your camera (Zoom, Teams, Skype, etc.)</p>
-                      <p>✅ <strong>Try Different Browser:</strong> Chrome, Firefox, Edge, and Safari support camera access</p>
-                      <p>✅ <strong>Check System Settings:</strong> Ensure camera is enabled in your OS privacy settings</p>
-                      <p>✅ <strong>Refresh Page:</strong> Sometimes a simple page refresh resolves permission issues</p>
-                    </div>
-                  </details>
-                </div>
-              )}
-
-              {!image && !isCameraOpen && (
-                <div className="h-64 border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center gap-4 bg-stone-50">
-                  <button 
-                    onClick={() => {
-                      console.log('Open Camera button clicked');
-                      startCamera();
-                    }}
-                    className="flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-full font-medium hover:bg-orange-700 transition"
-                  >
-                    <Camera size={20} /> Open Camera
-                  </button>
-                  <span className="text-stone-400 text-sm">or</span>
-                  <label className="flex items-center gap-2 text-stone-600 cursor-pointer hover:text-orange-600 transition">
-                    <Upload size={20} /> Upload Photo
-                    <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-                  </label>
-                </div>
-              )}
-
-              {isCameraOpen && (
-                <div className="relative h-64 bg-black rounded-xl overflow-hidden">
-                  <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                  
-                  {/* Loading indicator while camera initializes */}
-                  {!cameraStreamRef.current && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 text-white">
-                      <Loader2 className="w-12 h-12 animate-spin mb-3" />
-                      <p className="text-sm">Initializing camera...</p>
-                      <p className="text-xs text-gray-300 mt-2">Please allow camera permission if prompted</p>
-                    </div>
-                  )}
-                  
-                  {/* Camera controls */}
-                  {cameraStreamRef.current && (
-                    <>
-                      {/* Face count indicator */}
-                      {faceCount !== null && (
-                        <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-lg">
-                          {faceCount === 0 ? '😐 No faces detected' : 
-                           faceCount === 1 ? '😊 1 face detected' : 
-                           `👥 ${faceCount} faces detected`}
-                        </div>
-                      )}
-                      
-                      <button 
-                        onClick={capturePhoto}
-                        aria-label="Capture photo"
-                        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-black p-4 rounded-full shadow-lg hover:bg-stone-100 transition-all hover:scale-110"
-                      >
-                        <Camera size={28} />
-                      </button>
-                      <button 
-                        onClick={stopCamera}
-                        aria-label="Close camera"
-                        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-full shadow-lg hover:bg-red-700 transition-all"
-                      >
-                        ✕
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {image && (
-                <div className="relative h-64 rounded-xl overflow-hidden bg-stone-100">
-                  <img ref={imagePreviewRef} src={image} alt="Captured" className="w-full h-full object-cover" />
-                  <button 
-                    onClick={() => {
-                      clearCapturedImage();
-                      setAIStep(0);
-                    }}
-                    aria-label="Retake photo"
-                    className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
-                  >
-                    <RefreshCw size={16} />
-                  </button>
-                </div>
-              )}
-
-              {image && !result && (
-                <button 
-                  onClick={analyzeAI}
-                  disabled={loading}
-                  className="w-full mt-6 bg-teal-700 text-white py-3 rounded-xl font-semibold hover:bg-teal-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Analyzing your mood...
-                    </>
-                  ) : (
-                    '✨ Analyze Mood & Recommend'
-                  )}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* AI recommendations, payment, ticket */}
-          {aiStep === 1 && result && !paidAI && (
-            <div>
-              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 p-6 rounded-xl mb-6">
-                <div className="flex items-start gap-4">
-                  <div className="text-4xl">🎯</div>
-                  <div>
-                    <h3 className="font-bold text-orange-800 text-lg mb-1">
-                      {result.detectedMood} ({(result.confidence * 100).toFixed(0)}% confidence)
-                    </h3>
-                    <p className="text-orange-700 text-sm">{result.reasoning}</p>
-                    <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
-                      <div className="bg-white/60 p-2 rounded">
-                        <div className="font-semibold text-orange-600">Energy</div>
-                        <div className="text-lg">{result.energyLevel}/10</div>
-                      </div>
-                      <div className="bg-white/60 p-2 rounded">
-                        <div className="font-semibold text-orange-600">Social</div>
-                        <div className="text-lg">{result.socialScore}/10</div>
-                      </div>
-                      <div className="bg-white/60 p-2 rounded">
-                        <div className="font-semibold text-orange-600">Adventure</div>
-                        <div className="text-lg">{result.adventureScore}/10</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {faceCount && (
-                <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2">
-                  <span>👤</span>
-                  <span>{faceCount} face{faceCount > 1 ? 's' : ''} detected (using primary face for analysis)</span>
-                </div>
-              )}
-
-              <div className="mb-6">
-                <h3 className="font-bold text-lg mb-4 text-center">Your Top 3 Recommendations</h3>
-                <div className="flex flex-wrap gap-4 justify-center mb-6">
-                  {result.recommendations.map((rec, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setSelectedDestinationIdx(idx);
-                        setSelectedFAQIndex(0);
-                      }}
-                      className={`rounded-xl shadow-lg p-4 w-64 border-2 transition transform hover:scale-105 ${
-                        selectedDestinationIdx === idx
-                          ? 'border-orange-500 bg-orange-50'
-                          : 'border-gray-200 bg-white'
-                      }`}
-                    >
-                      <img src={rec.img} alt={rec.title} className="rounded-md mb-3 w-full h-32 object-cover"/>
-                      <div className="font-bold text-lg text-left">{rec.title}</div>
-                      <div className="mt-2 text-left">
-                        <span className="rounded-full px-2 py-1 text-xs bg-orange-100 text-orange-600 mr-2">{rec.label}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mt-2 text-xs text-left">
-                        {rec.tags.slice(0, 2).map((tag: string, i: number) => (
-                          <span key={i} className="bg-gray-200 rounded px-2 py-1">{tag}</span>
-                        ))}
-                        {rec.tags.length > 2 && (
-                          <span className="bg-gray-200 rounded px-2 py-1">+{rec.tags.length - 2}</span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* FAQ Section */}
-                {selectedDestinationIdx !== null && (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 mb-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-2xl">❓</span>
-                      <h4 className="font-bold text-blue-900">Frequently Asked Questions</h4>
-                    </div>
-                    
-                    {(() => {
-                      const faqs = generateFAQ(result.recommendations[selectedDestinationIdx], {
-                        detectedMood: result.detectedMood,
-                        confidence: result.confidence,
-                        emotions: result.emotions,
-                        energyLevel: result.energyLevel,
-                        socialScore: result.socialScore,
-                        adventureScore: result.adventureScore,
-                        reasoning: result.reasoning,
-                        recommendedKeys: [],
-                      } as any);
-
-                      return (
-                        <div className="space-y-3">
-                          {faqs.map((faq, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => setSelectedFAQIndex(selectedFAQIndex === idx ? -1 : idx)}
-                              className="w-full text-left bg-white rounded-lg p-3 hover:bg-blue-100 transition"
-                            >
-                              <div className="font-semibold text-blue-900 flex items-start gap-2">
-                                <span className="text-lg">{['🏜️', '🎯', '🔄'][idx]}</span>
-                                <span>{faq.question}</span>
-                              </div>
-                              {selectedFAQIndex === idx && (
-                                <div className="mt-3 text-sm text-blue-800 ml-6">{faq.answer}</div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-between gap-3">
-                <button 
-                  className="flex-1 px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => {
+        {/* Mode Switcher */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-full shadow-xl border border-white/50 flex gap-2">
+            {[
+              { id: 'ai', label: 'AI Mood Analyzer', icon: Camera },
+              { id: 'ar', label: 'AR Experience', icon: Scan },
+              { id: 'manual', label: 'Manual Selection', icon: Sparkles }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  if (tab.id === 'ar') {
+                    setMode('ar');
+                  } else if (tab.id === 'ai') {
+                    setMode('ai');
                     setAIStep(0);
                     clearCapturedImage();
                     setPaidAI(false);
-                    setSelectedDestinationIdx(0);
-                    setSelectedFAQIndex(0);
-                  }}
-                >
-                  Try Different Expression
-                </button>
-                <button 
-                  className="flex-1 px-6 py-3 rounded-lg font-medium bg-orange-600 text-white hover:bg-orange-700 transition disabled:opacity-50"
-                  onClick={payAI}
-                  disabled={isPayingAI || selectedDestinationIdx === null}
-                >
-                  {isPayingAI ? (
-                    <>
-                      <Loader2 className="inline animate-spin mr-2" size={16} />
-                      Processing...
-                    </>
-                  ) : (
-                    '💳 Pay & Book (₹6,500)'
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {paidAI && (
-            <div className="text-center">
-              <div className="mb-6 flex justify-center">
-                <CheckCircle className="text-green-600" size={64} />
-              </div>
-              <h2 className="font-bold text-2xl mb-2 text-green-700">Payment Successful! 🎉</h2>
-              <p className="text-gray-600 mb-6">Your DarShana AI Trip Ticket is ready</p>
-              
-              {selectedDestinationIdx !== null && (
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 mb-6 text-left">
-                  <div className="font-bold text-lg text-green-900 mb-2">
-                    ✈️ {result?.recommendations[selectedDestinationIdx].title}
-                  </div>
-                  <div className="text-green-800 space-y-1 text-sm">
-                    <div><span className="font-semibold">Detected Mood:</span> {result?.detectedMood}</div>
-                    <div><span className="font-semibold">Confidence:</span> {result && (result.confidence * 100).toFixed(0)}%</div>
-                    <div><span className="font-semibold">Amount Paid:</span> ₹6,500</div>
-                    <div><span className="font-semibold">Booking Date:</span> {new Date().toLocaleDateString('en-IN')}</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex justify-center gap-3">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
-                  onClick={downloadTicketAI}
-                >
-                  📥 Download PDF Ticket
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => {
-                    setAIStep(0);
-                    setPaidAI(false);
-                    clearCapturedImage();
-                    setSelectedDestinationIdx(0);
-                    setSelectedFAQIndex(0);
                     setIsPayingAI(false);
-                  }}
-                >
-                  Plan Another Trip
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      ) : (
-        // Manual multi-step form flow
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-stone-100">
-          <div className="flex justify-center gap-2 mb-6">
-            {STEPS.slice(0,-1).map((_, i) => (
-              <div key={i} className={`w-3 h-3 rounded-full transition ${step===i?'bg-teal-500 scale-125':'bg-gray-300'}`}></div>
+                  } else {
+                    setMode('manual');
+                    setStep(0);
+                    setMood(null);
+                    setEnergy(5);
+                    setSocial(5);
+                    setAdventure(5);
+                  }
+                }}
+                className={`relative px-6 py-3 rounded-full font-semibold text-sm transition-colors duration-300 flex items-center gap-2 ${
+                  mode === tab.id ? 'text-white' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {mode === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className={`absolute inset-0 rounded-full shadow-md ${
+                      (tab.id as string) === 'ai' ? 'bg-gradient-to-r from-orange-500 to-orange-600' :
+                      (tab.id as string) === 'ar' ? 'bg-gradient-to-r from-cyan-500 to-blue-500' :
+                      'bg-gradient-to-r from-teal-500 to-emerald-600'
+                    }`}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  <tab.icon size={18} />
+                  {tab.label}
+                </span>
+              </button>
             ))}
           </div>
-
-          {step === 0 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">😊 How are you feeling today?</h2>
-              <div className="flex flex-wrap justify-center gap-4">
-                {['😊 Happy','😐 Neutral','😮 Surprised','😢 Sad','😃 Excited','🤔 Thoughtful','😁 Energetic'].map((em, idx) => (
-                  <button 
-                    key={idx} 
-                    className={`rounded-xl px-6 py-4 border-2 text-lg font-semibold transition transform hover:scale-110 ${
-                      mood === idx ? "bg-teal-600 text-white border-teal-600" : "bg-white border-gray-300 text-gray-700 hover:border-teal-400"
-                    }`} 
-                    onClick={() => setMood(idx)}
-                  >
-                    {em}
-                  </button>
-                ))}
-              </div>
-              <button 
-                className="w-full mt-8 px-6 py-3 bg-teal-700 text-white rounded-lg font-semibold hover:bg-teal-800 transition disabled:opacity-50"
-                disabled={mood===null}
-                onClick={()=>setStep(1)}
-              >
-                Next →
-              </button>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">⚡ What's your energy level?</h2>
-              <div className="flex flex-col items-center py-6">
-                <div className="text-6xl mb-4">{energy < 3 ? '😴' : energy < 7 ? '😊' : '🚀'}</div>
-                <div className="text-2xl font-bold text-teal-700 mb-4">{energy < 3 ? 'Low' : energy < 7 ? 'Moderate' : 'High'}</div>
-                <input 
-                  type="range" 
-                  min={1} 
-                  max={10} 
-                  value={energy} 
-                  onChange={e => setEnergy(Number(e.target.value))}
-                  className="w-64 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between w-64 px-2 text-sm text-gray-500 mt-2">
-                  <span>Low (1)</span>
-                  <span className="font-bold text-teal-700">{energy}/10</span>
-                  <span>High (10)</span>
-                </div>
-              </div>
-              <div className="flex justify-between mt-8">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => setStep(0)}
-                >
-                  ← Previous
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-teal-700 text-white hover:bg-teal-800 transition"
-                  onClick={() => setStep(2)}
-                >
-                  Next →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">👥 How social do you want to be?</h2>
-              <div className="flex flex-col items-center py-6">
-                <div className="text-6xl mb-4">{social < 4 ? '🧘' : social < 7 ? '👫' : '🎉'}</div>
-                <div className="text-2xl font-bold text-teal-700 mb-4">{social < 4 ? 'Solo' : social < 7 ? 'Small Groups' : 'Large Groups'}</div>
-                <input 
-                  type="range" 
-                  min={1} 
-                  max={10} 
-                  value={social} 
-                  onChange={e => setSocial(Number(e.target.value))}
-                  className="w-64 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between w-64 px-2 text-sm text-gray-500 mt-2">
-                  <span>Solo</span>
-                  <span className="font-bold text-teal-700">{social}/10</span>
-                  <span>Group</span>
-                </div>
-              </div>
-              <div className="flex justify-between mt-8">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => setStep(1)}
-                >
-                  ← Previous
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-teal-700 text-white hover:bg-teal-800 transition"
-                  onClick={() => setStep(3)}
-                >
-                  Next →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">🏔️ How adventurous are you?</h2>
-              <div className="flex flex-col items-center py-6">
-                <div className="text-6xl mb-4">{adventure < 4 ? '🛋️' : adventure < 7 ? '🥾' : '🪂'}</div>
-                <div className="text-2xl font-bold text-teal-700 mb-4">{adventure < 4 ? 'Safe' : adventure < 7 ? 'Mild Adventure' : 'Extreme Adventure'}</div>
-                <input 
-                  type="range" 
-                  min={1} 
-                  max={10} 
-                  value={adventure} 
-                  onChange={e => setAdventure(Number(e.target.value))}
-                  className="w-64 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                />
-                <div className="flex justify-between w-64 px-2 text-sm text-gray-500 mt-2">
-                  <span>Safe</span>
-                  <span className="font-bold text-teal-700">{adventure}/10</span>
-                  <span>Adventurous</span>
-                </div>
-              </div>
-              <div className="flex justify-between mt-8">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => setStep(2)}
-                >
-                  ← Previous
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-teal-700 text-white hover:bg-teal-800 transition"
-                  onClick={() => setStep(4)}
-                >
-                  Analyze My Mood →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">🎯 Your Recommendations</h2>
-              <div className="flex flex-wrap gap-4 justify-center mb-6">
-                {getRecommendations().map((dest, idx) => (
-                  <button
-                    key={idx}
-                    className={`rounded-xl shadow-lg p-4 w-64 transition border-2 transform hover:scale-105 ${
-                      selectedIdx === idx ? 'border-teal-500 bg-teal-50' : 'border-gray-200 bg-white'
-                    }`}
-                    onClick={() => setSelectedIdx(idx)}
-                  >
-                    <img src={dest.img} alt={dest.title} className="rounded-md mb-3 w-full h-32 object-cover"/>
-                    <div className="font-bold text-lg text-left">{dest.title}</div>
-                    <div className="mt-2 text-left">
-                      <span className="rounded-full px-2 py-1 text-xs bg-teal-100 text-teal-600 mr-2">{dest.label}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2 text-xs text-left">
-                      {dest.tags.slice(0, 2).map((tag, i) => (
-                        <span key={i} className="bg-gray-200 rounded px-2 py-1">{tag}</span>
-                      ))}
-                      {dest.tags.length > 2 && (
-                        <span className="bg-gray-200 rounded px-2 py-1">+{dest.tags.length - 2}</span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-between">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => {
-                    setStep(0);
-                    setMood(null);
-                    setEnergy(5);
-                    setSocial(5);
-                    setAdventure(5);
-                  }}
-                >
-                  Analyze Again
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-teal-700 text-white hover:bg-teal-800 transition disabled:opacity-50"
-                  disabled={selectedIdx === null}
-                  onClick={() => setStep(5)}
-                >
-                  Proceed to Payment →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === 5 && (
-            <div>
-              <h2 className="font-bold text-2xl text-center mb-6">💳 Booking Details</h2>
-              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200 rounded-xl p-6 mb-6">
-                <div className="space-y-3 text-left">
-                  <div className="text-lg">
-                    <span className="font-semibold text-teal-900">Destination:</span>
-                    <span className="ml-2 text-teal-700"> {getRecommendations()[selectedIdx ?? 0]?.title}</span>
-                  </div>
-                  <div className="text-lg">
-                    <span className="font-semibold text-teal-900">Your Mood:</span>
-                    <span className="ml-2 text-teal-700"> {['Happy & Excited','Neutral','Surprised','Sad','Energetic','Thoughtful','Social'][mood ?? 0]}</span>
-                  </div>
-                  <div className="text-lg">
-                    <span className="font-semibold text-teal-900">Energy Level:</span>
-                    <span className="ml-2 text-teal-700"> {energy}/10</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-orange-50 border-2 border-orange-300 rounded-xl p-6 mb-6">
-                <div className="text-center">
-                  <div className="text-sm text-orange-700 mb-2">Total Trip Cost</div>
-                  <div className="text-4xl font-bold text-orange-600">
-                    ₹{5000 + energy*120 + adventure*180 + social*100}
-                  </div>
-                  <div className="text-xs text-orange-600 mt-2">
-                    Base: ₹5,000 + Energy: ₹{energy*120} + Adventure: ₹{adventure*180} + Social: ₹{social*100}
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                className="w-full px-6 py-4 rounded-lg font-semibold text-white bg-teal-700 hover:bg-teal-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                disabled={isPaying}
-                onClick={pay}
-              >
-                {isPaying ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Processing Payment...
-                  </>
-                ) : (
-                  <>
-                    💳 Pay & Confirm Booking
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-
-          {step === 6 && (
-            <div className="text-center">
-              <div className="mb-6 flex justify-center">
-                <CheckCircle className="text-green-600" size={64} />
-              </div>
-              <h2 className="font-bold text-2xl mb-2 text-green-700">Payment Successful! 🎉</h2>
-              <p className="text-gray-600 mb-6">Your DarShana Trip Ticket is ready</p>
-              
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6 mb-6 text-left">
-                <div className="font-bold text-lg text-green-900 mb-3">
-                  ✈️ {getRecommendations()[selectedIdx ?? 0]?.title}
-                </div>
-                <div className="text-green-800 space-y-2 text-sm">
-                  <div><span className="font-semibold">Amount Paid:</span> ₹{5000 + energy*120 + adventure*180 + social*100}</div>
-                  <div><span className="font-semibold">Booking Date:</span> {new Date().toLocaleDateString('en-IN')}</div>
-                  <div><span className="font-semibold">Best Time to Visit:</span> {getRecommendations()[selectedIdx ?? 0]?.bestTime || 'Year-round'}</div>
-                </div>
-              </div>
-
-              <div className="flex justify-center gap-3">
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition flex items-center gap-2"
-                  onClick={downloadTicket}
-                >
-                  📥 Download PDF Ticket
-                </button>
-                <button 
-                  className="px-6 py-3 rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => {
-                    setStep(0);
-                    setMood(null);
-                    setEnergy(5);
-                    setSocial(5);
-                    setAdventure(5);
-                  }}
-                >
-                  Plan Another Trip
-                </button>
-              </div>
-            </div>
-          )}
         </div>
-      )}
 
-      {/* Footer info */}
-      <div className="mt-12 text-center text-sm text-gray-600">
-        <p>🛡️ Your data is secure and not stored. Analysis happens locally on your device.</p>
-        <p className="mt-2">🤖 Powered by face-api.js & TensorFlow.js | 🇮🇳 Designed for Indian travelers</p>
+        <AnimatePresence mode="wait">
+          {mode === 'ai' ? (
+            <motion.div
+              key="ai-mode"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden"
+            >
+              <div className="p-8 md:p-12">
+                {aiStep === 0 && (
+                  <div className="max-w-2xl mx-auto text-center">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <div className="inline-block p-4 rounded-full bg-orange-100 text-orange-600 mb-6">
+                        <Camera size={48} />
+                      </div>
+                      <h2 className="text-3xl font-bold text-gray-900 mb-4">AI Mood Travel Matcher</h2>
+                      <p className="text-gray-600 mb-8 text-lg">
+                        Our advanced AI analyzes your facial expressions to recommend destinations that perfectly match your current vibe.
+                      </p>
+                    </motion.div>
+
+                    {detectionError && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl text-left"
+                      >
+                        <div className="flex gap-3">
+                          <AlertCircle className="text-red-600 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="text-red-700 font-semibold mb-1">Camera Error</div>
+                            <div className="text-red-600 text-sm whitespace-pre-line">{detectionError}</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 mt-4">
+                          <button 
+                            onClick={() => {
+                              if (cameraStreamRef.current) {
+                                cameraStreamRef.current.getTracks().forEach(track => track.stop());
+                                cameraStreamRef.current = null;
+                              }
+                              setDetectionError(null);
+                              setIsCameraOpen(false);
+                              setTimeout(() => startCamera(), 100);
+                            }}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition"
+                          >
+                            Retry Camera
+                          </button>
+                          <button 
+                            onClick={() => setDetectionError(null)}
+                            className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {!image && !isCameraOpen && (
+                      <motion.div 
+                        whileHover={{ scale: 1.02 }}
+                        className="h-80 border-3 border-dashed border-gray-300 rounded-3xl flex flex-col items-center justify-center gap-6 bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer group"
+                      >
+                        <button 
+                          onClick={startCamera}
+                          className="flex items-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform group-hover:-translate-y-1"
+                        >
+                          <Camera size={24} /> Open Camera
+                        </button>
+                        <div className="flex items-center gap-4 w-full max-w-xs">
+                          <div className="h-px bg-gray-300 flex-1"></div>
+                          <span className="text-gray-400 font-medium">OR</span>
+                          <div className="h-px bg-gray-300 flex-1"></div>
+                        </div>
+                        <label className="flex items-center gap-2 text-gray-600 cursor-pointer hover:text-orange-600 transition font-medium">
+                          <Upload size={20} /> Upload Photo
+                          <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                        </label>
+                      </motion.div>
+                    )}
+
+                    {isCameraOpen && (
+                      <div className="relative h-96 bg-black rounded-3xl overflow-hidden shadow-2xl ring-4 ring-orange-100">
+                        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform scale-x-[-1]" />
+                        
+                        {/* Scanning Animation */}
+                        <motion.div 
+                          animate={{ top: ['0%', '100%', '0%'] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                          className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-70 z-10"
+                        />
+                        
+                        {!cameraStreamRef.current && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white backdrop-blur-sm">
+                            <Loader2 className="w-12 h-12 animate-spin mb-4 text-orange-500" />
+                            <p className="font-medium">Initializing camera...</p>
+                          </div>
+                        )}
+                        
+                        {cameraStreamRef.current && (
+                          <>
+                            {faceCount !== null && (
+                              <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20 flex items-center gap-2">
+                                <Users size={16} className="text-orange-400" />
+                                {faceCount === 0 ? 'No faces' : `${faceCount} face${faceCount > 1 ? 's' : ''} detected`}
+                              </div>
+                            )}
+                            
+                            <button 
+                              onClick={capturePhoto}
+                              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform duration-200 border-4 border-orange-500"
+                            >
+                              <div className="w-16 h-16 bg-orange-500 rounded-full border-4 border-white"></div>
+                            </button>
+                            
+                            <button 
+                              onClick={stopCamera}
+                              className="absolute top-6 right-6 bg-black/50 backdrop-blur-md text-white p-3 rounded-full hover:bg-red-500/80 transition-colors border border-white/20"
+                            >
+                              <Scan size={20} />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {image && (
+                      <div className="relative h-96 rounded-3xl overflow-hidden shadow-2xl ring-4 ring-orange-100 group">
+                        <img ref={imagePreviewRef} src={image} alt="Captured" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <button 
+                          onClick={() => {
+                            clearCapturedImage();
+                            setAIStep(0);
+                          }}
+                          className="absolute top-6 right-6 bg-white/90 backdrop-blur text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all transform hover:rotate-180 duration-500"
+                        >
+                          <RefreshCw size={20} />
+                        </button>
+                      </div>
+                    )}
+
+                    {image && !result && (
+                      <motion.button 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={analyzeAI}
+                        disabled={loading}
+                        className="w-full mt-8 bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-teal-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="animate-spin" size={24} />
+                            Analyzing your mood...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={24} /> Analyze Mood & Recommend
+                          </>
+                        )}
+                      </motion.button>
+                    )}
+                  </div>
+                )}
+
+                {aiStep === 1 && result && !paidAI && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 p-8 rounded-3xl mb-10 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-orange-200 rounded-full opacity-20 blur-2xl"></div>
+                      <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                        <div className="text-6xl bg-white p-6 rounded-full shadow-lg">
+                          {result.detectedMood === 'Happy' ? '😊' : 
+                           result.detectedMood === 'Sad' ? '😢' : 
+                           result.detectedMood === 'Surprised' ? '😮' : '😐'}
+                        </div>
+                        <div className="flex-1 text-center md:text-left">
+                          <h3 className="font-bold text-orange-900 text-3xl mb-2 font-serif">
+                            You seem {result.detectedMood}!
+                          </h3>
+                          <p className="text-orange-800/80 text-lg mb-6 leading-relaxed">{result.reasoning}</p>
+                          
+                          <div className="grid grid-cols-3 gap-4">
+                            {[
+                              { label: 'Energy', value: result.energyLevel, icon: Zap, color: 'text-yellow-600' },
+                              { label: 'Social', value: result.socialScore, icon: Users, color: 'text-blue-600' },
+                              { label: 'Adventure', value: result.adventureScore, icon: Mountain, color: 'text-green-600' }
+                            ].map((stat, i) => (
+                              <div key={i} className="bg-white/60 backdrop-blur-sm p-3 rounded-xl border border-white/50 text-center">
+                                <stat.icon size={20} className={`mx-auto mb-1 ${stat.color}`} />
+                                <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{stat.label}</div>
+                                <div className="text-xl font-bold text-gray-800">{stat.value}/10</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-10">
+                      <h3 className="font-bold text-2xl mb-6 text-center text-gray-800">Recommended Destinations</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {result.recommendations.map((rec, idx) => (
+                          <motion.button
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            whileHover={{ y: -8 }}
+                            onClick={() => {
+                              setSelectedDestinationIdx(idx);
+                              setSelectedFAQIndex(0);
+                            }}
+                            className={`relative group rounded-3xl overflow-hidden shadow-lg transition-all duration-300 text-left h-full flex flex-col ${
+                              selectedDestinationIdx === idx
+                                ? 'ring-4 ring-orange-500 ring-offset-4'
+                                : 'hover:shadow-2xl'
+                            }`}
+                          >
+                            <div className="h-48 overflow-hidden">
+                              <img src={rec.img} alt={rec.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+                              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+                                {rec.label}
+                              </div>
+                            </div>
+                            <div className="p-5 bg-white flex-1 flex flex-col">
+                              <h4 className="font-bold text-xl text-gray-900 mb-2">{rec.title}</h4>
+                              <div className="flex flex-wrap gap-2 mt-auto">
+                                {rec.tags.slice(0, 3).map((tag: string, i: number) => (
+                                  <span key={i} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs font-medium">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* FAQ Section */}
+                    {selectedDestinationIdx !== null && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="bg-blue-50/50 border border-blue-100 rounded-3xl p-8 mb-10"
+                      >
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                            <Sparkles size={24} />
+                          </div>
+                          <h4 className="font-bold text-xl text-blue-900">Why this destination?</h4>
+                        </div>
+                        
+                        {(() => {
+                          const faqs = generateFAQ(result.recommendations[selectedDestinationIdx], {
+                            detectedMood: result.detectedMood,
+                            confidence: result.confidence,
+                            emotions: result.emotions,
+                            energyLevel: result.energyLevel,
+                            socialScore: result.socialScore,
+                            adventureScore: result.adventureScore,
+                            reasoning: result.reasoning,
+                            recommendedKeys: [],
+                          } as any);
+
+                          return (
+                            <div className="space-y-4">
+                              {faqs.map((faq, idx) => (
+                                <motion.div 
+                                  key={idx}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: idx * 0.1 }}
+                                >
+                                  <button
+                                    onClick={() => setSelectedFAQIndex(selectedFAQIndex === idx ? -1 : idx)}
+                                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
+                                      selectedFAQIndex === idx 
+                                        ? 'bg-white shadow-md border-l-4 border-blue-500' 
+                                        : 'bg-white/50 hover:bg-white hover:shadow-sm'
+                                    }`}
+                                  >
+                                    <div className="font-semibold text-gray-800 flex items-center justify-between">
+                                      <span>{faq.question}</span>
+                                      <ArrowRight size={16} className={`transform transition-transform ${selectedFAQIndex === idx ? 'rotate-90 text-blue-500' : 'text-gray-400'}`} />
+                                    </div>
+                                    <AnimatePresence>
+                                      {selectedFAQIndex === idx && (
+                                        <motion.div 
+                                          initial={{ height: 0, opacity: 0 }}
+                                          animate={{ height: 'auto', opacity: 1 }}
+                                          exit={{ height: 0, opacity: 0 }}
+                                          className="overflow-hidden"
+                                        >
+                                          <div className="pt-3 text-gray-600 text-sm leading-relaxed border-t border-gray-100 mt-3">
+                                            {faq.answer}
+                                          </div>
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </button>
+                                </motion.div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                      </motion.div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <button 
+                        className="flex-1 px-8 py-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                        onClick={() => {
+                          setAIStep(0);
+                          clearCapturedImage();
+                          setPaidAI(false);
+                          setSelectedDestinationIdx(0);
+                          setSelectedFAQIndex(0);
+                        }}
+                      >
+                        Try Again
+                      </button>
+                      <button 
+                        className="flex-1 px-8 py-4 rounded-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg hover:shadow-orange-500/30 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                        onClick={payAI}
+                        disabled={isPayingAI || selectedDestinationIdx === null}
+                      >
+                        {isPayingAI ? (
+                          <>
+                            <Loader2 className="animate-spin" size={20} />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            Book Now • ₹6,500 <ArrowRight size={20} />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {paidAI && (
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-center py-12"
+                  >
+                    <div className="mb-8 inline-flex p-6 bg-green-100 rounded-full text-green-600">
+                      <CheckCircle size={64} />
+                    </div>
+                    <h2 className="font-bold text-4xl mb-4 text-gray-900">You're All Set! 🎉</h2>
+                    <p className="text-gray-600 mb-10 text-lg">Your journey to {result?.recommendations[selectedDestinationIdx ?? 0].title} begins now.</p>
+                    
+                    <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-3xl p-8 shadow-xl mb-10 text-left relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-emerald-600"></div>
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <div className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Destination</div>
+                          <div className="text-2xl font-bold text-gray-900">{result?.recommendations[selectedDestinationIdx ?? 0].title}</div>
+                        </div>
+                        <div className="bg-green-50 text-green-700 px-3 py-1 rounded-lg text-sm font-bold">CONFIRMED</div>
+                      </div>
+                      
+                      <div className="space-y-4 border-t border-gray-100 pt-6">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Mood Match</span>
+                          <span className="font-medium text-gray-900">{result?.detectedMood}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Confidence</span>
+                          <span className="font-medium text-gray-900">{result && (result.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Date</span>
+                          <span className="font-medium text-gray-900">{new Date().toLocaleDateString('en-IN')}</span>
+                        </div>
+                        <div className="flex justify-between pt-4 border-t border-dashed border-gray-200">
+                          <span className="font-bold text-gray-900">Total Paid</span>
+                          <span className="font-bold text-green-600 text-xl">₹6,500</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                      <button 
+                        className="px-8 py-4 rounded-xl font-bold bg-gray-900 text-white hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2"
+                        onClick={downloadTicketAI}
+                      >
+                        <Scan size={20} /> Download Ticket
+                      </button>
+                      <button 
+                        className="px-8 py-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                        onClick={() => {
+                          setAIStep(0);
+                          setPaidAI(false);
+                          clearCapturedImage();
+                          setSelectedDestinationIdx(0);
+                          setSelectedFAQIndex(0);
+                          setIsPayingAI(false);
+                        }}
+                      >
+                        Plan Another Trip
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="manual-mode"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12"
+            >
+              {/* Progress Bar */}
+              <div className="flex justify-center gap-3 mb-12">
+                {STEPS.slice(0,-1).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      step >= i ? 'w-12 bg-teal-500' : 'w-4 bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {step === 0 && (
+                  <motion.div 
+                    key="step0"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="text-center"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8">How are you feeling today?</h2>
+                    <div className="flex flex-wrap justify-center gap-4 max-w-3xl mx-auto">
+                      {['😊 Happy','😐 Neutral','😮 Surprised','😢 Sad','😃 Excited','🤔 Thoughtful','😁 Energetic'].map((em, idx) => (
+                        <button 
+                          key={idx} 
+                          className={`rounded-2xl px-8 py-6 border-2 text-lg font-semibold transition-all duration-200 transform hover:-translate-y-1 ${
+                            mood === idx 
+                              ? "bg-teal-50 border-teal-500 text-teal-700 shadow-lg scale-105" 
+                              : "bg-white border-gray-100 text-gray-600 hover:border-teal-200 hover:shadow-md"
+                          }`} 
+                          onClick={() => setMood(idx)}
+                        >
+                          {em}
+                        </button>
+                      ))}
+                    </div>
+                    <button 
+                      className="mt-12 px-12 py-4 bg-teal-600 text-white rounded-full font-bold text-lg shadow-lg hover:bg-teal-700 hover:shadow-teal-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={mood===null}
+                      onClick={()=>setStep(1)}
+                    >
+                      Continue <ArrowRight className="inline ml-2" size={20} />
+                    </button>
+                  </motion.div>
+                )}
+
+                {step === 1 && (
+                  <motion.div 
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="text-center max-w-2xl mx-auto"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-10">What's your energy level?</h2>
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                      <div className="text-8xl mb-6 animate-bounce">
+                        {energy < 3 ? '😴' : energy < 7 ? '😊' : '🚀'}
+                      </div>
+                      <div className="text-2xl font-bold text-teal-600 mb-8">
+                        {energy < 3 ? 'Low Energy' : energy < 7 ? 'Moderate Energy' : 'High Energy'}
+                      </div>
+                      <input 
+                        type="range" 
+                        min={1} 
+                        max={10} 
+                        value={energy} 
+                        onChange={e => setEnergy(Number(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                      />
+                      <div className="flex justify-between text-sm text-gray-500 mt-4 font-medium">
+                        <span>Relaxed (1)</span>
+                        <span className="text-teal-600 font-bold text-lg">{energy}/10</span>
+                        <span>Active (10)</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between mt-10">
+                      <button 
+                        className="px-8 py-3 rounded-full font-medium text-gray-500 hover:bg-gray-100 transition"
+                        onClick={() => setStep(0)}
+                      >
+                        Back
+                      </button>
+                      <button 
+                        className="px-10 py-3 rounded-full font-bold bg-teal-600 text-white hover:bg-teal-700 shadow-lg transition"
+                        onClick={() => setStep(2)}
+                      >
+                        Next Step
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 2 && (
+                  <motion.div 
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="text-center max-w-2xl mx-auto"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-10">Social Preference?</h2>
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                      <div className="text-8xl mb-6">
+                        {social < 4 ? '🧘' : social < 7 ? '👫' : '🎉'}
+                      </div>
+                      <div className="text-2xl font-bold text-teal-600 mb-8">
+                        {social < 4 ? 'Solo Traveler' : social < 7 ? 'Small Group' : 'Party Animal'}
+                      </div>
+                      <input 
+                        type="range" 
+                        min={1} 
+                        max={10} 
+                        value={social} 
+                        onChange={e => setSocial(Number(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                      />
+                      <div className="flex justify-between text-sm text-gray-500 mt-4 font-medium">
+                        <span>Solo</span>
+                        <span className="text-teal-600 font-bold text-lg">{social}/10</span>
+                        <span>Crowd</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between mt-10">
+                      <button 
+                        className="px-8 py-3 rounded-full font-medium text-gray-500 hover:bg-gray-100 transition"
+                        onClick={() => setStep(1)}
+                      >
+                        Back
+                      </button>
+                      <button 
+                        className="px-10 py-3 rounded-full font-bold bg-teal-600 text-white hover:bg-teal-700 shadow-lg transition"
+                        onClick={() => setStep(3)}
+                      >
+                        Next Step
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 3 && (
+                  <motion.div 
+                    key="step3"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="text-center max-w-2xl mx-auto"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-10">Adventure Level?</h2>
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                      <div className="text-8xl mb-6">
+                        {adventure < 4 ? '🛋️' : adventure < 7 ? '🥾' : '🪂'}
+                      </div>
+                      <div className="text-2xl font-bold text-teal-600 mb-8">
+                        {adventure < 4 ? 'Chill & Relax' : adventure < 7 ? 'Explorer' : 'Thrill Seeker'}
+                      </div>
+                      <input 
+                        type="range" 
+                        min={1} 
+                        max={10} 
+                        value={adventure} 
+                        onChange={e => setAdventure(Number(e.target.value))}
+                        className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                      />
+                      <div className="flex justify-between text-sm text-gray-500 mt-4 font-medium">
+                        <span>Safe</span>
+                        <span className="text-teal-600 font-bold text-lg">{adventure}/10</span>
+                        <span>Extreme</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between mt-10">
+                      <button 
+                        className="px-8 py-3 rounded-full font-medium text-gray-500 hover:bg-gray-100 transition"
+                        onClick={() => setStep(2)}
+                      >
+                        Back
+                      </button>
+                      <button 
+                        className="px-10 py-3 rounded-full font-bold bg-gradient-to-r from-teal-600 to-emerald-600 text-white hover:shadow-lg hover:scale-105 transition-all"
+                        onClick={() => setStep(4)}
+                      >
+                        Find My Trip ✨
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 4 && (
+                  <motion.div 
+                    key="step4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8">Perfect Matches For You</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                      {getRecommendations().map((dest, idx) => (
+                        <motion.button
+                          key={idx}
+                          whileHover={{ y: -10 }}
+                          className={`relative rounded-3xl overflow-hidden shadow-lg transition-all duration-300 text-left h-full flex flex-col ${
+                            selectedIdx === idx ? 'ring-4 ring-teal-500 ring-offset-4' : 'hover:shadow-2xl'
+                          }`}
+                          onClick={() => setSelectedIdx(idx)}
+                        >
+                          <div className="h-48 overflow-hidden">
+                            <img src={dest.img} alt={dest.title} className="w-full h-full object-cover"/>
+                            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-gray-800">
+                              {dest.label}
+                            </div>
+                          </div>
+                          <div className="p-6 bg-white flex-1 flex flex-col">
+                            <h4 className="font-bold text-xl text-gray-900 mb-2">{dest.title}</h4>
+                            <div className="flex flex-wrap gap-2 mt-auto">
+                              {dest.tags.slice(0, 3).map((tag, i) => (
+                                <span key={i} className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs font-medium">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                    <div className="flex justify-center gap-4 flex-wrap">
+                      <button 
+                        className="px-8 py-3 rounded-full font-medium text-gray-500 hover:bg-gray-100 transition"
+                        onClick={() => {
+                          setStep(0);
+                          setMood(null);
+                          setEnergy(5);
+                          setSocial(5);
+                          setAdventure(5);
+                        }}
+                      >
+                        Start Over
+                      </button>
+                      <a 
+                        href="/#/safety"
+                        className="px-8 py-3 rounded-full font-bold bg-red-600 text-white hover:bg-red-700 shadow-lg transition flex items-center gap-2"
+                      >
+                        <Shield className="w-5 h-5" /> Safety First
+                      </a>
+                      <button 
+                        className="px-12 py-3 rounded-full font-bold bg-teal-600 text-white hover:bg-teal-700 shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={selectedIdx === null}
+                        onClick={() => setStep(5)}
+                      >
+                        Proceed to Booking
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {step === 5 && (
+                  <motion.div 
+                    key="step5"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="max-w-lg mx-auto"
+                  >
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Confirm Booking</h2>
+                    
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
+                      <div className="h-32 bg-gray-200 relative">
+                        <img 
+                          src={getRecommendations()[selectedIdx ?? 0]?.img} 
+                          alt="Destination" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                          <h3 className="text-white font-bold text-2xl">{getRecommendations()[selectedIdx ?? 0]?.title}</h3>
+                        </div>
+                      </div>
+                      <div className="p-8 space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Mood</span>
+                          <span className="font-medium text-gray-900">{['Happy','Neutral','Surprised','Sad','Excited','Thoughtful','Energetic'][mood ?? 0]}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <span className="text-gray-500">Energy Level</span>
+                          <span className="font-medium text-gray-900">{energy}/10</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-4">
+                          <span className="text-lg font-bold text-gray-900">Total</span>
+                          <span className="text-3xl font-bold text-teal-600">₹{5000 + energy*120 + adventure*180 + social*100}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      className="w-full py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-70 flex items-center justify-center gap-2"
+                      disabled={isPaying}
+                      onClick={pay}
+                    >
+                      {isPaying ? (
+                        <>
+                          <Loader2 className="animate-spin" size={20} />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          Pay & Confirm <ArrowRight size={20} />
+                        </>
+                      )}
+                    </button>
+                  </motion.div>
+                )}
+
+                {step === 6 && (
+                  <motion.div 
+                    key="step6"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-center py-12"
+                  >
+                    <div className="mb-8 inline-flex p-6 bg-green-100 rounded-full text-green-600">
+                      <CheckCircle size={64} />
+                    </div>
+                    <h2 className="font-bold text-4xl mb-4 text-gray-900">Booking Confirmed!</h2>
+                    <p className="text-gray-600 mb-10 text-lg">Get ready for an amazing trip to {getRecommendations()[selectedIdx ?? 0]?.title}</p>
+                    
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
+                      <button 
+                        className="px-8 py-4 rounded-xl font-bold bg-gray-900 text-white hover:bg-gray-800 transition shadow-lg flex items-center justify-center gap-2"
+                        onClick={downloadTicket}
+                      >
+                        <Scan size={20} /> Download Ticket
+                      </button>
+                      <button 
+                        className="px-8 py-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600 hover:bg-gray-50 transition"
+                        onClick={() => {
+                          setStep(0);
+                          setMood(null);
+                          setEnergy(5);
+                          setSocial(5);
+                          setAdventure(5);
+                        }}
+                      >
+                        Plan Another Trip
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Footer */}
+        <div className="mt-16 text-center text-sm text-gray-500 flex flex-col items-center gap-2 pb-8">
+          <p className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Secure & Private. Analysis happens locally on your device.
+          </p>
+        </div>
       </div>
     </div>
   );

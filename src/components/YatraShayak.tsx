@@ -1,8 +1,12 @@
 import { useState } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Shield } from 'lucide-react';
 import { yatraShayakApi } from '../services/api';
 
-const YatraShayak = () => {
+interface YatraShayakProps {
+  onSafetyClick?: () => void;
+}
+
+const YatraShayak = ({ onSafetyClick }: YatraShayakProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [history, setHistory] = useState<{ type: 'user' | 'bot'; text: string }[]>([
@@ -32,22 +36,47 @@ const YatraShayak = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-6">
+      {/* Chatbot Group (Hint + Button) */}
       {!isOpen && (
+        <div className="flex flex-col items-end animate-float">
+          {/* Popup Hint */}
+          <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-primary-100 origin-bottom-right mb-2 relative mr-2">
+            <p className="text-sm font-medium text-primary-800">Need help? Ask me! 👋</p>
+            <div className="absolute -bottom-1 right-6 w-3 h-3 bg-white border-b border-r border-primary-100 transform rotate-45"></div>
+          </div>
+
+          {/* Chatbot Button */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition transform hover:scale-110"
+            aria-label="Open AI Assistant"
+            title="Yatra Sahayak AI"
+          >
+            <MessageCircle size={28} />
+          </button>
+        </div>
+      )}
+
+      {/* Safety SOS Button */}
+      {!isOpen && onSafetyClick && (
         <button
-          onClick={() => setIsOpen(true)}
-          className="bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition transform hover:scale-110"
-          aria-label="Open AI Assistant"
+          onClick={onSafetyClick}
+          className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group animate-pulse"
+          title="Emergency Safety Dashboard"
         >
-          <MessageCircle size={28} />
+          <Shield className="w-7 h-7" />
+          <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            Safety SOS
+          </span>
         </button>
       )}
 
       {isOpen && (
-        <div className="bg-neutral-50 rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col h-[500px] border border-neutral-200">
+        <div className="bg-neutral-50 rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col h-[500px] border border-neutral-200 mb-20 sm:mb-0">
           <div className="bg-primary-500 text-white p-4 rounded-t-2xl flex justify-between items-center">
             <div className="font-bold flex items-center gap-2">
-              <span>🤖</span> Yatra Shayak
+              <span>👨‍✈️</span> Saarthi
             </div>
             <button onClick={() => setIsOpen(false)} className="hover:bg-primary-600 p-1 rounded">
               <X size={20} />

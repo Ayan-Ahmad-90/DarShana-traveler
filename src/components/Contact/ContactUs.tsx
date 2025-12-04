@@ -130,7 +130,8 @@ const ContactUs: React.FC = () => {
               </div>
             </div>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Phone</h3>
-            <p className="text-gray-600">+91-1800-TRAVEL-1</p>
+            <p className="text-gray-600">+91 87918 98194</p>
+            <p className="text-gray-600">+91 93685 68267</p>
             <p className="text-sm text-gray-500">Available 24/7</p>
           </div>
 

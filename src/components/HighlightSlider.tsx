@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, MapPin, Calendar, Wind, Mountain } from 'lucide-react';
+import { Sparkles, MapPin, Calendar, Wind, Mountain, CloudSun } from 'lucide-react';
 
 export interface HighlightItem {
   id: string;
@@ -10,7 +10,9 @@ export interface HighlightItem {
   badge?: string;
   type: 'destination' | 'festival' | 'season' | 'experience';
   link?: string;
-  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light';
+  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light' | 'green';
+  lat?: number;
+  lon?: number;
 }
 
 interface HighlightSliderProps {
@@ -18,46 +20,52 @@ interface HighlightSliderProps {
   onItemClick?: (item: HighlightItem) => void;
 }
 
-// Professional travel & tourism highlight data
+// Default travel & tourism highlight data
 const DEFAULT_ITEMS: HighlightItem[] = [
   {
     id: 'jaipur',
     title: 'Jaipur',
     description: 'Royal Pink City',
     badge: 'Must Visit',
-    icon: <MapPin size={20} />,
+    icon: <MapPin size={16} />,
     type: 'destination',
-    link: '/destinations/jaipur',
+    link: '/travelhub?search=Jaipur',
     color: 'blue',
+    lat: 26.9124,
+    lon: 75.7873
   },
   {
     id: 'kerala',
-    title: 'Kerala',
-    description: 'God\'s Own Country',
+    title: "Kerala",
+    description: "God's Own Country",
     badge: 'Paradise',
-    icon: <Wind size={20} />,
+    icon: <Wind size={16} />,
     type: 'destination',
-    link: '/destinations/kerala',
+    link: '/travelhub?search=Kerala',
     color: 'slate',
+    lat: 8.5241,
+    lon: 76.9366
   },
   {
     id: 'taj-mahal',
     title: 'Taj Mahal',
     description: 'Symbol of Love',
     badge: 'Heritage',
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={16} />,
     type: 'destination',
-    link: '/destinations/agra',
+    link: '/travelhub?search=Agra',
     color: 'neutral',
+    lat: 27.1751,
+    lon: 78.0421
   },
   {
     id: 'diwali',
     title: 'Diwali Festival',
     description: 'Festival of Lights',
-    badge: 'Nov-Dec',
-    icon: <Calendar size={20} />,
+    badge: 'Nov–Dec',
+    icon: <Calendar size={16} />,
     type: 'festival',
-    link: '/festivals/diwali',
+    link: '/festivals?search=Diwali',
     color: 'blue',
   },
   {
@@ -65,29 +73,33 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Manali',
     description: 'Mountain Adventure',
     badge: 'Popular',
-    icon: <Mountain size={20} />,
+    icon: <Mountain size={16} />,
     type: 'destination',
-    link: '/destinations/manali',
+    link: '/travelhub?search=Manali',
     color: 'accent',
+    lat: 32.2432,
+    lon: 77.1892
   },
   {
     id: 'goa',
     title: 'Goa',
     description: 'Beach Escape',
     badge: 'Relaxation',
-    icon: <Wind size={20} />,
+    icon: <Wind size={16} />,
     type: 'destination',
-    link: '/destinations/goa',
+    link: '/travelhub?search=Goa',
     color: 'slate',
+    lat: 15.4909,
+    lon: 73.8278
   },
   {
     id: 'holi',
     title: 'Holi Festival',
     description: 'Colors of Joy',
-    badge: 'Mar-Apr',
-    icon: <Calendar size={20} />,
+    badge: 'Mar–Apr',
+    icon: <Calendar size={16} />,
     type: 'festival',
-    link: '/festivals/holi',
+    link: '/festivals?search=Holi',
     color: 'neutral',
   },
   {
@@ -95,20 +107,44 @@ const DEFAULT_ITEMS: HighlightItem[] = [
     title: 'Shimla',
     description: 'Hill Station Beauty',
     badge: 'Scenic',
-    icon: <Mountain size={20} />,
+    icon: <Mountain size={16} />,
     type: 'destination',
-    link: '/destinations/shimla',
-    color: 'light',
+    link: '/travelhub?search=Shimla',
+    color: 'blue',
+    lat: 31.1048,
+    lon: 77.1734
   },
   {
     id: 'varanasi',
     title: 'Varanasi',
     description: 'Spiritual Journey',
     badge: 'Sacred',
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={16} />,
     type: 'destination',
-    link: '/destinations/varanasi',
+    link: '/travelhub?search=Varanasi',
     color: 'accent',
+    lat: 25.3176,
+    lon: 82.9739
+  },
+  {
+    id: 'navratri',
+    title: 'Navratri',
+    description: '9 Nights of Dance',
+    badge: 'Sep-Oct',
+    icon: <Calendar size={16} />,
+    type: 'festival',
+    link: '/festivals?search=Navratri',
+    color: 'green',
+  },
+  {
+    id: 'onam',
+    title: 'Onam',
+    description: 'Harvest Festival',
+    badge: 'Aug-Sep',
+    icon: <Calendar size={16} />,
+    type: 'festival',
+    link: '/festivals?search=Onam',
+    color: 'light',
   },
 ];
 
@@ -118,23 +154,53 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isPaused, setIsPaused] = useState(false);
+  const [weatherData, setWeatherData] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      const newWeatherData: Record<string, number> = {};
+      
+      // Filter items that have coordinates
+      const itemsWithCoords = items.filter(item => item.lat && item.lon);
+      
+      // Fetch weather for each item (using Open-Meteo free API)
+      // In a real app, you might want to batch this or use a backend proxy
+      for (const item of itemsWithCoords) {
+        try {
+          const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${item.lat}&longitude=${item.lon}&current_weather=true`
+          );
+          const data = await response.json();
+          if (data.current_weather) {
+            newWeatherData[item.id] = Math.round(data.current_weather.temperature);
+          }
+        } catch (error) {
+          console.error(`Failed to fetch weather for ${item.title}`, error);
+        }
+      }
+      setWeatherData(newWeatherData);
+    };
+
+    fetchWeather();
+    // Refresh every 30 minutes
+    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []); // Run once on mount
 
   const handleItemClick = (item: HighlightItem) => {
-    if (onItemClick) {
-      onItemClick(item);
-    }
+    onItemClick?.(item);
     if (item.link) {
       navigate(item.link);
     }
   };
 
-  // Professional Light & Dark Color Palette
+  // Color palette
   const colorGradients: Record<string, string> = {
-    blue: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',      // Professional Blue
-    slate: 'linear-gradient(135deg, #334155 0%, #475569 100%)',     // Professional Slate
-    neutral: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',   // Professional Neutral
-    accent: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',    // Professional Dark
-    light: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',     // Professional Light
+    blue: 'linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%)',
+    slate: 'linear-gradient(135deg, #334155 0%, #475569 100%)',
+    neutral: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
+    accent: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+    light: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',
   };
 
   const colorShadows: Record<string, string> = {
@@ -145,95 +211,111 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     light: 'rgba(241, 245, 249, 0.3)',
   };
 
-  // Triple items for seamless infinite loop
-  const loopedItems = [...items, ...items, ...items];
-  const animationDuration = items.length * 4;
+  // Duplicate items for infinite scroll
+  const loopedItems = [...items, ...items];
+  const animationDuration = items.length * 2; // seconds
 
   return (
-    <div 
-      className="w-full relative overflow-hidden"
+    <div
+      className="highlight-slider w-full relative overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.98) 100%)',
+        background:
+          'linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(241, 245, 249, 0.98) 100%)',
         backdropFilter: 'blur(10px)',
         borderBottom: '2px solid rgba(51, 65, 85, 0.15)',
       }}
     >
-      {/* Premium gradient overlay background */}
-      <div 
-        className="absolute inset-0 opacity-30"
+      {/* Soft gradient background */}
+      <div
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
-          background: 'radial-gradient(circle at 20% 50%, rgba(30, 64, 175, 0.08), transparent 50%), radial-gradient(circle at 80% 50%, rgba(51, 65, 85, 0.08), transparent 50%)',
-          pointerEvents: 'none',
+          background:
+            'radial-gradient(circle at 20% 50%, rgba(30, 64, 175, 0.08), transparent 50%), radial-gradient(circle at 80% 50%, rgba(51, 65, 85, 0.08), transparent 50%)',
         }}
       />
 
-      {/* Animated background elements */}
-      <div 
+      {/* Top animated line */}
+      <div
         className="absolute top-0 left-0 w-full h-1 opacity-30"
         style={{
-          background: 'linear-gradient(90deg, transparent, #EA580C, #A855F7, #3B82F6, transparent)',
+          background:
+            'linear-gradient(90deg, transparent, #EA580C, #A855F7, #3B82F6, transparent)',
         }}
       />
 
-      {/* Main content container */}
-      <div className="relative z-10 py-3 sm:py-4 px-3 sm:px-6 lg:px-8">
-        {/* Header label */}
-        <div className="mb-2 flex items-center gap-2 px-2">
-          <div className="w-1 h-4 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
-          <span className="text-xs font-bold tracking-widest uppercase text-orange-400">
+      {/* Content */}
+      <div className="relative z-10 py-1 sm:py-2 px-3 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-1 flex items-center gap-2 px-2">
+          <div className="w-1 h-3 bg-gradient-to-b from-orange-500 to-orange-400 rounded-full" />
+          <span className="text-[10px] font-bold tracking-widest uppercase text-orange-400">
             ✈️ Explore Destinations
           </span>
         </div>
 
-        {/* Slider container */}
-        <div 
-          className="w-full overflow-hidden rounded-2xl px-1"
+        {/* Slider */}
+        <div
+          className="w-full overflow-hidden rounded-xl px-1"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 sm:gap-6 lg:gap-8 items-center py-1.5"
+            className="flex gap-3 sm:gap-4 lg:gap-6 items-center py-1"
             style={{
               animation: isPaused
                 ? 'none'
                 : `smooth-flow ${animationDuration}s linear infinite`,
               willChange: 'transform',
             }}
+            role="list"
+            aria-label="Popular Indian travel highlights"
           >
             {loopedItems.map((item, idx) => {
               const gradient = colorGradients[item.color || 'blue'];
               const shadowColor = colorShadows[item.color || 'blue'];
 
+              const ariaLabel = item.description
+                ? `${item.title} – ${item.description}`
+                : item.title;
+
               return (
                 <button
                   key={`${item.id}-${idx}`}
                   onClick={() => handleItemClick(item)}
-                  className="group relative flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
+                  className="group relative flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl whitespace-nowrap flex-shrink-0 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent hover:scale-105 active:scale-95"
                   style={{
                     background: gradient,
                     boxShadow: `
-                      0 12px 32px ${shadowColor},
+                      0 8px 20px ${shadowColor},
                       inset 0 1px 2px rgba(255, 255, 255, 0.25),
-                      0 0 20px ${shadowColor.replace('0.4', '0.15')}
+                      0 0 15px ${shadowColor}
                     `,
                     backdropFilter: 'blur(4px)',
                   }}
                   title={item.description}
-                  aria-label={`${item.title} - ${item.description}`}
+                  aria-label={ariaLabel}
+                  role="listitem"
                 >
-                  {/* Premium glow effect on hover */}
-                  <div 
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  {/* Hover glow */}
+                  <div
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
-                      background: 'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%)',
+                      background:
+                        'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 70%)',
                       boxShadow: `inset 0 0 24px rgba(255, 255, 255, 0.15), 0 0 24px ${shadowColor}`,
                     }}
                   />
 
-                  {/* Badge label */}
+                  {/* Badge */}
                   {item.badge && (
-                    <div className="absolute -top-2 -right-1 px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white/90 border border-white/20">
+                    <div className="absolute -top-1.5 -right-1 px-1.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] font-bold text-white/90 border border-white/20 flex items-center gap-1">
                       {item.badge}
+                      {weatherData[item.id] !== undefined && (
+                        <span className="flex items-center gap-0.5 border-l border-white/30 pl-1 ml-1">
+                          <CloudSun size={8} />
+                          {weatherData[item.id]}°
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -242,26 +324,26 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
                     {item.icon}
                   </div>
 
-                  {/* Title and description */}
-                  <div className="flex flex-col items-start hidden sm:flex">
-                    <span className="text-sm sm:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                  {/* Desktop text */}
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
                       {item.title}
                     </span>
                     {item.description && (
-                      <span className="text-xs text-white/70 group-hover:text-white/90 transition-colors duration-300">
+                      <span className="text-[10px] text-white/70 group-hover:text-white/90 transition-colors duration-300">
                         {item.description}
                       </span>
                     )}
                   </div>
 
-                  {/* Mobile layout - title only */}
-                  <span className="text-xs sm:hidden font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
+                  {/* Mobile text */}
+                  <span className="text-[10px] sm:hidden font-bold text-white group-hover:text-orange-200 transition-colors duration-300">
                     {item.title}
                   </span>
 
-                  {/* Hover sparkle effect */}
-                  <Sparkles 
-                    size={16} 
+                  {/* Sparkles on hover */}
+                  <Sparkles
+                    size={12}
                     className="opacity-0 group-hover:opacity-100 transition-all duration-300 flex-shrink-0 text-white/80 ml-auto hidden sm:block"
                   />
                 </button>
@@ -271,8 +353,8 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
         </div>
 
         {/* Mobile hint */}
-        <div className="text-center text-white/50 text-xs mt-2 sm:hidden">
-          ← Swipe to explore more →
+        <div className="text-center text-slate-500 text-xs mt-2 sm:hidden">
+          Auto-scrolling highlights · Tap a card for details
         </div>
       </div>
 
@@ -282,31 +364,12 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-${items.length * 85}px - ${items.length * 16}px));
+            transform: translateX(-50%);
           }
         }
 
-        /* Mobile responsive animation */
-        @media (max-width: 640px) {
-          @keyframes smooth-flow {
-            0% {
-              transform: translateX(0);
-            }
-            100% {
-              transform: translateX(calc(-${items.length * 70}px - ${items.length * 12}px));
-            }
-          }
-        }
-
-        /* Smooth GPU-accelerated animation */
-        @supports (animation-timeline: scroll()) {
-          .highlight-slider-container {
-            animation-timeline: view();
-          }
-        }
-
-        /* Prevent jank */
-        * {
+        /* Scope performance tweaks to this component only */
+        .highlight-slider * {
           backface-visibility: hidden;
           -webkit-font-smoothing: antialiased;
         }

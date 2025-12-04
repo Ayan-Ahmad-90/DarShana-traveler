@@ -1,7 +1,10 @@
 const express = require('express');
-const router = express.Router();
-const safetyController = require('../controllers/safetyController');
+const { getSafetyResources, logEmergency, updateLiveLocation } = require('../controllers/safetyController');
 
-router.get('/', safetyController.getSafetyResources);
+const router = express.Router();
+
+router.get('/', getSafetyResources);
+router.post('/emergency', logEmergency);
+router.post('/live-track/:userId', updateLiveLocation);
 
 module.exports = router;

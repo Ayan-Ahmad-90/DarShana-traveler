@@ -226,6 +226,18 @@ export const bookingApi = {
     apiClient.post(`/bookings/${bookingId}/payment`, paymentData),
   shareTrip: (bookingId: string) => apiClient.post(`/bookings/${bookingId}/share`),
   getSharedTrip: (slug: string) => apiClient.get(`/bookings/shared/${slug}`),
+  uploadDocuments: (bookingId: string, formData: FormData) => {
+    // We need to bypass the default JSON content-type for FormData
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    
+    return fetch(`${getBackendUrl()}/api/bookings/${bookingId}/documents`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    }).then(res => res.json());
+  }
 };
 
 // Smart Planner APIs

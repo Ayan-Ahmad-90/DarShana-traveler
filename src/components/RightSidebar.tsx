@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, User, Luggage, Bell, Globe, LogOut, AlertCircle, Users, Shield } from 'lucide-react';
+import { X, User, Luggage, Bell, Globe, LogOut, AlertCircle, Users, Shield, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -73,7 +73,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
       { label: 'My Trips', icon: Luggage, color: 'text-orange-600', path: '/my-trips', },
       { label: 'Festival Alerts', icon: Bell, color: 'text-red-600', path: '/festival-alerts' },
       { label: 'Language', icon: Globe, color: 'text-green-600', path: '/language' },
-      { label: 'Local Guides', icon: Users, color: 'text-purple-600', path: '/guides' },
+      { label: 'Assistant', icon: Bot,  color: 'text-indigo-600', path: '/Assistant' },
       { label: 'Guide portal', icon: Users, color: 'text-indigo-600', path: '/become-guide' },
     ];
 
@@ -140,16 +140,13 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
         ) : (
           <div className="p-4 bg-blue-50 border-b border-stone-100 text-sm">
             <button
-              onClick={() => { navigate('/login'); onClose(); }}
+              onClick={() => { 
+                navigate('/login'); 
+                onClose(); 
+              }}
               className="w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition-colors mb-2"
             >
               Sign In
-            </button>
-            <button
-              onClick={() => { navigate('/register'); onClose(); }}
-              className="w-full px-3 py-2 border border-teal-600 text-teal-600 hover:bg-teal-50 rounded-lg text-xs font-semibold transition-colors"
-            >
-              Register
             </button>
           </div>
         )}

@@ -1,5 +1,5 @@
 // backend/middleware/auth.js
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
   try {
@@ -20,4 +20,4 @@ const auth = (req, res, next) => {
   }
 };
 
-export default auth;
+module.exports = auth;

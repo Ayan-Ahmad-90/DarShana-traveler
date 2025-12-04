@@ -30,13 +30,13 @@ const buildTokens = (user: UserDocument): AuthTokens => {
     roles: user.roles,
     primaryRole: user.primaryRole
   };
-  const accessToken = jwt.sign(payload, environment.jwt.accessSecret, {
-    expiresIn: environment.jwt.accessExpiresIn
+  const accessToken = jwt.sign(payload, environment.jwt.accessSecret as any, {
+    expiresIn: environment.jwt.accessExpiresIn as any
   });
   const refreshToken = jwt.sign(
     { ...payload, version: user.security?.refreshTokenVersion ?? 0 },
-    environment.jwt.refreshSecret,
-    { expiresIn: environment.jwt.refreshExpiresIn }
+    environment.jwt.refreshSecret as any,
+    { expiresIn: environment.jwt.refreshExpiresIn as any }
   );
   return {
     accessToken,

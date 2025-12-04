@@ -1,5 +1,5 @@
-import express from 'express';
-import * as questionController from '../controllers/questionController.js';
+const express = require('express');
+const questionController = require('../controllers/questionController');
 
 const router = express.Router();
 
@@ -11,4 +11,4 @@ router.post('/', questionController.createQuestion);
 router.put('/:id', questionController.updateQuestion);
 router.delete('/:id', questionController.deleteQuestion);
 
-export default router;
+module.exports = router;

@@ -70,7 +70,7 @@ export const createPaymentOrder = async ({ bookingId, method, couponCode, wallet
     });
     payment.providerOrderId = order.id;
     await payment.save();
-    gatewayPayload = order;
+    gatewayPayload = order as any;
   }
 
   if (method === 'stripe' && stripeClient) {
@@ -81,7 +81,7 @@ export const createPaymentOrder = async ({ bookingId, method, couponCode, wallet
     });
     payment.providerOrderId = intent.id;
     await payment.save();
-    gatewayPayload = intent;
+    gatewayPayload = intent as any;
   }
 
   if (method === 'wallet') {
@@ -122,7 +122,7 @@ export const handleStripeWebhook = async (event: Stripe.Event) => {
       const intent = event.data.object as Stripe.PaymentIntent;
       const payment = await Payment.findOne({ providerOrderId: intent.id });
       if (payment) {
-        await markPaymentSuccess(payment._id.toString(), intent.latest_charge ?? undefined, {
+        await markPaymentSuccess(payment._id.toString(), (intent.latest_charge as any) ?? undefined, {
           stripeEventId: event.id
         });
       }
@@ -144,7 +144,7 @@ export const handleStripeWebhook = async (event: Stripe.Event) => {
   }
 };
 
-export const handleRazorpayWebhook = async (payload: Razorpay.WebhookEvent) => {
+export const handleRazorpayWebhook = async (payload: any) => {
   if (payload.event === 'payment.captured') {
     const paymentId = payload.payload.payment.entity.id;
     const payment = await Payment.findOne({ providerPaymentId: paymentId });

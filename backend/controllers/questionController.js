@@ -1,6 +1,6 @@
-import Question from '../models/Question.js';
+const Question = require('../models/Question');
 
-export const getAllQuestions = async (req, res) => {
+exports.getAllQuestions = async (req, res) => {
   try {
     const questions = await Question.find();
     res.json(questions);
@@ -9,7 +9,7 @@ export const getAllQuestions = async (req, res) => {
   }
 };
 
-export const getQuestionsByCategory = async (req, res) => {
+exports.getQuestionsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
     const questions = await Question.find({ category });
@@ -19,7 +19,7 @@ export const getQuestionsByCategory = async (req, res) => {
   }
 };
 
-export const getQuestionById = async (req, res) => {
+exports.getQuestionById = async (req, res) => {
   try {
     const { id } = req.params;
     const question = await Question.findById(id);
@@ -29,7 +29,7 @@ export const getQuestionById = async (req, res) => {
   }
 };
 
-export const createQuestion = async (req, res) => {
+exports.createQuestion = async (req, res) => {
   try {
     const { category, categoryLabel, question, questionHi, answer, answerHi, tags } = req.body;
     const newQuestion = new Question({
@@ -48,7 +48,7 @@ export const createQuestion = async (req, res) => {
   }
 };
 
-export const updateQuestion = async (req, res) => {
+exports.updateQuestion = async (req, res) => {
   try {
     const { id } = req.params;
     const updated = await Question.findByIdAndUpdate(id, req.body, { new: true });
@@ -58,7 +58,7 @@ export const updateQuestion = async (req, res) => {
   }
 };
 
-export const deleteQuestion = async (req, res) => {
+exports.deleteQuestion = async (req, res) => {
   try {
     const { id } = req.params;
     await Question.findByIdAndDelete(id);
@@ -68,7 +68,7 @@ export const deleteQuestion = async (req, res) => {
   }
 };
 
-export const searchQuestions = async (req, res) => {
+exports.searchQuestions = async (req, res) => {
   try {
     const { q, category } = req.query;
     let filter = {};

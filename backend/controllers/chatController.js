@@ -1,7 +1,7 @@
-import ChatHistory from '../models/ChatHistory.js';
-import UserFeedback from '../models/UserFeedback.js';
+const ChatHistory = require('../models/ChatHistory');
+const UserFeedback = require('../models/UserFeedback');
 
-export const saveChatHistory = async (req, res) => {
+exports.saveChatHistory = async (req, res) => {
   try {
     const { userId, conversation, category } = req.body;
     const chat = new ChatHistory({
@@ -16,7 +16,7 @@ export const saveChatHistory = async (req, res) => {
   }
 };
 
-export const getChatHistory = async (req, res) => {
+exports.getChatHistory = async (req, res) => {
   try {
     const { userId } = req.params;
     const history = await ChatHistory.find({ userId }).sort({ createdAt: -1 });
@@ -26,7 +26,7 @@ export const getChatHistory = async (req, res) => {
   }
 };
 
-export const saveFeedback = async (req, res) => {
+exports.saveFeedback = async (req, res) => {
   try {
     const { userId, questionId, responseQuality, relevance, accuracy, comment, liked, disliked } = req.body;
     const feedback = new UserFeedback({
@@ -46,7 +46,7 @@ export const saveFeedback = async (req, res) => {
   }
 };
 
-export const getFeedback = async (req, res) => {
+exports.getFeedback = async (req, res) => {
   try {
     const { userId } = req.params;
     const feedback = await UserFeedback.find({ userId });
@@ -56,7 +56,7 @@ export const getFeedback = async (req, res) => {
   }
 };
 
-export const getStats = async (req, res) => {
+exports.getStats = async (req, res) => {
   try {
     const totalChats = await ChatHistory.countDocuments();
     const totalQuestions = await ChatHistory.aggregate([

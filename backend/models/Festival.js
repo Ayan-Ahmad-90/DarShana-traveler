@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const festivalSchema = new mongoose.Schema({
   name: {
@@ -26,5 +26,5 @@ const festivalSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model('Festival', festivalSchema);
+module.exports = mongoose.model('Festival', festivalSchema);
 

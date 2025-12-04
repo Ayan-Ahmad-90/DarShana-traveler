@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { MapPin, Navigation, Search, Route, Clock, Car, Loader2, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MapPin, Navigation, Search, Route, Clock, Car, Loader2, X, Leaf, ArrowRight } from 'lucide-react';
 
 interface RouteInfo {
   origin: string;
@@ -246,6 +247,51 @@ const RouteMapSection: React.FC = () => {
                   💡 <strong>Pro Tip:</strong> Click "Open in Google Maps" to get turn-by-turn navigation, traffic updates, and alternate routes on your device.
                 </p>
               </div>
+
+              {/* Eco Route Planner CTA */}
+              <Link 
+                to="/sustainable"
+                className="mt-6 block p-5 rounded-2xl bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 hover:border-emerald-400/50 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <Leaf className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">Want full CO₂ data and mode comparison?</p>
+                      <p className="text-sm text-white/60">Compare Train, Bus, Flight emissions • Earn green rewards • Track your carbon footprint</p>
+                    </div>
+                  </div>
+                  <div className="hidden md:flex items-center gap-2 text-emerald-400 group-hover:translate-x-1 transition-transform">
+                    <span className="font-medium">Open Eco Travel Planner</span>
+                    <ArrowRight size={20} />
+                  </div>
+                </div>
+              </Link>
+            </div>
+          )}
+
+          {/* Always visible Eco Banner (when no route shown) */}
+          {!showMap && (
+            <div className="max-w-3xl mx-auto mt-8">
+              <Link 
+                to="/sustainable"
+                className="block p-6 rounded-2xl bg-gradient-to-r from-emerald-600/30 to-cyan-600/30 border border-emerald-500/30 hover:border-emerald-400/50 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <Leaf className="w-7 h-7 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-bold text-white">🌱 View Detailed CO₂ Route Planner</p>
+                      <p className="text-sm text-white/60">Compare emissions across Car, Train, Bus, Flight • Get sustainability scores • Earn eco rewards</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="hidden md:block w-6 h-6 text-emerald-400 group-hover:translate-x-2 transition-transform" />
+                </div>
+              </Link>
             </div>
           )}
         </div>

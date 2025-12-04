@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Menu, X, Plane, Sparkles } from 'lucide-react';
+import { Menu, X, Sparkles } from 'lucide-react';
+import logoImage from '../images/images-map-logo.png';
 
 interface NavbarProps {
   onBookTrip?: () => void;
@@ -25,17 +26,18 @@ const Navbar: React.FC<NavbarProps> = ({ onBookTrip }) => {
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/20 border-b border-white/10"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="flex items-center space-x-2"
+            className="flex items-center gap-3"
           >
-            <div className="relative">
-              <Plane className="h-8 w-8 text-white" />
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full blur opacity-30"></div>
-            </div>
-            <span className="text-xl font-bold text-white tracking-wide">Travel Hub</span>
+            <img 
+              src={logoImage} 
+              alt="Travel Hub Logo" 
+              className="h-12 w-auto object-contain rounded-full bg-white/90 p-1"
+            />
+            <span className="text-2xl font-bold text-white tracking-wide">Travel Hub</span>
           </motion.div>
 
           {/* Desktop Menu */}

@@ -1,7 +1,12 @@
 import React from 'react';
-import { ArrowRight, Users, Leaf, Map, Star, ShieldCheck, CreditCard, Train, Anchor, Mountain,Home as HomeIcon, Camera } from 'lucide-react';
+import { ArrowRight, Star, ShieldCheck, CreditCard, Train, Anchor, Mountain,Home as HomeIcon, Camera } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import HeroSection from '../components/HeroSection';
 import HighlightSlider from '../components/HighlightSlider';
+import KathakaliAssistant from "../components/KathakaliAssistant";
+import GovernmentInitiatives from '../components/GovernmentInitiatives';
+import FamousFood from '../components/FamousFood';
 
 const destinations = [
   {
@@ -42,73 +47,73 @@ const services = [
   { title: 'Monuments', icon: Camera, desc: 'Guided tours of UNESCO World Heritage sites and ancient temples.' },
 ];
 
+const quotes = [
+  { text: "Wherever you go becomes a part of you somehow.", author: "Anita Desai" },
+  { text: "I love to travel, but hate to arrive.", author: "Albert Einstein" },
+  { text: "Travel is never a matter of money, but of courage.", author: "Paulo Coelho" },
+  { text: "Live life with no excuses, travel with no regret.", author: "Oscar Wilde" },
+  { text: "The world is a book and those who do not travel read only one page.", author: "St. Augustine" },
+  { text: "The journey of a thousand miles begins with a single step.", author: "Lao Tzu" }
+];
+
 const Home: React.FC = () => {
   return (
     <div className="flex flex-col">
+     
+
       {/* Highlight Slider */}
       <HighlightSlider />
 
       {/* Hero Section */}
-      <div className="relative h-[60vh] md:h-[75vh] w-full overflow-hidden group">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
-          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1524492412937-b28074a5d7da?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80")' }}
-        >
-          {/* Enhanced gradient overlay: 40% top, fades to 20% bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/30"></div>
-        </div>
-        <div className="relative h-full flex flex-col items-center justify-center text-center px-4 sm:px-6">
-          <div className="space-y-6 animate-fade-in">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white font-serif mb-2 drop-shadow-xl leading-tight tracking-tight">
-              Experience India's Wonders
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-slate-100 max-w-2xl mx-auto font-light drop-shadow-lg">
-              Discover a land of vibrant cultures, spiritual depths, and breathtaking landscapes tailored to your mood.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-5 mt-10">
-            <Link 
-              to="/mood" 
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-8 sm:px-10 py-4 rounded-full font-bold text-base sm:text-lg hover:shadow-2xl transition-all duration-300 shadow-lg hover:scale-105 transform flex items-center justify-center gap-2 group/btn"
-            >
-              <span>Find My Vibe</span>
-              <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
-            </Link>
-            <Link 
-              to="/festivals" 
-              className="bg-white/15 backdrop-blur-md border-2 border-white/40 text-white px-8 sm:px-10 py-4 rounded-full font-bold text-base sm:text-lg hover:bg-white/25 hover:border-white/60 transition-all duration-300 shadow-lg hover:scale-105 transform"
-            >
-              Explore Festivals
-            </Link>
+      <HeroSection />
+     
+      {/* Inspirational Quotes Section - Auto Flow */}
+      <section className="bg-slate-900 text-white py-10 border-y border-slate-800 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 mb-6">
+          <div className="flex items-center gap-3">
+             <div className="h-8 w-1.5 bg-gradient-to-b from-orange-500 to-emerald-500 rounded-full"></div>
+             <h2 className="text-2xl font-serif font-bold text-slate-100">Traveler's Wisdom</h2>
           </div>
         </div>
-      </div>
-
-      {/* Stats Section */}
-      <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div className="p-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-orange-400/30 transition-all duration-300 group">
-            <Users className="w-10 h-10 mx-auto mb-4 text-orange-400 group-hover:scale-110 transition-transform" />
-            <h3 className="text-4xl font-black">50k+</h3>
-            <p className="text-slate-300 text-sm mt-2 font-semibold">Happy Travelers</p>
-          </div>
-          <div className="p-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-emerald-400/30 transition-all duration-300 group">
-            <Map className="w-10 h-10 mx-auto mb-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <h3 className="text-4xl font-black">120+</h3>
-            <p className="text-slate-300 text-sm mt-2 font-semibold">Destinations</p>
-          </div>
-          <div className="p-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-green-400/30 transition-all duration-300 group">
-            <Leaf className="w-10 h-10 mx-auto mb-4 text-green-400 group-hover:scale-110 transition-transform" />
-            <h3 className="text-4xl font-black">2.5T</h3>
-            <p className="text-slate-300 text-sm mt-2 font-semibold">CO₂ Offset</p>
-          </div>
-          <div className="p-6 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-amber-400/30 transition-all duration-300 group">
-            <Star className="w-10 h-10 mx-auto mb-4 text-amber-400 group-hover:scale-110 transition-transform" />
-            <h3 className="text-4xl font-black">4.9/5</h3>
-            <p className="text-slate-300 text-sm mt-2 font-semibold">Satisfaction Rate</p>
-          </div>
+          
+        {/* Auto Scroll Container */}
+        <div className="flex relative w-full">
+            <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-slate-900 to-transparent z-10"></div>
+            <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-slate-900 to-transparent z-10"></div>
+            
+            <motion.div 
+                className="flex gap-5 px-4"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ 
+                    repeat: Infinity, 
+                    ease: "linear", 
+                    duration: 30 
+                }}
+            >
+                {[...quotes, ...quotes].map((quote, index) => (
+                    <div key={index} className="min-w-[300px] md:min-w-[350px] bg-slate-800/40 border border-slate-700/50 p-5 rounded-xl flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+                        <div className="relative">
+                            <span className="text-5xl text-orange-500/20 font-serif leading-none absolute -top-4 -left-2">“</span>
+                            <p className="text-slate-300 text-base italic leading-relaxed pl-3 relative z-10">
+                                {quote.text}
+                            </p>
+                        </div>
+                        <div className="mt-4 flex justify-end items-center gap-2">
+                            <div className="h-px w-6 bg-slate-600"></div>
+                            <span className="text-emerald-400 text-xs font-black uppercase tracking-widest">
+                                {quote.author}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </motion.div>
         </div>
       </section>
+
+      <KathakaliAssistant />
+
+      {/* Famous Food Section */}
+      <FamousFood />
 
       {/* Featured Destinations */}
       <section className="py-24 max-w-7xl mx-auto px-4 w-full">
@@ -180,6 +185,9 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Government Initiatives Section */}
+      <GovernmentInitiatives />
 
       {/* Payment & Safety */}
       <section className="py-16 bg-gradient-to-r from-white via-slate-50 to-white border-t-2 border-slate-200">

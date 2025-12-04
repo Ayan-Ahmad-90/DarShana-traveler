@@ -68,8 +68,8 @@ export const GuestOnly: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    // Redirect to profile or intended destination
-    const from = location.state?.from?.pathname || '/profile';
+    // Redirect to travelhub or intended destination
+    const from = location.state?.from?.pathname || '/travelhub';
     return <Navigate to={from} replace />;
   }
 

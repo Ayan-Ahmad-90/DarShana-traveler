@@ -6,7 +6,8 @@ import { defaultReviews } from '../utils/mockData.js';
 export const listReviews = async (_req: Request, res: Response): Promise<void> => {
   const reviews = await Review.find().populate('user', 'fullName');
   if (reviews.length === 0) {
-    return res.json(successResponse(defaultReviews));
+    res.json(successResponse(defaultReviews));
+    return;
   }
   res.json(successResponse(reviews));
 };

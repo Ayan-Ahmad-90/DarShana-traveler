@@ -1,12 +1,12 @@
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_123',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret',
 });
 
-exports.createOrder = async (amount, currency = 'INR') => {
+export const createOrder = async (amount, currency = 'INR') => {
   const options = {
     amount: amount * 100, // amount in smallest currency unit
     currency,
@@ -21,7 +21,7 @@ exports.createOrder = async (amount, currency = 'INR') => {
   }
 };
 
-exports.verifyPayment = (orderId, paymentId, signature) => {
+export const verifyPayment = (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
   const generated_signature = crypto
     .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'secret')
     .update(orderId + '|' + paymentId)

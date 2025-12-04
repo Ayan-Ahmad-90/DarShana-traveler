@@ -22,18 +22,10 @@ export const env = {
   // Logging
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
   
-  // CORS - Accept both localhost for dev and Vercel domains for production
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,https://dar-shana-traveler-seven.vercel.app,https://darshana-traveler.vercel.app',
+  // CORS - Allow all local development ports and production domains
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*', 
   
   // Feature flags
   ENABLE_EXTERNAL_APIS: process.env.ENABLE_EXTERNAL_APIS === 'true',
   USE_CACHE: process.env.USE_CACHE === 'true',
 };
-
-// Validate required environment variables
-const requiredEnvVars = ['MONGODB_URI'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
-
-if (missingEnvVars.length > 0) {
-  console.warn(`⚠️  Missing environment variables: ${missingEnvVars.join(', ')}`);
-}

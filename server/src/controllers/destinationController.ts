@@ -7,7 +7,8 @@ import { mockDestinations } from '../utils/mockData.js';
 export const getDestinations = async (_req: Request, res: Response): Promise<void> => {
   const destinations = await Destination.find();
   if (destinations.length === 0) {
-    return res.json(successResponse(mockDestinations));
+    res.json(successResponse(mockDestinations));
+    return;
   }
   res.json(successResponse(destinations));
 };
