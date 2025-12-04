@@ -1,9 +1,9 @@
+import { Backpack, Calendar, Leaf, Menu, MoreVertical, Plane, Smile, User, X } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Leaf, Smile, Calendar, Plane, MoreVertical, User } from "lucide-react";
-import RightSidebar from "./RightSidebar";
 import { useRightSidebar } from "../hooks/useRightSidebar";
 import logoImage from "../images/images-map-logo.png";
+import RightSidebar from "./RightSidebar";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +14,7 @@ const Navbar: React.FC = () => {
     { name: "Home", path: "/" },
     { name: "Mood AI", path: "/mood", icon: Smile },
     { name: "Travel Hub", path: "/travelhub", icon: Plane },  // ✔️ FIXED ROUTE
+    { name: "Essentials", path: "/travel-essentials", icon: Backpack },
     // { name: "Safety", path: "/safety-guide", icon: Shield },
     { name: "Cultural Odyssey", path: "/festivals", icon: Calendar },
     { name: "Eco Travel", path: "/sustainable", icon: Leaf },

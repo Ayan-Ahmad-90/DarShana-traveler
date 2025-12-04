@@ -1,43 +1,44 @@
-import React from "react";
-import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
-import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import React from "react";
+import { HashRouter, Route, Routes, useLocation } from "react-router-dom";
 
-import { AuthProvider } from "./context/AuthContext";
-import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import { AuthProvider } from "./context/AuthContext";
 
 // Auth Components
-import { RequireAuth, RequireAdmin, GuestOnly } from "./components/Auth/ProtectedRoute";
+import { GuestOnly, RequireAdmin, RequireAuth } from "./components/Auth/ProtectedRoute";
 
 // Pages
-import Home from "./pages/Home";
-import MoodAnalyzer from "./pages/MoodAnalyzer";
-import TravelHub from "./pages/TravelHub"; // ✔️ Correct Import
-import Festivals from "./pages/Festivals";
-import Sustainable from "./pages/Sustainable";
-import Assistant from "./pages/Assistant";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import MyTrips from "./pages/MyTrips";
-import FestivalAlerts from "./pages/FestivalAlerts";
-import LanguageSelector from "./pages/LanguageSelector";
-import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
-import LocalGuideDashboard from "./pages/LocalGuideDashboard";
+import LoginOverlay from "./components/Auth/LoginOverlay";
 import BecomeGuide from "./components/Guide/BecomeGuide";
-import GuideListing from "./pages/GuideListing";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import UIStyleGuide from "./pages/UIStyleGuide";
-import Booking from "./pages/Booking";
+import SafetyModal from "./components/SafetyModal";
 import YatraShayak from "./components/YatraShayak";
 import AdminDashboard from "./pages/AdminDashboard";
-import NotAuthorized from "./pages/NotAuthorized";
+import Assistant from "./pages/Assistant";
+import Booking from "./pages/Booking";
+import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
+import FestivalAlerts from "./pages/FestivalAlerts";
+import Festivals from "./pages/Festivals";
+import ForgotPassword from "./pages/ForgotPassword";
 import GreenRoutePlanner from "./pages/GreenRoutePlanner";
+import GuideListing from "./pages/GuideListing";
+import Home from "./pages/Home";
+import LanguageSelector from "./pages/LanguageSelector";
+import LocalGuideDashboard from "./pages/LocalGuideDashboard";
+import Login from "./pages/Login";
+import MoodAnalyzer from "./pages/MoodAnalyzer";
+import MyTrips from "./pages/MyTrips";
+import NotAuthorized from "./pages/NotAuthorized";
+import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 import SafetyDashboard from "./pages/SafetyDashboard";
 import SafetyGuide from "./pages/SafetyGuide";
-import SafetyModal from "./components/SafetyModal";
-import LoginOverlay from "./components/Auth/LoginOverlay";
+import Sustainable from "./pages/Sustainable";
+import TravelEssentials from "./pages/TravelEssentials";
+import TravelHub from "./pages/TravelHub"; // ✔️ Correct Import
+import UIStyleGuide from "./pages/UIStyleGuide";
 
 
 // Auto scroll to top when route changes
@@ -80,6 +81,7 @@ const App: React.FC = () => {
             <Route path="/green-route-planner" element={<GreenRoutePlanner />} />
             <Route path="/safety" element={<SafetyDashboard />} />
             <Route path="/safety-guide" element={<SafetyGuide />} />
+            <Route path="/travel-essentials" element={<TravelEssentials />} />
             <Route path="/assistant" element={<Assistant />} />
             <Route path="/festival-alerts" element={<FestivalAlerts />} />
             <Route path="/language" element={<LanguageSelector />} />
