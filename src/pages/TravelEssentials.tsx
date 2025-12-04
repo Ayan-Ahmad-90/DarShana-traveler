@@ -1,8 +1,6 @@
 import { Award, ChevronRight, Clock, DollarSign, Filter, MapPin, MapPinned, Search, Star, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
 // TypeScript Interfaces
 interface Transport {
   id: string;
@@ -123,10 +121,9 @@ const localFoodDatabase: LocalFood[] = [
 interface SearchBarProps {
   placeholder: string;
   onSearch: (query: string) => void;
-  onFilter: (filter: any) => void;
 }
 
-const UnifiedSearchBar: React.FC<SearchBarProps> = ({ placeholder, onSearch, onFilter }) => {
+const UnifiedSearchBar: React.FC<SearchBarProps> = ({ placeholder, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
@@ -419,11 +416,7 @@ const LocalFoodCard: React.FC<{ food: LocalFood; onBook: (id: string) => void }>
 const TravelEssentials: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'transport' | 'stay' | 'food'>('food');
   const [selectedCity, setSelectedCity] = useState('');
-  const [transportData, setTransportData] = useState<Transport[]>([]);
-  const [stayData, setStayData] = useState<Stay[]>([]);
-  const [foodData, setFoodData] = useState<LocalFood[]>([]);
   const [filteredFood, setFilteredFood] = useState<LocalFood[]>(localFoodDatabase);
-  const [loading, setLoading] = useState(false);
 
   const cities = [...new Set(localFoodDatabase.map(f => f.city))].sort();
 
@@ -513,7 +506,6 @@ const TravelEssentials: React.FC = () => {
             <UnifiedSearchBar
               placeholder="Search from, to, or transport type..."
               onSearch={handleSearch}
-              onFilter={() => {}}
             />
             <div className="space-y-5">
               {sampleTransport.map(transport => (
@@ -529,7 +521,6 @@ const TravelEssentials: React.FC = () => {
             <UnifiedSearchBar
               placeholder="Search location, hotel name, or city..."
               onSearch={handleSearch}
-              onFilter={() => {}}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sampleStay.map(stay => (
@@ -545,7 +536,6 @@ const TravelEssentials: React.FC = () => {
             <UnifiedSearchBar
               placeholder="Search dish name, shop, or city..."
               onSearch={handleSearch}
-              onFilter={() => {}}
             />
 
             {/* City Filter */}
