@@ -1,0 +1,46 @@
+import { Router } from 'express';
+import searchRoutes from './searchRoutes.js';
+import destinationRoutes from './destinationRoutes.js';
+import categoryRoutes from './categoryRoutes.js';
+import packageRoutes from './packageRoutes.js';
+import galleryRoutes from './galleryRoutes.js';
+import featureRoutes from './featureRoutes.js';
+import reviewRoutes from './reviewRoutes.js';
+import blogRoutes from './blogRoutes.js';
+import contactRoutes from './contactRoutes.js';
+import authRoutes from '../modules/auth/index.js';
+import paymentRoutes from '../modules/payments/index.js';
+import walletRoutes from '../modules/wallet/index.js';
+import couponRoutes from '../modules/coupon/index.js';
+import taxRoutes from '../modules/tax/index.js';
+import invoiceRoutes from '../modules/invoice/index.js';
+import ticketRoutes from '../modules/ticket/index.js';
+import supportRoutes from '../modules/support/index.js';
+import guideRoutes from '../modules/guide/index.js';
+import bookingRoutes from '../modules/booking/index.js';
+import adminRoutes from '../modules/admin/index.js';
+
+const router = Router();
+
+router.use('/auth', authRoutes);
+router.use('/search', searchRoutes);
+router.use('/destinations', destinationRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/packages', packageRoutes);
+router.use('/gallery', galleryRoutes);
+router.use('/features', featureRoutes);
+router.use('/reviews', reviewRoutes);
+router.use('/blogs', blogRoutes);
+router.use('/contact', contactRoutes);
+router.use('/bookings', bookingRoutes);
+router.use('/payments', paymentRoutes);
+router.use('/wallet', walletRoutes);
+router.use('/coupons', couponRoutes);
+router.use('/taxes', taxRoutes);
+router.use('/invoices', invoiceRoutes);
+router.use('/tickets', ticketRoutes);
+router.use('/support', supportRoutes);
+router.use('/guides', guideRoutes);
+router.use('/admin', adminRoutes);
+
+export default router;
