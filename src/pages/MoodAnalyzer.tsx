@@ -140,6 +140,9 @@ const MoodAnalyzer: React.FC = () => {
   const [selectedDestinationIdx, setSelectedDestinationIdx] = useState<number | null>(0);
   const [faceCount, setFaceCount] = useState<number | null>(null);
   const [detectionError, setDetectionError] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const faceDetectionStartTimeRef = useRef<number | null>(null);
+  const [isAutoAnalyzing, setIsAutoAnalyzing] = useState(false);
 
   // Sync face count from detection hook
   useEffect(() => {
@@ -365,6 +368,18 @@ const MoodAnalyzer: React.FC = () => {
     }
   }, [isCameraOpen, initCamera]);
 
+  const capturePhoto = useCallback(() => {
+    if (videoRef.current) {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      setImage(dataUrl);
+      stopCamera();
+    }
+  }, [stopCamera]);
+
   // Detect faces from video stream when camera is active
   useEffect(() => {
     if (!isCameraOpen || !cameraStreamRef.current || !faceDetection.modelsLoaded) {
@@ -376,7 +391,24 @@ const MoodAnalyzer: React.FC = () => {
       if (videoRef.current && !isDetectingRef.current) {
         isDetectingRef.current = true;
         try {
-          await faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+          const count = await faceDetection.detectFacesFromVideo(videoRef as React.RefObject<HTMLVideoElement>);
+          
+          if (count > 0) {
+            if (!faceDetectionStartTimeRef.current) {
+              faceDetectionStartTimeRef.current = Date.now();
+            }
+            const elapsed = Date.now() - faceDetectionStartTimeRef.current;
+            const remaining = Math.max(0, 5000 - elapsed);
+            setCountdown(Math.ceil(remaining / 1000));
+
+            if (remaining === 0 && !isAutoAnalyzing) {
+              setIsAutoAnalyzing(true);
+              capturePhoto();
+            }
+          } else {
+            faceDetectionStartTimeRef.current = null;
+            setCountdown(null);
+          }
         } finally {
           isDetectingRef.current = false;
         }
@@ -386,20 +418,10 @@ const MoodAnalyzer: React.FC = () => {
     return () => {
       console.log('🛑 Stopping face detection interval');
       clearInterval(intervalId);
+      faceDetectionStartTimeRef.current = null;
+      setCountdown(null);
     };
-  }, [isCameraOpen, faceDetection, videoRef]);
-
-  const capturePhoto = () => {
-    if (videoRef.current) {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
-      const dataUrl = canvas.toDataURL('image/jpeg');
-      setImage(dataUrl);
-      stopCamera();
-    }
-  };
+  }, [isCameraOpen, faceDetection, videoRef, capturePhoto, isAutoAnalyzing]);
 
   // Initialize face detection models on mount and ensure camera stops on unmount
   useEffect(() => {
@@ -586,6 +608,17 @@ const MoodAnalyzer: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // Auto-analyze effect
+  useEffect(() => {
+    if (image && isAutoAnalyzing && !loading) {
+      analyzeAI().finally(() => {
+         setIsAutoAnalyzing(false);
+         setCountdown(null);
+         faceDetectionStartTimeRef.current = null;
+      });
+    }
+  }, [image, isAutoAnalyzing, loading]);
 
   async function payAI() {
     setIsPayingAI(true);
@@ -841,6 +874,17 @@ const MoodAnalyzer: React.FC = () => {
                               <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold border border-white/20 flex items-center gap-2">
                                 <Users size={16} className="text-orange-400" />
                                 {faceCount === 0 ? 'No faces' : `${faceCount} face${faceCount > 1 ? 's' : ''} detected`}
+                              </div>
+                            )}
+
+                            {countdown !== null && countdown > 0 && (
+                              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none flex flex-col items-center">
+                                <div className="text-9xl font-bold text-white drop-shadow-2xl animate-pulse">
+                                  {countdown}
+                                </div>
+                                <div className="text-white text-xl font-semibold mt-4 text-center drop-shadow-md bg-black/30 px-4 py-1 rounded-full backdrop-blur-sm">
+                                  Auto-analyzing...
+                                </div>
                               </div>
                             )}
                             

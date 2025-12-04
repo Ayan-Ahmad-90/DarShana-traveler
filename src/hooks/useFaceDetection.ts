@@ -861,11 +861,11 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
 
       // Load each model with its own try/catch so we can report corrupt/partial downloads
       try {
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODELS_PATH);
-        console.log('✓ Loaded ssdMobilenetv1');
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_PATH);
+        console.log('✓ Loaded tinyFaceDetector');
       } catch (err) {
-        console.error('Failed to load ssdMobilenetv1 from', MODELS_PATH, err);
-        throw new Error('ssdMobilenetv1 failed to load');
+        console.error('Failed to load tinyFaceDetector from', MODELS_PATH, err);
+        throw new Error('tinyFaceDetector failed to load');
       }
 
       try {
@@ -957,7 +957,7 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
       // Detect faces with expressions
       console.log('Detecting faces...');
       const detections = await faceapi
-        .detectAllFaces(image)
+        .detectAllFaces(image, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceExpressions();
 
@@ -1097,7 +1097,7 @@ export function useFaceDetection(): UseFaceDetectionReturnV2 {
     }
 
     try {
-      const detections = await faceapi.detectAllFaces(videoRef.current);
+      const detections = await faceapi.detectAllFaces(videoRef.current, new faceapi.TinyFaceDetectorOptions());
       const count = detections?.length || 0;
       setFaceCount(count);
       console.log(`👤 Detected ${count} face(s) in video`);

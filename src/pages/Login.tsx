@@ -60,8 +60,13 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     try {
       await login(loginEmail, loginPassword);
 
-      if (onClose) onClose(); // Close modal
-      else navigate("/travelhub");
+      if (loginEmail === 'admin@darshana.com') {
+        navigate('/admin');
+        if (onClose) onClose();
+      } else {
+        if (onClose) onClose(); // Close modal
+        else navigate("/travelhub");
+      }
     } catch (err: any) {
       setError(err.message || "Invalid credentials");
     }

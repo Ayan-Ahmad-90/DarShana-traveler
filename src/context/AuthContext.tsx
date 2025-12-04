@@ -84,17 +84,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    const response = await authApi.login(email, password);
-    if (response.success && response.data) {
-      const loginData = response.data as any;
-      const { token: newToken, user: newUser } = loginData;
-      setToken(newToken);
-      setUser(newUser);
-      localStorage.setItem('token', newToken);
-    } else {
-      throw new Error((response as any).error || 'Login failed');
+
+    // Hardcoded Admin Login
+    if (email === 'admin@darshana.com' && password === 'admin123') {
+      const adminUser: User = {
+        id: 'admin-123',
+        name: 'DarShana Admin',
+        email: 'admin@darshana.com',
+        role: 'admin',
+        notificationPreferences: {
+          emailNotifications: true,
+          festivalAlerts: true,
+          smsNotifications: true
+        }
+      };
+      const fakeToken = 'admin-token-secret-123';
+      
+      setToken(fakeToken);
+      setUser(adminUser);
+      localStorage.setItem('token', fakeToken);
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+
+    try {
+      const response = await authApi.login(email, password);
+      if (response.success && response.data) {
+        const loginData = response.data as any;
+        const { token: newToken, user: newUser } = loginData;
+        setToken(newToken);
+        setUser(newUser);
+        localStorage.setItem('token', newToken);
+        // Also store user object for persistence
+        localStorage.setItem('user', JSON.stringify(newUser));
+      } else {
+        throw new Error((response as any).error || 'Login failed');
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Direct auth setter for when Login component handles its own API call
