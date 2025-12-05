@@ -140,6 +140,8 @@ export const authApi = {
   register: (data: any) => apiClient.post('/auth/register', data),
   login: (email: string, password: string) =>
     apiClient.post('/auth/login', { email, password }),
+  requestOtp: (identifier: string, password?: string) => apiClient.post('/auth/request-otp', { identifier, password }),
+  verifyOtp: (identifier: string, otp: string) => apiClient.post('/auth/verify-otp', { identifier, otp }),
   forgotPassword: (email: string) => apiClient.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) =>
     apiClient.put(`/auth/reset-password/${token}`, { password }),

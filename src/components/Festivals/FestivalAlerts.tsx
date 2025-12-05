@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import type { Notification, Festival } from '../../types';
-import { Bell, MapPin, Calendar, Zap } from 'lucide-react';
+import { Bell, Calendar, MapPin, Thermometer, Wind, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import type { Festival, Notification } from '../../types';
 
 const FestivalAlerts: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [festivals, setFestivals] = useState<Festival[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [weatherById, setWeatherById] = useState<Record<string, { temp: number; wind: number; label: string }>>({});
+  const [mapQuery, setMapQuery] = useState('India festivals');
 
   useEffect(() => {
     fetchNotifications();
@@ -25,31 +27,8 @@ const FestivalAlerts: React.FC = () => {
       setUnreadCount(data.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
-      // Mock data
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          userId: 'user1',
-          type: 'festival_alert',
-          title: 'Diwali in Delhi',
-          message: 'Diwali celebrations are coming up on November 1st',
-          relatedId: 'festival1',
-          read: false,
-          createdAt: new Date(),
-        },
-        {
-          id: '2',
-          userId: 'user1',
-          type: 'festival_alert',
-          title: 'Holi in Mathura',
-          message: 'Experience colorful Holi celebrations in the spiritual town of Mathura',
-          relatedId: 'festival2',
-          read: false,
-          createdAt: new Date(),
-        },
-      ];
-      setNotifications(mockNotifications);
-      setUnreadCount(mockNotifications.filter((n) => !n.read).length);
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
@@ -64,6 +43,11 @@ const FestivalAlerts: React.FC = () => {
       });
       const data = await response.json();
       setFestivals(data);
+      if (Array.isArray(data) && data.length) {
+        const firstUpcoming = data.find((f: Festival) => new Date(f.startDate) > new Date());
+        setMapQuery(firstUpcoming?.location || firstUpcoming?.name || data[0].location || 'India festivals');
+        hydrateWeather(data);
+      }
     } catch (error) {
       console.error('Failed to fetch festivals:', error);
       // Mock data
@@ -130,6 +114,61 @@ const FestivalAlerts: React.FC = () => {
         },
       ];
       setFestivals(mockFestivals);
+      hydrateWeather(mockFestivals);
+      setMapQuery(mockFestivals[0]?.location || 'India festivals');
+    }
+  };
+
+  const coordsByRegion: Record<string, { lat: number; lon: number }> = {
+    india: { lat: 20.5937, lon: 78.9629 },
+    delhi: { lat: 28.6139, lon: 77.209 },
+    mathura: { lat: 27.4924, lon: 77.6737 },
+    kerala: { lat: 10.8505, lon: 76.2711 },
+    rajasthan: { lat: 26.9124, lon: 75.7873 },
+    nagaland: { lat: 26.1584, lon: 94.5624 },
+    odisha: { lat: 20.9517, lon: 85.0985 },
+    goa: { lat: 15.2993, lon: 74.124 },
+    kutch: { lat: 23.7337, lon: 69.8597 },
+  };
+
+  const pickCoords = (location: string) => {
+    const key = location.toLowerCase();
+    if (key.includes('mathura')) return coordsByRegion.mathura;
+    if (key.includes('delhi')) return coordsByRegion.delhi;
+    if (key.includes('kerala')) return coordsByRegion.kerala;
+    if (key.includes('rajasthan') || key.includes('pushkar')) return coordsByRegion.rajasthan;
+    if (key.includes('nagaland')) return coordsByRegion.nagaland;
+    if (key.includes('odisha')) return coordsByRegion.odisha;
+    if (key.includes('goa')) return coordsByRegion.goa;
+    if (key.includes('kutch')) return coordsByRegion.kutch;
+    return coordsByRegion.india;
+  };
+
+  const hydrateWeather = async (list: Festival[]) => {
+    const slice = list.slice(0, 6); // limit requests
+    const nextWeather: Record<string, { temp: number; wind: number; label: string }> = {};
+    await Promise.all(
+      slice.map(async (fest) => {
+        try {
+          const coords = pickCoords(fest.location || '');
+          const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`
+          );
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data?.current_weather) return;
+          nextWeather[fest.id] = {
+            temp: data.current_weather.temperature,
+            wind: data.current_weather.windspeed,
+            label: `Updated ${new Date(data.current_weather.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+          };
+        } catch (err) {
+          // ignore per-festival weather failures
+        }
+      })
+    );
+    if (Object.keys(nextWeather).length) {
+      setWeatherById((prev) => ({ ...prev, ...nextWeather }));
     }
   };
 
@@ -215,6 +254,24 @@ const FestivalAlerts: React.FC = () => {
           </div>
         </div>
 
+        {/* Map spotlight */}
+        <div className="mb-10 bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Location spotlight</p>
+              <p className="text-sm font-semibold text-gray-800">{mapQuery}</p>
+            </div>
+            <span className="text-xs text-gray-500">Tap any festival card to update</span>
+          </div>
+          <iframe
+            title={`Map of ${mapQuery}`}
+            src={`https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`}
+            className="w-full h-64 md:h-80"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Notifications Sidebar */}
           <div className="lg:col-span-1">
@@ -251,7 +308,10 @@ const FestivalAlerts: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-600 text-center py-8">No alerts yet</p>
+                <div className="text-center py-8 text-sm text-gray-600 space-y-2">
+                  <p>No alerts yet.</p>
+                  <p className="text-gray-500">Live alerts will appear here when your backend sends them.</p>
+                </div>
               )}
             </div>
           </div>
@@ -271,6 +331,7 @@ const FestivalAlerts: React.FC = () => {
                     <div
                       key={festival.id}
                       className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
+                      onClick={() => setMapQuery(festival.location || festival.name)}
                     >
                       <img
                         src={festival.image}
@@ -301,6 +362,30 @@ const FestivalAlerts: React.FC = () => {
                         </div>
 
                         <p className="text-gray-700 mb-3">{festival.description}</p>
+
+                        <div className="rounded-lg overflow-hidden border border-gray-200 mb-4">
+                          <iframe
+                            title={`Map of ${festival.location}`}
+                            src={`https://www.google.com/maps?q=${encodeURIComponent(festival.location)}&output=embed`}
+                            className="w-full h-40"
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          />
+                        </div>
+
+                        {weatherById[festival.id] && (
+                          <div className="flex items-center gap-4 text-sm text-gray-700 mb-3">
+                            <div className="flex items-center gap-1">
+                              <Thermometer size={16} className="text-orange-600" />
+                              {Math.round(weatherById[festival.id].temp)}°C
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Wind size={16} className="text-orange-600" />
+                              {Math.round(weatherById[festival.id].wind)} km/h
+                            </div>
+                            <span className="text-xs text-gray-500">{weatherById[festival.id].label}</span>
+                          </div>
+                        )}
 
                         <p className="text-sm text-gray-600 mb-4">
                           <span className="font-semibold">Significance:</span>{' '}

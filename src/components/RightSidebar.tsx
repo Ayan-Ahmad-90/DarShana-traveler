@@ -1,28 +1,56 @@
-import React, { useEffect } from 'react';
-import { X, User, Luggage, Bell, Globe, LogOut, AlertCircle, Users, Shield, Bot } from 'lucide-react';
+import {
+  AlertCircle,
+  Bot,
+  Compass,
+  Globe,
+  Heart,
+  LogOut,
+  Luggage,
+  Shield,
+  Sparkles,
+  User,
+  Users,
+  X,
+} from 'lucide-react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-interface RightSidebarProps {
+type RightSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-}
+};
+
+const quickActions = [
+  { label: 'Trips', icon: Luggage, path: '/my-trips' },
+  { label: 'Explore', icon: Compass, path: '/travelhub' },
+  { label: 'Rewards', icon: Heart, path: '/rewards' },
+  { label: 'Assistant', icon: Bot, path: '/assistant' },
+  { label: 'Guide Portal', icon: Users, path: '/guide-dashboard' },
+];
+
+const menuItems = [
+  { label: 'Home', icon: Sparkles, path: '/', color: 'text-amber-300' },
+  { label: 'My Profile', icon: User, path: '/profile', color: 'text-slate-500' },
+  { label: 'Guide Portal', icon: Users, path: '/guide-dashboard', color: 'text-blue-400' },
+  { label: 'Language', icon: Globe, path: '/language', color: 'text-cyan-400' },
+  { label: 'Festival Alerts', icon: Sparkles, path: '/festival-alerts', color: 'text-amber-400' },
+  { label: 'Travel Hub', icon: Globe, path: '/travelhub', color: 'text-cyan-300' },
+  { label: 'Essentials', icon: Luggage, path: '/travel-essentials', color: 'text-emerald-300' },
+  { label: 'Eco Travel', icon: Heart, path: '/sustainable', color: 'text-lime-200' },
+  { label: 'Local Guides', icon: Compass, path: '/guides', color: 'text-blue-200' },
+  { label: 'Admin Dashboard', icon: Shield, path: '/admin', color: 'text-rose-400' },
+];
 
 const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const { isAuthenticated, user, logout, deleteAccount } = useAuth();
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Close on Escape key
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      window.addEventListener('keydown', handleEscape);
-      return () => window.removeEventListener('keydown', handleEscape);
-    }
-  }, [isOpen, onClose]);
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    onClose();
+  };
 
   const handleLogout = () => {
     logout();
@@ -31,169 +59,149 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      return;
-    }
-
-    setIsDeleting(true);
     try {
-      // Simulated API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      logout();
+      setIsDeleting(true);
+      await deleteAccount();
       onClose();
       navigate('/');
-    } catch (err) {
-      alert('Failed to delete account');
+    } catch (error) {
+      console.error('Failed to delete account', error);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  interface MenuItem {
-    label: string;
-    icon: React.ComponentType<{ size?: number; className?: string }>;
-    color: string;
-    path: string;
-    requiresAuth?: boolean;
-  }
-
-  const handleNavigate = (path: string, requiresAuth = false) => {
-    if (requiresAuth && !isAuthenticated) {
-      navigate('/login');
-      onClose();
-      return;
-    }
-    navigate(path);
-    onClose();
-  };
-
-  const menuItems: MenuItem[] = React.useMemo(() => {
-    const base: MenuItem[] = [
-      { label: 'My Profile', icon: User, color: 'text-blue-600', path: '/profile', requiresAuth: true },
-      { label: 'My Trips', icon: Luggage, color: 'text-orange-600', path: '/my-trips', },
-      { label: 'Festival Alerts', icon: Bell, color: 'text-red-600', path: '/festival-alerts' },
-      { label: 'Language', icon: Globe, color: 'text-green-600', path: '/language' },
-      { label: 'Assistant', icon: Bot,  color: 'text-indigo-600', path: '/Assistant' },
-      { label: 'Guide portal', icon: Users, color: 'text-indigo-600', path: '/become-guide' },
-    ];
-
-    base.push({ label: 'Admin Dashboard', icon: Shield, color: 'text-slate-700', path: '/admin' });
-
-    return base;
-  }, [isAuthenticated]);
-
-  // Map to onClick handlers when rendering
-  // (the rendering code below expects menuItems to contain icon/color/label and uses item.onClick;
-  //  we attach onClick here to keep render simple)
-  const menuItemsWithHandlers = menuItems.map(it => ({
-    ...it,
-    onClick: () => handleNavigate(it.path, it.requiresAuth),
-  }));
-
   return (
     <>
-      {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar Drawer */}
       <div
-        className={`fixed top-0 right-0 h-screen w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed top-0 right-0 h-screen w-[23rem] bg-gradient-to-b from-white via-slate-50 to-slate-100 text-slate-900 z-50 transform transition-transform duration-300 ease-in-out overflow-y-auto shadow-[0_20px_60px_rgba(0,0,0,0.25)] border-l border-slate-200 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-stone-100 sticky top-0 bg-white">
-          <h2 className="text-base font-semibold text-stone-800">Menu</h2>
+        <div className="flex items-center justify-between px-5 py-4 sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            <h2 className="text-base font-semibold tracking-tight">DarShana Control</h2>
+          </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-stone-100 rounded-lg transition text-stone-600 hover:text-stone-800"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 transition text-slate-700"
             aria-label="Close menu"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* User Profile Section */}
+        {/* User block */}
         {isAuthenticated && user ? (
-          <div className="p-4 bg-gradient-to-r from-teal-50 to-blue-50 border-b border-stone-100 text-sm">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center">
-                <User size={20} className="text-white" />
+          <div className="px-5 py-4 bg-white border-b border-slate-200">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-400 flex items-center justify-center shadow-inner">
+                <User size={22} className="text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-stone-900 text-sm">{user.name}</h3>
-                <p className="text-xs text-stone-600">{user.email}</p>
+                <p className="text-xs text-slate-500">Welcome back</p>
+                <h3 className="text-sm font-semibold text-slate-900">{user.name}</h3>
+                <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
               </div>
             </div>
             <button
-              onClick={() => { navigate('/profile'); onClose(); }}
-              className="w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition-colors"
+              onClick={() => handleNavigate('/profile')}
+              className="mt-3 w-full px-3 py-2 bg-slate-900 text-white hover:bg-slate-800 border border-slate-900/10 text-xs font-semibold rounded-lg transition"
             >
               Edit Profile
             </button>
           </div>
         ) : (
-          <div className="p-4 bg-blue-50 border-b border-stone-100 text-sm">
+          <div className="px-5 py-4 bg-white border-b border-slate-200">
+            <p className="text-xs text-slate-600 mb-2">Sign in to sync trips, rewards, and alerts.</p>
             <button
-              onClick={() => { 
-                navigate('/login'); 
-                onClose(); 
-              }}
-              className="w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition-colors mb-2"
+              onClick={() => handleNavigate('/login')}
+              className="w-full px-3 py-2 bg-gradient-to-r from-amber-500 to-pink-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-amber-500/20"
             >
               Sign In
             </button>
           </div>
         )}
 
-        {/* Menu Items */}
-        <div className="p-4 space-y-1.5 text-sm">
-          {menuItemsWithHandlers.map((item) => {
-            const Icon = item.icon;
+        {/* Quick actions */}
+        <div className="px-5 py-3 grid grid-cols-2 gap-2 border-b border-slate-200 bg-slate-50">
+          {quickActions.map((action) => {
+            const Icon = action.icon;
             return (
               <button
-                key={item.label}
-                onClick={item.onClick}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-700 hover:bg-stone-50 transition-colors group"
+                key={action.label}
+                onClick={() => handleNavigate(action.path)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-left text-xs font-semibold transition text-slate-800"
               >
-                <Icon size={18} className={`${item.color} group-hover:scale-110 transition-transform`} />
-                <span className="font-semibold text-sm">{item.label}</span>
+                <Icon className="w-4 h-4 text-amber-500" />
+                <span>{action.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Danger Zone */}
+        {/* Menu */}
+        <div className="p-5 space-y-2">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Navigate</p>
+          <div className="space-y-1.5">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.label}
+                  onClick={() => handleNavigate(item.path)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-amber-300 hover:bg-amber-50/60 transition group text-slate-800"
+                >
+                  <span className="p-2 rounded-lg bg-slate-100 group-hover:bg-amber-100 transition">
+                    <Icon size={18} className={`group-hover:scale-110 transition-transform ${item.color}`} />
+                  </span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+                    <span className="text-[11px] text-slate-500">Tap to open</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Danger zone */}
         {isAuthenticated && user && (
-          <div className="p-4 border-t border-stone-100 space-y-2 text-sm">
+          <div className="px-5 pb-5 pt-3 border-t border-slate-200 bg-white space-y-2">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-700 hover:bg-red-50 hover:text-red-600 transition-colors group"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 hover:bg-red-50 hover:border-red-200 text-slate-800 transition group"
             >
-              <LogOut size={18} className="group-hover:scale-110 transition-transform" />
-              <span className="font-semibold text-sm">Logout</span>
+              <LogOut size={18} className="text-red-400 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-semibold">Logout</span>
             </button>
             <button
               onClick={handleDeleteAccount}
               disabled={isDeleting}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors group disabled:opacity-50"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 hover:bg-red-100 text-red-700 transition group disabled:opacity-60"
             >
               <AlertCircle size={18} className="group-hover:scale-110 transition-transform" />
-              <span className="font-semibold text-sm">{isDeleting ? 'Deleting...' : 'Delete Account'}</span>
+              <span className="text-sm font-semibold">{isDeleting ? 'Deleting…' : 'Delete Account'}</span>
             </button>
           </div>
         )}
 
-        {/* Footer Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-stone-100 bg-stone-50 text-xs">
-          <p className="text-[11px] text-stone-500 text-center">
-            🇮🇳 DarShana Travel Explorer v1.0
-          </p>
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 flex items-center justify-between">
+          <span>🇮🇳 DarShana Travel Explorer v1.0</span>
+          <span className="flex items-center gap-1">
+            <Shield className="w-4 h-4" />
+            Secure
+          </span>
         </div>
       </div>
     </>

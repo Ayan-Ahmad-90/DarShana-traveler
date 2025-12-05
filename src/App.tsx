@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 
 // Auth Components
-import { GuestOnly, RequireAdmin, RequireAuth } from "./components/Auth/ProtectedRoute";
+import { GuestOnly, RequireAuth } from "./components/Auth/ProtectedRoute";
 
 // Pages
 import LoginOverlay from "./components/Auth/LoginOverlay";
@@ -98,11 +98,11 @@ const App: React.FC = () => {
             <Route path="/my-trips" element={<RequireAuth><MyTrips /></RequireAuth>} />
             <Route path="/rewards" element={<RequireAuth><EcoRewardsDashboard /></RequireAuth>} />
             <Route path="/become-guide" element={<RequireAuth><BecomeGuide /></RequireAuth>} />
-            <Route path="/guide-dashboard" element={<RequireAuth><LocalGuideDashboard /></RequireAuth>} />
+            <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/booking" element={<Booking />} />
             
             {/* Admin Only Routes */}
-            <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
         {/* Footer */}
