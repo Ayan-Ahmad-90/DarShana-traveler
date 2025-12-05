@@ -197,7 +197,6 @@ const MoodAnalyzer: React.FC = () => {
       setFaceCount(faceDetection.faceCount);
     }
   }, [faceDetection.faceCount]);
-  const [selectedFAQIndex, setSelectedFAQIndex] = useState<number>(0);
 
   // Manual multi-step analyzer states
   const [step, setStep] = useState<number>(0);
@@ -453,7 +452,6 @@ const MoodAnalyzer: React.FC = () => {
 
       setResult(aiResult);
       setSelectedDestinationIdx(0);
-      setSelectedFAQIndex(0);
       setAIStep(1);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Analysis failed';
@@ -858,7 +856,6 @@ const MoodAnalyzer: React.FC = () => {
                             whileHover={{ y: -8 }}
                             onClick={() => {
                               setSelectedDestinationIdx(idx);
-                              setSelectedFAQIndex(0);
                             }}
                             className={`relative group rounded-3xl overflow-hidden shadow-lg transition-all duration-300 text-left h-full flex flex-col ${
                               selectedDestinationIdx === idx
@@ -983,7 +980,6 @@ const MoodAnalyzer: React.FC = () => {
                           clearCapturedImage();
                           setPaidAI(false);
                           setSelectedDestinationIdx(0);
-                          setSelectedFAQIndex(0);
                         }}
                       >
                         Try Again
@@ -1064,7 +1060,6 @@ const MoodAnalyzer: React.FC = () => {
                           setPaidAI(false);
                           clearCapturedImage();
                           setSelectedDestinationIdx(0);
-                          setSelectedFAQIndex(0);
                           setIsPayingAI(false);
                         }}
                       >
