@@ -46,9 +46,9 @@ function hasUncommittedChanges() {
     
     return {
       hasChanges: !!(unstagedChanges || stagedChanges || untrackedFiles),
-      unstaged: unstagedChanges ? unstagedChanges.split('\n') : [],
-      staged: stagedChanges ? stagedChanges.split('\n') : [],
-      untracked: untrackedFiles ? untrackedFiles.split('\n') : []
+      unstaged: unstagedChanges ? unstagedChanges.split('\n').filter(f => f) : [],
+      staged: stagedChanges ? stagedChanges.split('\n').filter(f => f) : [],
+      untracked: untrackedFiles ? untrackedFiles.split('\n').filter(f => f) : []
     };
   } catch (error) {
     console.error(`${colors.red}Error checking git status:${colors.reset}`, error.message);

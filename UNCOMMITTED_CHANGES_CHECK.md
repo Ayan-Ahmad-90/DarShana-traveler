@@ -87,21 +87,15 @@ This check can be integrated into CI/CD pipelines to warn about uncommitted chan
 
 ## Disabling the Check
 
-If you need to disable the automatic check during build:
+If you need to disable the automatic check during build, remove the `prebuild` script from `package.json`:
 
-1. **Temporarily** - Set the environment variable:
-   ```bash
-   SKIP_PREFLIGHT_CHECK=true npm run build
-   ```
-
-2. **Permanently** - Remove the `prebuild` script from `package.json`:
-   ```json
-   "scripts": {
-     "build": "tsc -b && vite build",
-     // Remove this line:
-     // "prebuild": "node check-uncommitted-changes.cjs",
-   }
-   ```
+```json
+"scripts": {
+  "build": "tsc -b && vite build",
+  // Remove this line:
+  // "prebuild": "node check-uncommitted-changes.cjs",
+}
+```
 
 ## Why This Check Exists
 
