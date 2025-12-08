@@ -101,7 +101,6 @@ export function classifyMood(emotions: EmotionScores): MoodCategory {
   const { happy, sad, neutral, surprised, angry, fear, disgust } = emotions;
 
   // Calculate composite scores
-  const positiveScore = happy + surprised;
   const negativeScore = sad + angry + fear + disgust;
   const calmScore = neutral;
 
@@ -158,7 +157,7 @@ export function calculateSocialScore(emotions: EmotionScores): number {
  * Based on surprise + happiness combination (openness to new experiences)
  */
 export function calculateAdventureScore(emotions: EmotionScores): number {
-  const { surprised, happy, angry, fear } = emotions;
+  const { surprised, happy, fear } = emotions;
   // Surprise = openness to new things, happy = positive attitude
   const adventureBase = happy + surprised * 0.8 - fear * 0.5; // Fear reduces adventure
   return Math.round(Math.min(10, Math.max(1, adventureBase * 10)));

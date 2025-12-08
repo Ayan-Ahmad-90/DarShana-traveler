@@ -22,7 +22,7 @@ export const authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
     const decoded = jwt.verify(token, environment.jwt.accessSecret) as AuthenticatedUserPayload;
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ message: 'Invalid token' });
   }
 };
@@ -35,7 +35,7 @@ export const optionalAuth = (req: AuthenticatedRequest, _res: Response, next: Ne
   try {
     const decoded = jwt.verify(token, environment.jwt.accessSecret) as AuthenticatedUserPayload;
     req.user = decoded;
-  } catch (error) {
+  } catch {
     // ignore invalid tokens for optional auth
   }
   next();

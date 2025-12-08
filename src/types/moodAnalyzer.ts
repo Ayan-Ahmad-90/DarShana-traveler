@@ -82,7 +82,7 @@ export interface AIAnalysisResult {
   energyLevel: number;
   socialScore: number;
   adventureScore: number;
-  recommendations: any[]; // Destination[]
+  recommendations: Destination[];
 }
 
 /**

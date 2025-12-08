@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import { connectDatabase } from './config/database.js';
 import { env } from './config/environment.js';
-import logger from './utils/logger.js';
 import routeRoutes from './routes/routes.js';
 import moodAnalyzerRoutes from './routes/moodAnalyzer.js';
 import arGuideRoutes from './routes/arGuide.js';
@@ -59,9 +58,10 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: unknown, req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(' Unhandled error:', err);
-  res.status(500).json({ error: err.message || 'Internal server error' });
+  const error = err as Error;
+  res.status(500).json({ error: error.message || 'Internal server error' });
 });
 
 // Start server

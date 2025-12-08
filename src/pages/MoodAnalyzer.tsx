@@ -9,9 +9,31 @@ import ARGuide from './ARGuide';
 import MoodCameraLoader from '../components/MoodCameraLoader';
 import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  image: string;
+  handler: () => void;
+  prefill: {
+    name: string;
+    email: string;
+    contact: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -32,7 +54,7 @@ async function makePayment(amount: number): Promise<void> {
       name: "DarShana Travel",
       description: "AI Trip Booking",
       image: "/vite.svg", // Use a valid logo path
-      handler: function (_response: any) {
+      handler: function () {
         resolve();
       },
       prefill: {

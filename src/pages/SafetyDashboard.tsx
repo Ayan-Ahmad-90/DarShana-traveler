@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
@@ -32,6 +32,14 @@ interface EmergencyContact {
   name: string;
   phone: string;
   relation: string;
+}
+
+interface BatteryManager extends EventTarget {
+  level: number;
+}
+
+interface NavigatorWithBattery extends Navigator {
+  getBattery: () => Promise<BatteryManager>;
 }
 
 const SafetyDashboard: React.FC = () => {
@@ -71,7 +79,7 @@ const SafetyDashboard: React.FC = () => {
 
     // Battery Status
     if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+      (navigator as NavigatorWithBattery).getBattery().then((battery: BatteryManager) => {
         setBatteryLevel(Math.round(battery.level * 100));
         battery.addEventListener('levelchange', () => {
           setBatteryLevel(Math.round(battery.level * 100));
@@ -141,9 +149,10 @@ const SafetyDashboard: React.FC = () => {
 
     // Cleanup function to stop sound
     return () => {
-      if (oscillator) { try { oscillator.stop(); } catch(e) {} }
-      if (lfo) { try { lfo.stop(); } catch(e) {} }
-      if (audioCtx) { try { audioCtx.close(); } catch(e) {} }
+      // Cleanup operations may fail if resources are already disposed - this is safe to ignore
+      if (oscillator) { try { oscillator.stop(); } catch { /* Already stopped */ } }
+      if (lfo) { try { lfo.stop(); } catch { /* Already stopped */ } }
+      if (audioCtx) { try { audioCtx.close(); } catch { /* Already closed */ } }
     };
   }, [isSOSActive]);
 
@@ -312,7 +321,7 @@ const SafetyDashboard: React.FC = () => {
           {['emergency', 'women', 'forest', 'medical'].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab as 'emergency' | 'women' | 'forest' | 'medical')}
               className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
                 activeTab === tab 
                   ? 'bg-blue-600 text-white' 

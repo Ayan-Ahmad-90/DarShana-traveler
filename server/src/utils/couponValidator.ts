@@ -10,7 +10,7 @@ interface ValidationResult {
 export const validateCoupon = async (
   code: string,
   orderAmount: number,
-  userId?: string
+  _userId?: string
 ): Promise<ValidationResult> => {
   const coupon = await Coupon.findOne({ code: code.toUpperCase() });
   if (!coupon) return { isValid: false, discountAmount: 0, reason: 'Coupon not found' };
