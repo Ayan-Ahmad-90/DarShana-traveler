@@ -1,7 +1,9 @@
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { ArrowRight, Lock, Mail, User, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { auth } from "../firebase.config.ts";
 import loginImage from "../images/image-login-desh.jpg";
 import { sendSignupEmail } from "../services/emailService";
 
@@ -13,7 +15,7 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, register } = useAuth();
+  const { login, register, setAuth } = useAuth();
 
   const [isLoginView, setIsLoginView] = useState(true);
   const [loginStep, setLoginStep] = useState(1);
@@ -111,8 +113,30 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     setIsLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google Login");
+  const handleGoogleLogin = async () => {
+    setError("");
+    setIsLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      const googleUser = {
+        id: result.user.uid,
+        name: result.user.displayName || "Traveler",
+        email: result.user.email || "",
+        profileImage: result.user.photoURL || "",
+        role: 'user' as const,
+      };
+
+      setAuth(idToken, googleUser);
+      if (onClose) onClose();
+      else navigate("/travelhub");
+    } catch (err: any) {
+      setError(err?.message || "Google sign-in failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
