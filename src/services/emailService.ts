@@ -27,9 +27,7 @@ export async function sendSignupEmail(payload: SignupEmailPayload) {
         user_name: payload.name || "Traveler",
         user_email: payload.email,
       },
-      {
-        publicKey: PUBLIC_KEY!,
-      }
+      PUBLIC_KEY!
     );
   } catch (err) {
     console.error("Failed to send signup email", err);

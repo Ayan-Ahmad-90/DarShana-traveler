@@ -78,7 +78,7 @@ export async function getChatResponse(history: any[], userInput: string) {
 
   } catch (error) {
     console.error("Gemini chat error:", error);
-    const message = error?.message || "";
+    const message = (error as any)?.message || "";
     if (message.includes("404") || message.includes("not found")) {
       return "Gemini model unavailable. Please verify the model name and try again.";
     }

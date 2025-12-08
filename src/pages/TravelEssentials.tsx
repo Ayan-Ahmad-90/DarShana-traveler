@@ -313,50 +313,17 @@ const TravelEssentials: React.FC = () => {
 		`/booking?destination=${encodeURIComponent(destination)}&category=${encodeURIComponent(category)}`;
 
 	const [foodQuery, setFoodQuery] = useState('');
-	const [foodHistory, setFoodHistory] = useState<string[]>([]);
-	const [activeCityFilter, setActiveCityFilter] = useState<string | null>(null);
-
-	const totalFoodCount = foodSpots.length;
-
-	const topCities = useMemo(() => {
-		const counts: Record<string, number> = {};
-		foodSpots.forEach((spot) => {
-			counts[spot.city] = (counts[spot.city] || 0) + 1;
-		});
-		return Object.entries(counts)
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 6)
-			.map(([city]) => city);
-	}, []);
-
-	const commitFoodSearch = (value: string) => {
-		const term = value.trim();
-		if (!term) return;
-		setFoodQuery(term);
-		setFoodHistory((prev) => [term, ...prev.filter((item) => item !== term)].slice(0, 5));
-	};
-
-	const clearFoodHistory = () => setFoodHistory([]);
-
-	const toggleCityFilter = (city: string) => {
-		setActiveCityFilter((prev) => (prev === city ? null : city));
-	};
 
 	const filteredFood = useMemo(() => {
-		let list = foodSpots;
-		if (activeCityFilter) {
-			const city = activeCityFilter.toLowerCase();
-			list = list.filter((item) => item.city.toLowerCase() === city);
-		}
-		if (!foodQuery.trim()) return list;
+		if (!foodQuery.trim()) return foodSpots;
 		const q = foodQuery.toLowerCase();
-		return list.filter(
+		return foodSpots.filter(
 			(item) =>
 				item.city.toLowerCase().includes(q) ||
 				item.title.toLowerCase().includes(q) ||
 				item.special.toLowerCase().includes(q)
 		);
-	}, [foodQuery, activeCityFilter]);
+	}, [foodQuery]);
 
 	return (
 		<div className="mx-auto max-w-6xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
