@@ -97,8 +97,8 @@ const App: React.FC = () => {
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             <Route path="/my-trips" element={<RequireAuth><MyTrips /></RequireAuth>} />
             <Route path="/rewards" element={<RequireAuth><EcoRewardsDashboard /></RequireAuth>} />
-            <Route path="/become-guide" element={<RequireAuth><BecomeGuide /></RequireAuth>} />
-            <Route path="/guide-dashboard" element={<RequireAuth><LocalGuideDashboard /></RequireAuth>} />
+            <Route path="/become-guide" element={<BecomeGuide />} />
+            <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/booking" element={<Booking />} />
             
             {/* Admin Only Routes */}
