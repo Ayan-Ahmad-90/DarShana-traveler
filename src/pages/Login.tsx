@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowRight, Lock, Mail, User, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { User, Mail, Lock, ArrowRight, X } from "lucide-react";
 import loginImage from "../images/image-login-desh.jpg";
+import { sendSignupEmail } from "../services/emailService";
 
 interface LoginProps {
   onClose?: () => void;
@@ -12,7 +13,7 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   const [isLoginView, setIsLoginView] = useState(true);
   const [loginStep, setLoginStep] = useState(1);
@@ -78,6 +79,16 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     e.preventDefault();
     setError("");
 
+    if (!signupName.trim() || !signupEmail.trim() || !signupPassword.trim()) {
+      setError("Name, email, and password are required");
+      return;
+    }
+
+    if (!signupEmail.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+
     if (signupPassword !== signupConfirmPassword) {
       setError("Passwords do not match");
       return;
@@ -86,11 +97,10 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     setIsLoading(true);
 
     try {
-      console.log("SIGNUP:", {
-        signupName,
-        signupEmail,
-        signupPassword,
-      });
+      await register(signupName, signupEmail, signupEmail, signupPassword);
+
+      // Fire-and-forget welcome email; do not block UI on failure
+      void sendSignupEmail({ name: signupName, email: signupEmail });
 
       if (onClose) onClose();
       else navigate("/travelhub");
