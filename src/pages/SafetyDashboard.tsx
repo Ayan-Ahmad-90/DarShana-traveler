@@ -34,6 +34,14 @@ interface EmergencyContact {
   relation: string;
 }
 
+interface BatteryManager extends EventTarget {
+  level: number;
+}
+
+interface NavigatorWithBattery extends Navigator {
+  getBattery: () => Promise<BatteryManager>;
+}
+
 const SafetyDashboard: React.FC = () => {
   const [location, setLocation] = useState<Location | null>(null);
   const [isSOSActive, setIsSOSActive] = useState(false);
@@ -71,7 +79,7 @@ const SafetyDashboard: React.FC = () => {
 
     // Battery Status
     if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+      (navigator as NavigatorWithBattery).getBattery().then((battery: BatteryManager) => {
         setBatteryLevel(Math.round(battery.level * 100));
         battery.addEventListener('levelchange', () => {
           setBatteryLevel(Math.round(battery.level * 100));
@@ -312,7 +320,7 @@ const SafetyDashboard: React.FC = () => {
           {['emergency', 'women', 'forest', 'medical'].map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as any)}
+              onClick={() => setActiveTab(tab as 'emergency' | 'women' | 'forest' | 'medical')}
               className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-colors ${
                 activeTab === tab 
                   ? 'bg-blue-600 text-white' 
