@@ -102,7 +102,7 @@ const estimateTravelTime = (
 /**
  * Generate route description based on mode
  */
-const generateDescription = (mode: string, distance: number): string => {
+const generateDescription = (mode: string, _distance: number): string => {
   const descriptions: { [key: string]: string } = {
     flight: `Direct or connecting flights with comfortable seating. Fastest option for long distances.`,
     train: `Comfortable journey with meals. Indian Railways offers multiple classes for different budgets.`,

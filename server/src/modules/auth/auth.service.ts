@@ -46,6 +46,7 @@ const buildTokens = (user: UserDocument): AuthTokens => {
 };
 
 const sanitizeUser = (user: UserDocument) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, security, __v, ...rest } = user.toObject();
   return rest;
 };

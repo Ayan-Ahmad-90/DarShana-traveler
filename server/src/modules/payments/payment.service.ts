@@ -1,14 +1,11 @@
-import Razorpay from 'razorpay';
 import Stripe from 'stripe';
 import Booking from '../../models/Booking.js';
 import Payment from '../../models/Payment.js';
 import Refund from '../../models/Refund.js';
 import TaxConfig from '../../models/TaxConfig.js';
-import Coupon from '../../models/Coupon.js';
 import WalletTransaction from '../../models/WalletTransaction.js';
 import { validateCoupon } from '../../utils/couponValidator.js';
 import { calculateFareBreakdown } from '../../utils/fareCalculator.js';
-import { environment } from '../../config/environment.js';
 import { razorpayClient, stripeClient } from '../../config/paymentGateways.js';
 
 interface PaymentPayload {

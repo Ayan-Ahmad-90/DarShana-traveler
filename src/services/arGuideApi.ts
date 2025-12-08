@@ -39,7 +39,7 @@ async function postARAnalysis(payload: { imageData?: string; imageUrl?: string; 
     let data: ARGuideResponse;
     try {
       data = JSON.parse(text);
-    } catch (e) {
+    } catch {
       console.error('❌ Failed to parse JSON:', text);
       throw new Error(`Invalid JSON response from server: ${text.substring(0, 100)}...`);
     }

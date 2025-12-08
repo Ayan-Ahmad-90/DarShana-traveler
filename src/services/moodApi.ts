@@ -45,7 +45,7 @@ async function postMoodAnalysis(payload: { imageData?: string; imageUrl?: string
     let data;
     try {
       data = JSON.parse(text);
-    } catch (e) {
+    } catch {
       console.error(' Failed to parse JSON:', text);
       throw new Error(`Invalid JSON response from server: ${text.substring(0, 100)}...`);
     }

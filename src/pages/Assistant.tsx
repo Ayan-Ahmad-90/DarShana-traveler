@@ -187,7 +187,7 @@ const Assistant: React.FC = () => {
       const historyForModel = [...messages, userMsg];
       const responseText = await getChatResponse(historyForModel, text);
       
-      let aiMsg: Message = { 
+      const aiMsg: Message = { 
         id: Date.now() + 1, 
         role: 'model', 
         text: responseText || 'Sorry, I encountered an error. Please try again.' 

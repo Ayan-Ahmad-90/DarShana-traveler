@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Joi, { ObjectSchema } from 'joi';
+import { ObjectSchema } from 'joi';
 import { ApiError } from './errorHandler.js';
 
 export const validateBody = (schema: ObjectSchema) => {

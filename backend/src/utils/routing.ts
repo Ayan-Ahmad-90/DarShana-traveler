@@ -219,7 +219,7 @@ export const getRoadDistance = async (from: string, to: string): Promise<RouteRe
           logger.info(`✅ Got distance from OpenRouteService: ${distance} km`);
           return { distance, duration, source: 'api' };
         }
-      } catch (apiError) {
+      } catch {
         logger.warn(`⚠️  OpenRouteService API failed, using fallback`);
       }
     }

@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
@@ -141,9 +141,9 @@ const SafetyDashboard: React.FC = () => {
 
     // Cleanup function to stop sound
     return () => {
-      if (oscillator) { try { oscillator.stop(); } catch(e) {} }
-      if (lfo) { try { lfo.stop(); } catch(e) {} }
-      if (audioCtx) { try { audioCtx.close(); } catch(e) {} }
+      if (oscillator) { try { oscillator.stop(); } catch { /* Ignore errors on cleanup */ } }
+      if (lfo) { try { lfo.stop(); } catch { /* Ignore errors on cleanup */ } }
+      if (audioCtx) { try { audioCtx.close(); } catch { /* Ignore errors on cleanup */ } }
     };
   }, [isSOSActive]);
 

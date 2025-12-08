@@ -19,7 +19,7 @@ export const calculateRewardPoints = (input: RewardCalculationInput): number => 
   const { mode, distanceKm, sustainabilityScore, emissionsCO2 } = input;
   
   // Base points: 1 point per km
-  let basePoints = Math.round(distanceKm);
+  const basePoints = Math.round(distanceKm);
   
   // Sustainability bonus (up to 2x multiplier)
   const sustainabilityMultiplier = 1 + (sustainabilityScore / 10);

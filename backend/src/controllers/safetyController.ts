@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-// @ts-ignore
+// @ts-expect-error SafetyResource model may not be defined
 import SafetyResource from '../../models/SafetyResource.js';
 
 // In-memory storage for demo purposes
-const activeEmergencies: any[] = [];
+const activeEmergencies: unknown[] = [];
 const liveLocations = new Map();
 
 export const getSafetyResources = async (req: Request, res: Response) => {
@@ -11,7 +11,7 @@ export const getSafetyResources = async (req: Request, res: Response) => {
     const { region } = req.query;
     
     // Mock response if DB not connected or empty
-    // @ts-ignore
+    // @ts-expect-error SafetyResource model may not be defined
     if (!SafetyResource) {
        return res.json({
         region: region || 'National',
@@ -63,8 +63,9 @@ export const logEmergency = async (req: Request, res: Response) => {
     console.log('🚨 EMERGENCY LOGGED:', emergency);
     
     res.status(201).json({ success: true, message: 'Emergency logged', emergencyId: emergency.id });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Failed to log emergency', error: error.message });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: 'Failed to log emergency', error: err.message });
   }
 };
 
@@ -81,7 +82,8 @@ export const updateLiveLocation = async (req: Request, res: Response) => {
     console.log(`📍 Location updated for ${userId}:`, location);
     
     res.json({ success: true });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Failed to update location', error: error.message });
+  } catch (error: unknown) {
+    const err = error as Error;
+    res.status(500).json({ message: 'Failed to update location', error: err.message });
   }
 };

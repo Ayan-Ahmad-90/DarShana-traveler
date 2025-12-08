@@ -119,7 +119,7 @@ export const getGuideById = async (req: Request, res: Response) => {
 export const getGuideAvailability = async (req: Request, res: Response) => {
   try {
     const { guideId } = req.params;
-    const { startDate, endDate } = req.query;
+    // const { startDate, endDate } = req.query; // TODO: Use these for checking availability
 
     logger.info(`Checking availability for guide: ${guideId}`);
 
@@ -282,7 +282,7 @@ export const completeTrip = async (req: Request, res: Response) => {
 export const rateGuide = async (req: Request, res: Response) => {
   try {
     const { guideId } = req.params;
-    const { rating, review } = req.body;
+    const { rating } = req.body;
 
     logger.info(`Rating guide: ${guideId} with rating: ${rating}`);
 

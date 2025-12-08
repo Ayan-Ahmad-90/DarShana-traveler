@@ -32,7 +32,7 @@ async function makePayment(amount: number): Promise<void> {
       name: "DarShana Travel",
       description: "AI Trip Booking",
       image: "/vite.svg", // Use a valid logo path
-      handler: function (_response: any) {
+      handler: function () {
         resolve();
       },
       prefill: {
