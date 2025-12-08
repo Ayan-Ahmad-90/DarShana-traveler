@@ -149,9 +149,10 @@ const SafetyDashboard: React.FC = () => {
 
     // Cleanup function to stop sound
     return () => {
-      if (oscillator) { try { oscillator.stop(); } catch { /* Ignore errors on cleanup */ } }
-      if (lfo) { try { lfo.stop(); } catch { /* Ignore errors on cleanup */ } }
-      if (audioCtx) { try { audioCtx.close(); } catch { /* Ignore errors on cleanup */ } }
+      // Cleanup operations may fail if resources are already disposed - this is safe to ignore
+      if (oscillator) { try { oscillator.stop(); } catch { /* Already stopped */ } }
+      if (lfo) { try { lfo.stop(); } catch { /* Already stopped */ } }
+      if (audioCtx) { try { audioCtx.close(); } catch { /* Already closed */ } }
     };
   }, [isSOSActive]);
 

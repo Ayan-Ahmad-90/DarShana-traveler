@@ -101,7 +101,6 @@ export function classifyMood(emotions: EmotionScores): MoodCategory {
   const { happy, sad, neutral, surprised, angry, fear, disgust } = emotions;
 
   // Calculate composite scores
-  // const positiveScore = happy + surprised; // TODO: Use in future enhancements
   const negativeScore = sad + angry + fear + disgust;
   const calmScore = neutral;
 
