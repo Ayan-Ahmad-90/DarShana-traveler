@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, Upload, RefreshCw, Loader2, CheckCircle, AlertCircle, Scan, Sparkles, Zap, Users, Mountain, ArrowRight, Shield, MapPin } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import jsPDF from 'jspdf';
+import { AlertCircle, ArrowRight, Camera, CheckCircle, Loader2, MapPin, Mountain, RefreshCw, Scan, Shield, Sparkles, Upload, Users, Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import MoodCameraLoader from '../components/MoodCameraLoader';
+import { DESTINATIONS } from '../data/destinations';
 import { useFaceDetection } from '../hooks/useFaceDetection';
 import { analyzeMoodWithImage, getMoodAnalyzerUrl } from '../services/moodApi';
-import { DESTINATIONS } from '../data/destinations';
+import { createRazorpayOrder } from '../services/razorpay';
+import type { AIAnalysisResult, Destination, MoodAnalyzeResponse } from '../types/moodAnalyzer';
 import ARGuide from './ARGuide';
-import MoodCameraLoader from '../components/MoodCameraLoader';
-import type { Destination, MoodAnalyzeResponse, AIAnalysisResult } from '../types/moodAnalyzer';
 
 declare global {
   interface Window {
@@ -15,46 +16,71 @@ declare global {
   }
 }
 
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1234567890';
+const PAYMENT_PROVIDER = (import.meta.env.VITE_PAYMENT_PROVIDER as 'razorpay' | 'offline' | undefined) || 'razorpay';
+
+function simulatePayment(amount: number): Promise<void> {
+  console.info(`Simulating payment of ₹${amount} (offline provider)`);
+  return new Promise((resolve) => setTimeout(resolve, 900));
+}
+
 // Razorpay Payment Integration
 async function makePayment(amount: number): Promise<void> {
+  if (PAYMENT_PROVIDER === 'offline') {
+    return simulatePayment(amount);
+  }
+
+  if (!RAZORPAY_KEY_ID) {
+    throw new Error('Missing Razorpay key. Set VITE_RAZORPAY_KEY_ID in your environment or set VITE_PAYMENT_PROVIDER=offline.');
+  }
+
+  // Create order on backend when available; fall back to client-only checkout if unreachable
+  const order = await createRazorpayOrder(amount).catch((err) => {
+    console.warn('Falling back to client-only Razorpay checkout:', err);
+    return null;
+  });
+
   return new Promise((resolve, reject) => {
     if (!window.Razorpay) {
-      console.error("Razorpay SDK not loaded");
-      // Fallback for development if script fails to load
-      setTimeout(resolve, 1500);
+      console.error('Razorpay SDK not loaded');
+      setTimeout(resolve, 1200);
       return;
     }
 
     const options = {
-      key: "rzp_test_YOUR_KEY_HERE", // Replace with your actual Razorpay Test Key
-      amount: amount * 100, // Amount in paise
-      currency: "INR",
-      name: "DarShana Travel",
-      description: "AI Trip Booking",
-      image: "/vite.svg", // Use a valid logo path
+      key: RAZORPAY_KEY_ID,
+      amount: order?.amount ?? amount * 100,
+      currency: order?.currency ?? 'INR',
+      name: 'DarShana Travel',
+      description: 'AI Trip Booking',
+      order_id: order?.id,
+      image: '/vite.svg',
       handler: function (_response: any) {
         resolve();
       },
       prefill: {
-        name: "Traveler",
-        email: "traveler@darshana.com",
-        contact: "9999999999"
+        name: 'Traveler',
+        email: 'traveler@darshana.com',
+        contact: '9999999999',
+      },
+      notes: {
+        product: 'AiMood Analyzer',
       },
       theme: {
-        color: "#ea580c" // Orange-600
+        color: '#ea580c',
       },
       modal: {
-        ondismiss: function() {
-          reject(new Error("Payment cancelled by user"));
-        }
-      }
+        ondismiss: function () {
+          reject(new Error('Payment cancelled by user'));
+        },
+      },
     };
 
     try {
       const rzp1 = new window.Razorpay(options);
       rzp1.open();
     } catch (error) {
-      console.error("Razorpay initialization failed:", error);
+      console.error('Razorpay initialization failed:', error);
       reject(error);
     }
   });

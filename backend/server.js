@@ -19,6 +19,7 @@ const contactRoutes = require('./routes/contact');
 const guideRoutes = require('./routes/guides');
 const notificationRoutes = require('./routes/notifications');
 const moodAnalyzerRoutes = require('./routes/moodAnalyzer');
+const paymentRoutes = require('./routes/payments');
 
 dotenv.config();
 
@@ -59,6 +60,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/local-guides', guideRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/mood-analyze', moodAnalyzerRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
