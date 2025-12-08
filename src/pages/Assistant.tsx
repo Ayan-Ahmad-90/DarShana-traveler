@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, Shield, Languages, Mic, ThumbsUp, ThumbsDown, MapPin, AlertCircle, Compass, Heart, MessageSquare } from 'lucide-react';
-import { getChatResponse } from '../services/geminiService';
-import { fetchQuestionsFromDB, saveChatToDB, saveFeedback } from '../services/databaseService';
-import { useTranslation } from 'react-i18next';
-import { auth } from '../firebase.config.ts';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { AlertCircle, Bot, Compass, Heart, Languages, MapPin, MessageSquare, Mic, Send, Shield, ThumbsDown, ThumbsUp } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase.config.ts';
+import { fetchQuestionsFromDB, saveChatToDB, saveFeedback } from '../services/databaseService';
+import { getChatResponse } from '../services/geminiService';
 
 interface Message {
   id: number;
@@ -184,7 +184,8 @@ const Assistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const responseText = await getChatResponse(messages, text);
+      const historyForModel = [...messages, userMsg];
+      const responseText = await getChatResponse(historyForModel, text);
       
       let aiMsg: Message = { 
         id: Date.now() + 1, 

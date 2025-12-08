@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { MapPin, Phone, Mail, AlertCircle, Loader, Save, DollarSign, MessageSquare, CheckCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { AlertCircle, CheckCircle, DollarSign, Loader, Mail, MapPin, MessageSquare, Phone, Save } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getBackendUrl } from '../config/api';
+import { useAuth } from '../context/AuthContext';
 
 interface GuideProfile {
   _id: string;
@@ -129,6 +129,85 @@ const LocalGuideDashboard = () => {
         },
         body: JSON.stringify(formData)
       });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
       const data = await response.json();
       if (data.success) {
         setGuideProfile(data.guide);

@@ -8,6 +8,55 @@ const resolveBackendOrigin = (): string => {
 
 const API_BASE_URL = `${resolveBackendOrigin()}/api`;
 
+const fallbackQuestions: Record<string, string[]> = {
+  itinerary: [
+    'Plan a 7-day North India itinerary',
+    'Best South India tour route',
+    'How many days per destination?',
+    'Best time to visit Rajasthan?',
+    'Budget itinerary for 5 days'
+  ],
+  safety: [
+    'Safety tips for solo travelers',
+    'Is it safe to travel at night?',
+    'Areas to avoid in major cities',
+    'Stay safe using public transport',
+    'Emergency precautions'
+  ],
+  emergency: [
+    'Emergency numbers in India',
+    'How to contact the police',
+    'Medical emergency services',
+    'Tourist helpline numbers',
+    'Report a crime or incident'
+  ],
+  culture: [
+    'Essential Hindi phrases',
+    'Major festivals in India',
+    'Indian dining etiquette',
+    'Religious sites significance',
+    'Regional Indian cuisines'
+  ],
+  experience: [
+    'Best adventure activities',
+    'Top 10 must-visit destinations',
+    'Best trekking routes',
+    'Water sports and beaches',
+    'Cultural experiences'
+  ],
+  practical: [
+    'Required travel documents',
+    'Train vs Bus vs Flight',
+    'Currency and payment methods',
+    'Accommodation options',
+    'Visa requirements'
+  ],
+};
+
+const defaultQuestions = Object.entries(fallbackQuestions).flatMap(([category, questions]) =>
+  questions.map(question => ({ category, question }))
+);
+
 export async function fetchQuestionsFromDB(category?: string) {
   try {
     const url = category 
@@ -17,8 +66,11 @@ export async function fetchQuestionsFromDB(category?: string) {
     if (!response.ok) throw new Error('Failed to fetch questions');
     return await response.json();
   } catch (error) {
-    console.error('Error fetching questions:', error);
-    return [];
+    console.warn('Using fallback questions, fetch failed:', error);
+    if (category) {
+      return fallbackQuestions[category]?.map(question => ({ category, question })) || [];
+    }
+    return defaultQuestions;
   }
 }
 

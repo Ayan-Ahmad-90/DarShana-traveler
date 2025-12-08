@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { Calendar, MapPin, Grid, Map as MapIcon, X, TrendingUp, Download, Share2, Phone, MessageCircle, Info, ChevronRight, Search, ChevronDown, Clock } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import domtoimage from 'dom-to-image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Calendar, ChevronDown, ChevronRight, Clock, Download, Grid, Info, Map as MapIcon, MapPin, MessageCircle, Phone, Search, Share2, TrendingUp, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
 
 // --- Leaflet marker icon fix ---
@@ -183,6 +183,105 @@ const festivalsData = [
         lat: 24.5,
         lng: 79.0
     },
+    {
+      id: 16,
+      name: "Ugadi (उगादी)",
+      type: "New Year (Hindu)",
+      month: "March/April",
+      location: "Andhra Pradesh, Telangana, Karnataka",
+      desc: "Telugu and Kannada New Year, celebrated with special dishes symbolizing different tastes of life and community rituals.",
+      img: "https://data1.ibtimes.co.in/en/full/640477/ugadi-festival.jpg?h=450&l=50&t=40",
+      lat: 17.385,
+      lng: 78.4867
+    },
+    {
+      id: 17,
+      name: "Vishu (विशु)",
+      type: "New Year (Hindu)",
+      month: "April",
+      location: "Kerala",
+      desc: "Kerala New Year with Vishukkani (first sight), fireworks, feasts, and giving Vishukkaineetam (token gifts).",
+      img: "https://pin.it/6cq4UDSjV",
+      lat: 10.8505,
+      lng: 76.2711
+    },
+    {
+      id: 18,
+      name: "Thaipusam",
+      type: "Religious (Hindu)",
+      month: "January/February",
+      location: "Tamil Nadu",
+      desc: "Devotion to Lord Murugan with kavadi processions and acts of penance including body piercings.",
+      img: "https://pin.it/CYpQXlsPl",
+      lat: 11.1271,
+      lng: 78.6569
+    },
+    {
+      id: 19,
+      name: "Makara Sankranti",
+      type: "Harvest (Hindu)",
+      month: "January",
+      location: "Karnataka, Andhra Pradesh",
+      desc: "Harvest festival marking the sun's northward journey; kite flying, sesame sweets, and sharing ellu-bella.",
+      img: "https://pin.it/5X9OCoaUk",
+      lat: 15.3173,
+      lng: 75.7139
+    },
+    {
+      id: 20,
+      name: "Navratri (South India)",
+      type: "Religious (Hindu)",
+      month: "September/October",
+      location: "Tamil Nadu, Karnataka",
+      desc: "Nine nights of worship for Goddess Durga; marked by Golu doll displays and vibrant community celebrations.",
+      img: "https://pin.it/22fqk5O25",
+      lat: 23.0225,
+      lng: 72.5714
+    },
+    {
+      id: 21,
+      name: "Karaga Festival",
+      type: "Cultural (Folk)",
+      month: "April/May",
+      location: "Bangalore, Karnataka",
+      desc: "Ancient Draupadi procession featuring the priest carrying the decorated Karaga on his head through the city at night.",
+      img: "https://pin.it/2qAFwxRxJ",
+      lat: 12.9716,
+      lng: 77.5946
+    },
+    {
+      id: 22,
+      name: "Thrissur Pooram",
+      type: "Religious (Hindu)",
+      month: "April/May",
+      location: "Thrissur, Kerala",
+      desc: "Kerala's grand temple festival famed for caparisoned elephants, percussion ensembles, and fireworks.",
+      img: "https://pin.it/1PCHfCvO2",
+      lat: 10.5276,
+      lng: 76.2144
+    },
+    {
+      id: 23,
+      name: "Kollam Pooram",
+      type: "Religious (Hindu)",
+      month: "April/May",
+      location: "Kollam, Kerala",
+      desc: "Colorful annual temple festival with elephant processions and traditional music.",
+      img: "https://pin.it/3CidcJsyb",
+      lat: 8.8932,
+      lng: 76.6141
+    },
+    {
+      id: 24,
+      name: "Makaravilakku",
+      type: "Religious (Hindu)",
+      month: "January",
+      location: "Sabarimala, Kerala",
+      desc: "Pilgrimage climax marked by witnessing the sacred light at Sabarimala hill shrine.",
+      img: "https://pin.it/boQOIOTeE",
+      lat: 9.2971,
+      lng: 77.0259
+    },
 ];
 
 // ----------------------------------------------------------------------------------
@@ -266,6 +365,78 @@ const culturalHighlights = [
     aspect: "Visual Arts",
     description: "Detailed, colorful paintings developed under Mughal, Rajput, and Pahari royal courts, depicting epics, portraits, and courtly life on small scale.",
     img: "https://t3.ftcdn.net/jpg/14/97/84/14/240_F_1497841456_hjqQRp5Nl3EWK8ZZwrWaLdnSc11wmYzv.jpg",
+    lat: 26.9124,
+    lng: 75.7873
+  },
+  {
+    name: "Bharatanatyam",
+    aspect: "Classical Dance",
+    description: "Temple dance tradition from Tamil Nadu noted for expressive abhinaya, precise footwork, and storytelling.",
+    img: "https://images.pexels.com/photos/30481580/pexels-photo-30481580.jpeg",
+    lat: 13.0802,
+    lng: 80.2838
+  },
+  {
+    name: "Kathakali",
+    aspect: "Classical Dance",
+    description: "Kerala's dramatic dance-theatre with elaborate makeup, face masks, and vigorous mudras narrating epics.",
+    img: "https://images.pexels.com/photos/8610533/pexels-photo-8610533.jpeg",
+    lat: 10.8505,
+    lng: 76.2711
+  },
+  {
+    name: "Carnatic Music",
+    aspect: "Classical Music",
+    description: "South Indian classical tradition focused on kritis, ragam-tanam-pallavi, and rich improvisation.",
+    img: "https://images.pexels.com/photos/10491556/pexels-photo-10491556.jpeg",
+    lat: 12.9716,
+    lng: 77.5946
+  },
+  {
+    name: "Kuchipudi",
+    aspect: "Classical Dance",
+    description: "Dance-drama from Andhra Pradesh blending quick footwork, abhinaya, and character-driven storytelling.",
+    img: "https://images.pexels.com/photos/18240707/pexels-photo-18240707.jpeg",
+    lat: 16.5062,
+    lng: 80.648
+  },
+  {
+    name: "Mohiniyattam",
+    aspect: "Classical Dance",
+    description: "Graceful solo dance from Kerala emphasizing lasya (soft movements) and lyrical expression.",
+    img: "https://images.pexels.com/photos/30444651/pexels-photo-30444651.jpeg",
+    lat: 10.8505,
+    lng: 76.2711
+  },
+  {
+    name: "Yoga and Ayurveda",
+    aspect: "Wellness",
+    description: "Ancient body-mind practices and holistic medicine systems rooted in South Indian tradition and ashrams.",
+    img: "https://i0.wp.com/powercutonline.com/wp-content/uploads/2025/07/Jnana-Yoga-Basics-optimized.webp?w=1280&ssl=1",
+    lat: 30.3165,
+    lng: 78.0322
+  },
+  {
+    name: "Tanjore Painting",
+    aspect: "Visual Art",
+    description: "Gold-foil embellished devotional art from Thanjavur featuring rich colors and relief work.",
+    img: "https://poompuhar.com/wp-content/uploads/2024/09/DSC05347-1.png",
+    lat: 10.7905,
+    lng: 79.1372
+  },
+  {
+    name: "Mysore Painting",
+    aspect: "Visual Art",
+    description: "Karnataka style noted for delicate lines, muted palettes, and gesso relief halos in mythological themes.",
+    img: "https://poompuhar.com/wp-content/uploads/2024/09/DSC05347-1.png",
+    lat: 12.2958,
+    lng: 76.6394
+  },
+  {
+    name: "Traditional Textiles",
+    aspect: "Craft",
+    description: "Handloom heritage like Kanjivaram, Ilkal, and Pochampally weaving, showcasing South Indian textile mastery.",
+    img: "https://images.pexels.com/photos/34996132/pexels-photo-34996132.jpeg",
     lat: 26.9124,
     lng: 75.7873
   },

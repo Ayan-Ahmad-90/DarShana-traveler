@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Leaf,
-  Plane,
-  Train,
-  Bus,
-  Car,
-  Loader2,
-  AlertCircle,
-  MapPin,
-  Bike,
-  Map,
-  Sparkles,
-  ArrowRight,
+    AlertCircle,
+    ArrowRight,
+    Bike,
+    Bus,
+    Car,
+    Leaf,
+    Loader2,
+    Map,
+    MapPin,
+    Plane,
+    Sparkles,
+    Train,
 } from 'lucide-react';
-import { API_ENDPOINTS } from '../config/api';
-import { searchLocations, formatLocationLabel } from '../services/locationApi';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 import type { LocationSuggestion } from '../services/locationApi';
+import { formatLocationLabel, searchLocations } from '../services/locationApi';
 
 interface RouteOption {
   mode: string;
@@ -93,6 +93,55 @@ const Sustainable: React.FC = () => {
     setFromSuggestions([]);
     setToSuggestions([]);
   };
+
+  const buildMockRoutes = (origin: string, destination: string): RouteResponse => ({
+    from: { name: origin, coordinates: { lat: 28.6139, lon: 77.209 } },
+    to: { name: destination, coordinates: { lat: 26.9124, lon: 75.7873 } },
+    distance: 320,
+    routes: [
+      {
+        mode: 'Electric Train',
+        duration: '4h 15m',
+        durationHours: 4.25,
+        distance: 320,
+        cost: 950,
+        co2: 15.5,
+        ecoRating: 9.2,
+        ecoReward: 120,
+        isGreenest: true,
+      },
+      {
+        mode: 'Electric Bus',
+        duration: '6h 00m',
+        durationHours: 6.0,
+        distance: 320,
+        cost: 750,
+        co2: 22.0,
+        ecoRating: 8.5,
+        ecoReward: 80,
+      },
+      {
+        mode: 'Shared Cab (EV)',
+        duration: '5h 30m',
+        durationHours: 5.5,
+        distance: 320,
+        cost: 2200,
+        co2: 45.5,
+        ecoRating: 7.0,
+        ecoReward: 40,
+      },
+      {
+        mode: 'Car',
+        duration: '5h 15m',
+        durationHours: 5.25,
+        distance: 320,
+        cost: 3500,
+        co2: 110.5,
+        ecoRating: 3.0,
+        ecoReward: 0,
+      },
+    ],
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -176,6 +225,14 @@ const Sustainable: React.FC = () => {
     setRouteData(null);
     closeSuggestions();
 
+    // Guard: if backend URL is missing, fall back immediately to demo data
+    if (!API_BASE_URL) {
+      setError('Backend URL not configured; showing demo routes.');
+      setRouteData(buildMockRoutes(origin, destination));
+      setLoading(false);
+      return;
+    }
+
     try {
       // Call backend API
       const response = await fetch(API_ENDPOINTS.ROUTES, {
@@ -202,63 +259,16 @@ const Sustainable: React.FC = () => {
         setError(data.error || 'Failed to calculate routes');
       }
     } catch (err) {
-      console.error('Route calculation error:', err);
+      console.warn('Route calculation error (handled, using demo routes):', err);
       const errorMsg = err instanceof Error ? err.message : 'Failed to calculate routes';
       
       // Check if it's a connection refused error
       if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Connection refused')) {
         console.warn('Backend unreachable, switching to demo mode');
         // Fallback to mock data for demonstration/offline usage
-        setRouteData({
-          from: { name: origin, coordinates: { lat: 28.6139, lon: 77.2090 } },
-          to: { name: destination, coordinates: { lat: 26.9124, lon: 75.7873 } },
-          distance: 320,
-          routes: [
-            {
-              mode: 'Electric Train',
-              duration: '4h 15m',
-              durationHours: 4.25,
-              distance: 320,
-              cost: 950,
-              co2: 15.5,
-              ecoRating: 9.2,
-              ecoReward: 120,
-              isGreenest: true
-            },
-            {
-              mode: 'Electric Bus',
-              duration: '6h 00m',
-              durationHours: 6.0,
-              distance: 320,
-              cost: 750,
-              co2: 22.0,
-              ecoRating: 8.5,
-              ecoReward: 80
-            },
-            {
-              mode: 'Shared Cab (EV)',
-              duration: '5h 30m',
-              durationHours: 5.5,
-              distance: 320,
-              cost: 2200,
-              co2: 45.5,
-              ecoRating: 7.0,
-              ecoReward: 40
-            },
-            {
-              mode: 'Car',
-              duration: '5h 15m',
-              durationHours: 5.25,
-              distance: 320,
-              cost: 3500,
-              co2: 110.5,
-              ecoRating: 3.0,
-              ecoReward: 0
-            }
-          ]
-        });
-        // Optional: Set a non-blocking error or info message
-        // setError('⚠️ Backend unavailable. Showing demo routes for ' + origin + ' to ' + destination);
+        setRouteData(buildMockRoutes(origin, destination));
+        // Optional: non-blocking notice for users
+        setError('Using demo routes because the backend is unreachable.');
       } else {
         const isProductionError = window.location.hostname.includes('vercel.app');
         const helpText = isProductionError 
