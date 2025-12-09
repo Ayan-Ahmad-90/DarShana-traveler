@@ -4,6 +4,14 @@
  * Extended with mood/energy/social/adventure matching
  */
 
+export type DestinationLocation = {
+  city?: string;
+  state?: string;
+  country?: string;
+  lat?: number;
+  lon?: number;
+};
+
 export interface Destination {
   id: string;
   title: string;
@@ -18,9 +26,10 @@ export interface Destination {
   state?: string;
   bestTime?: string;
   pricePerDay?: number;
+  location?: DestinationLocation;
 }
 
-export const DESTINATIONS: Destination[] = [
+const DESTINATIONS_RAW: Destination[] = [
   {
     id: "ladakh",
     title: "Ladakh, J&K",
@@ -216,10 +225,10 @@ export const DESTINATIONS: Destination[] = [
     pricePerDay: 1800,
     description: "Queen of Hill Stations with botanical gardens and serene mountain beauty."
   },
-  {
+ {
     id: "hampi",
     title: "Hampi, Karnataka",
-    img: "https://pin.it/PQPJ08Y9V",
+    img: "https://share.google/VNX0KJ5mvWOgY4Smr",
     label: "Heritage",
     tags: ["Ancient Temples", "Ruins", "UNESCO Site"],
     mood: [4, 5],
@@ -234,7 +243,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "andaman",
     title: "Andaman Islands",
-    img: "https://pin.it/6knWrblS8",
+    img: "https://share.google/lAEA1KbJ2zY7A59MD",
     label: "Beach",
     tags: ["Scuba Diving", "Snorkeling", "Islands"],
     mood: [0, 5],
@@ -249,7 +258,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "leh",
     title: "Leh, Ladakh",
-    img: "https://pin.it/3dFZc1cwb",
+    img: "https://share.google/3I07NYrQeHEKhTSzi",
     label: "Mountains",
     tags: ["Monasteries", "Adventure", "Pangong Lake"],
     mood: [2, 4],
@@ -264,7 +273,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "sikkim",
     title: "Sikkim",
-    img: "https://pin.it/5LFPZFVV2",
+    img: "https://share.google/u1SIaBbwi6sBYbN0t",
     label: "Nature",
     tags: ["Monasteries", "Lakes", "Himalayan Views"],
     mood: [1, 4],
@@ -279,7 +288,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "pushkar",
     title: "Pushkar, Rajasthan",
-    img: "https://pin.it/5HF0eWQQP",
+    img: "https://share.google/FMoIswo1cGbQ4ITp6",
     label: "Festival",
     tags: ["Camel Fair", "Sacred Lake", "Temples"],
     mood: [3, 5],
@@ -309,7 +318,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mysore",
     title: "Mysore, Karnataka",
-    img: "https://pin.it/6clwgnUVX",
+    img: "https://share.google/NoUS6duSn7M7l1Oc5",
     label: "Culture",
     tags: ["Palace", "Dasara Festival", "Zoo"],
     mood: [1, 6],
@@ -324,7 +333,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "puducherry",
     title: "Puducherry",
-    img: "https://pin.it/3uHsUfXDc",
+    img: "https://share.google/yvMllFzLYflOGBwS4",
     label: "Beach",
     tags: ["French Town", "Beaches", "Auroville"],
     mood: [0, 5],
@@ -339,7 +348,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "mahabaleshwar",
     title: "Mahabaleshwar, Maharashtra",
-    img: "https://pin.it/6dLW33ehT",
+    img: "https://share.google/LHSde4qNEqCJmtM57",
     label: "Nature",
     tags: ["Strawberry Farms", "Sunrise Views", "Forest"],
     mood: [1, 5],
@@ -354,7 +363,7 @@ export const DESTINATIONS: Destination[] = [
   {
     id: "dharamsala",
     title: "Dharamsala, Himachal",
-    img: "https://pin.it/33I8JzwlR",
+    img: "https://share.google/6jqrL1jfNeWexwuZX",
     label: "Spiritual",
     tags: ["Monasteries", "Trekking", "Tea Gardens"],
     mood: [1, 4],
@@ -1012,3 +1021,12 @@ export const DESTINATIONS: Destination[] = [
     description: "Ancient cave complex with carvings and inscriptions near Nellore."
   }
 ];
+
+export const DESTINATIONS: Destination[] = DESTINATIONS_RAW.map((dest) => ({
+  ...dest,
+  location: dest.location ?? {
+    city: dest.title.replace(/,.*/, '').trim(),
+    state: dest.state,
+    country: 'India',
+  },
+}));

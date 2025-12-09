@@ -1,8 +1,14 @@
-﻿import { useState } from 'react';
+﻿import { AlertCircle, Calendar, CheckCircle, CreditCard, Languages, Loader, MapPin, ShieldCheck, UserPlus, Users, Wallet } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, MapPin, Users, CreditCard, CheckCircle, AlertCircle, Loader, UserPlus, Languages, Wallet, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { bookingApi } from '../services/api';
+
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
 
 interface BookingFormData {
   destination: string;
@@ -16,13 +22,22 @@ interface BookingFormData {
   contactPhone: string;
 }
 
+type PackageOption = {
+  id: string;
+  name: string;
+  price: number;
+  badge: string;
+  description: string;
+  perks: string[];
+};
+
 const Booking = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState<BookingFormData>({
-    destination: searchParams.get('destination') || '',
+    destination: searchParams.get('destination') || searchParams.get('city') || 'Lucknow',
     checkIn: searchParams.get('checkIn') || '',
     checkOut: searchParams.get('checkOut') || '',
     guests: parseInt(searchParams.get('guests') || '1') || 1,
@@ -41,6 +56,48 @@ const Booking = () => {
     requirements: ''
   });
   const [paymentMethod, setPaymentMethod] = useState('upi');
+  const [lucknowOptions, setLucknowOptions] = useState({
+    arrivalMode: 'train',
+    arrivalFrom: '',
+    arrivalTime: '',
+    pickupLocation: '',
+    stayType: 'hotel',
+    guideFocus: 'Heritage walk',
+    foodPreferences: ['Awadhi kebabs', 'Biryani trail'],
+    dietaryNotes: ''
+  });
+
+  const packages: PackageOption[] = [
+    {
+      id: 'hold',
+      name: 'Lucknow Quick Hold',
+      price: 500,
+      badge: '₹500 registration',
+      description: 'Lock your slot for the dates you want; adjust plan later.',
+      perks: ['48h slot hold', 'Basic concierge chat', 'Reschedule once for free']
+    },
+    {
+      id: 'guided',
+      name: 'Guided Day Experience',
+      price: 1200,
+      badge: 'Most picked',
+      description: 'Local guide + curated routes across food, heritage, and shopping.',
+      perks: ['Certified local guide', '2 curated routes', 'Pickup coordination']
+    },
+    {
+      id: 'weekend',
+      name: 'Food + Heritage Weekend',
+      price: 2500,
+      badge: 'Premium',
+      description: 'Deep-dive weekend across kebabs, Imambaras, riverfront, and bazaars.',
+      perks: ['Priority slots', 'Restaurant pre-booking', 'Evening riverfront walk']
+    }
+  ];
+
+  const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || import.meta.env.VITE_RAZORPAY_KEY;
+  const [payingPackage, setPayingPackage] = useState<string | null>(null);
+  const [payError, setPayError] = useState('');
+  const [paySuccess, setPaySuccess] = useState<{ packageName: string; paymentId: string } | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,13 +120,100 @@ const Booking = () => {
     }));
   };
 
+  const handleLucknowChange = (name: string, value: string) => {
+    setLucknowOptions(prev => ({ ...prev, [name]: value }));
+  };
+
+  const toggleFoodPreference = (choice: string) => {
+    setLucknowOptions(prev => {
+      const exists = prev.foodPreferences.includes(choice);
+      return {
+        ...prev,
+        foodPreferences: exists
+          ? prev.foodPreferences.filter(item => item !== choice)
+          : [...prev.foodPreferences, choice]
+      };
+    });
+  };
+
+  const loadRazorpayScript = () =>
+    new Promise<boolean>((resolve, reject) => {
+      if (window.Razorpay) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(false);
+      document.body.appendChild(script);
+    });
+
+  const handleRazorpayPay = async (pkg: PackageOption) => {
+    setPayError('');
+    setPaySuccess(null);
+
+    if (!razorpayKey) {
+      setPayError('Missing Razorpay key (set VITE_RAZORPAY_KEY_ID).');
+      return;
+    }
+
+    setPayingPackage(pkg.id);
+
+    try {
+      await loadRazorpayScript();
+      const order = await createRazorpayOrder(pkg.price * 100, 'INR');
+
+      const options = {
+        key: razorpayKey,
+        amount: order?.amount || pkg.price * 100,
+        currency: order?.currency || 'INR',
+        name: 'DarShana Trips',
+        description: pkg.name,
+        order_id: order?.id,
+        prefill: {
+          name: formData.contactName || user?.name || '',
+          email: formData.contactEmail || user?.email || '',
+          contact: formData.contactPhone || user?.phone || ''
+        },
+        notes: {
+          destination: formData.destination,
+          packageId: pkg.id,
+          source: 'lucknow-packages'
+        },
+        theme: { color: '#0f62fe' },
+        handler: (response: any) => {
+          setPayingPackage(null);
+          setPaySuccess({
+            packageName: pkg.name,
+            paymentId: response?.razorpay_payment_id || 'Payment successful'
+          });
+        },
+        modal: {
+          ondismiss: () => setPayingPackage(null)
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      setPayError(err?.message || 'Unable to start Razorpay checkout.');
+      setPayingPackage(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Combine guide details and payment into special requests for backend compatibility
+    // Combine guide, Lucknow specifics, and payment into special requests for backend compatibility
     let enhancedSpecialRequests = formData.specialRequests;
+    const isLucknowTrip = formData.destination.toLowerCase().includes('lucknow');
+
+    if (isLucknowTrip) {
+      const foodList = lucknowOptions.foodPreferences.length
+        ? lucknowOptions.foodPreferences.join(', ')
+        : 'No specific food picks';
+      enhancedSpecialRequests += `\n[Lucknow Plan]: arrivalMode=${lucknowOptions.arrivalMode}, from=${lucknowOptions.arrivalFrom || 'unspecified'}, arrivalTime=${lucknowOptions.arrivalTime || 'flexible'}, pickup=${lucknowOptions.pickupLocation || 'decide later'}, stayType=${lucknowOptions.stayType}, guideFocus=${lucknowOptions.guideFocus}, food=${foodList}, dietary=${lucknowOptions.dietaryNotes || 'none'}`;
+    }
     if (addGuide) {
       enhancedSpecialRequests += `\n[Guide Requested]: Language: ${guideDetails.language}, Gender: ${guideDetails.gender}, Req: ${guideDetails.requirements}`;
     }
@@ -84,7 +228,8 @@ const Booking = () => {
 
       if (response.success && response.data) {
         setSuccess(true);
-        setBookingId((response.data as any).bookingId);
+        const result = response.data as any;
+        setBookingId(result.bookingId || result.bookingCode || result._id || '');
       } else {
         setError(response.error || 'Failed to create booking');
       }
@@ -161,7 +306,65 @@ const Booking = () => {
             </div>
           )}
 
+          {payError && (
+            <div className="mx-8 mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+              {payError}
+            </div>
+          )}
+
+          {paySuccess && (
+            <div className="mx-8 mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900">
+              Payment received for {paySuccess.packageName}. Payment ID: {paySuccess.paymentId}
+            </div>
+          )}
+
           <div className="p-8 space-y-8">
+
+            {/* Lucknow package quick-pay */}
+            <section className="rounded-xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Lucknow packages (pay via Razorpay)</h3>
+                  <p className="text-sm text-slate-600">Pick a ready option and pay securely. You can still finish the form for full booking.</p>
+                </div>
+                <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Instant checkout</span>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                {packages.map((pkg) => (
+                  <div key={pkg.id} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-slate-900">{pkg.name}</h4>
+                      <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded-full">{pkg.badge}</span>
+                    </div>
+                    <p className="text-2xl font-extrabold text-blue-700">₹{pkg.price.toLocaleString()}</p>
+                    <p className="text-sm text-slate-600">{pkg.description}</p>
+                    <ul className="text-sm text-slate-700 space-y-1">
+                      {pkg.perks.map((perk) => (
+                        <li key={perk} className="flex items-start gap-2">
+                          <span className="text-blue-600">•</span>
+                          <span>{perk}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      onClick={() => handleRazorpayPay(pkg)}
+                      disabled={payingPackage === pkg.id}
+                      className="mt-auto w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {payingPackage === pkg.id ? (
+                        <>
+                          <Loader size={18} className="animate-spin" /> Processing...
+                        </>
+                      ) : (
+                        'Pay with Razorpay'
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
             
             {/* Section 1: Trip Details */}
             <section>
@@ -236,6 +439,118 @@ const Booking = () => {
                     <option value="deluxe">Deluxe</option>
                     <option value="suite">Suite</option>
                   </select>
+                </div>
+              </div>
+            </section>
+
+            <section className="bg-amber-50 border border-amber-100 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-amber-900">Lucknow-focused preferences</h3>
+                  <p className="text-sm text-amber-700">How you will reach, what you want to eat, and on-ground help.</p>
+                </div>
+                <span className="text-xs font-semibold text-amber-700 bg-amber-200 px-3 py-1 rounded-full">Optional</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Arrival mode</label>
+                  <select
+                    value={lucknowOptions.arrivalMode}
+                    onChange={(e) => handleLucknowChange('arrivalMode', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="flight">Flight</option>
+                    <option value="train">Train</option>
+                    <option value="bus">Bus</option>
+                    <option value="car">Car / Self-drive</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Coming from</label>
+                  <input
+                    type="text"
+                    value={lucknowOptions.arrivalFrom}
+                    onChange={(e) => handleLucknowChange('arrivalFrom', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="City / station / airport"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">ETA (optional)</label>
+                  <input
+                    type="datetime-local"
+                    value={lucknowOptions.arrivalTime}
+                    onChange={(e) => handleLucknowChange('arrivalTime', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pickup point</label>
+                  <input
+                    type="text"
+                    value={lucknowOptions.pickupLocation}
+                    onChange={(e) => handleLucknowChange('pickupLocation', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Airport / station / hotel"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stay type</label>
+                  <select
+                    value={lucknowOptions.stayType}
+                    onChange={(e) => handleLucknowChange('stayType', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="hotel">Hotel</option>
+                    <option value="homestay">Homestay</option>
+                    <option value="hostel">Hostel</option>
+                    <option value="guesthouse">Guest house</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Guide focus</label>
+                  <select
+                    value={lucknowOptions.guideFocus}
+                    onChange={(e) => handleLucknowChange('guideFocus', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="Heritage walk">Heritage walk (Imambaras, Residency)</option>
+                    <option value="Food trail">Food trail (kebabs, biryani, chaat)</option>
+                    <option value="Shopping lanes">Shopping lanes (Chowk, Hazratganj, Aminabad)</option>
+                    <option value="Parks & riverfront">Parks & riverfront</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Food picks</label>
+                <div className="flex flex-wrap gap-2">
+                  {["Awadhi kebabs", "Biryani trail", "Street chaat", "Sweets & desserts", "Vegetarian only"].map((item) => {
+                    const active = lucknowOptions.foodPreferences.includes(item);
+                    return (
+                      <button
+                        type="button"
+                        key={item}
+                        onClick={() => toggleFoodPreference(item)}
+                        className={`px-4 py-2 rounded-full border text-sm font-semibold transition ${
+                          active ? 'bg-amber-600 text-white border-amber-700' : 'bg-white text-amber-800 border-amber-200 hover:border-amber-400'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dietary notes</label>
+                  <input
+                    type="text"
+                    value={lucknowOptions.dietaryNotes}
+                    onChange={(e) => handleLucknowChange('dietaryNotes', e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="E.g., Jain meals, avoid peanuts"
+                  />
                 </div>
               </div>
             </section>

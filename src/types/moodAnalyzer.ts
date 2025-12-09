@@ -6,6 +6,14 @@
 /**
  * Destination interface (imported from destinations.ts)
  */
+export type DestinationLocation = {
+  city?: string;
+  state?: string;
+  country?: string;
+  lat?: number;
+  lon?: number;
+};
+
 export interface Destination {
   id: string;
   title: string;
@@ -20,6 +28,7 @@ export interface Destination {
   state?: string;
   bestTime?: string;
   pricePerDay?: number;
+  location?: DestinationLocation;
 }
 
 /**

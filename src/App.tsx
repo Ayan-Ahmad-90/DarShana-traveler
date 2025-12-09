@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import { AuthProvider } from "./context/AuthContext";
 
 // Auth Components
-import { GuestOnly, RequireAdmin, RequireAuth } from "./components/Auth/ProtectedRoute";
+import { GuestOnly, RequireAuth } from "./components/Auth/ProtectedRoute";
 
 // Pages
 import LoginOverlay from "./components/Auth/LoginOverlay";
@@ -16,6 +16,7 @@ import BecomeGuide from "./components/Guide/BecomeGuide";
 import SafetyModal from "./components/SafetyModal";
 import YatraShayak from "./components/YatraShayak";
 import AdminDashboard from "./pages/AdminDashboard";
+import AllCities from "./pages/AllCities";
 import Assistant from "./pages/Assistant";
 import Booking from "./pages/Booking";
 import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
@@ -28,6 +29,7 @@ import Home from "./pages/Home";
 import LanguageSelector from "./pages/LanguageSelector";
 import LocalGuideDashboard from "./pages/LocalGuideDashboard";
 import Login from "./pages/Login";
+import Lucknow from "./pages/Lucknow";
 import MoodAnalyzer from "./pages/MoodAnalyzer";
 import MyTrips from "./pages/MyTrips";
 import NotAuthorized from "./pages/NotAuthorized";
@@ -76,6 +78,8 @@ const App: React.FC = () => {
             <Route path="/home" element={<Home />} />
             <Route path="/mood" element={<MoodAnalyzer />} />
             <Route path="/travelhub" element={<TravelHub />} />
+            <Route path="/cities" element={<AllCities />} />
+            <Route path="/city/lucknow" element={<Lucknow />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/green-route-planner" element={<GreenRoutePlanner />} />
@@ -101,8 +105,8 @@ const App: React.FC = () => {
             <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/booking" element={<Booking />} />
             
-            {/* Admin Only Routes */}
-            <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+            {/* Admin Dashboard (public for now) */}
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>
         {/* Footer */}

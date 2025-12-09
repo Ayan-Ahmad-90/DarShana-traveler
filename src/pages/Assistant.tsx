@@ -26,7 +26,7 @@ interface QuickCategory {
 
 const Assistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 0, role: 'model', text: 'नमस्ते! मैं यात्रा सहायक हूँ, आपका AI यात्रा साथी। 🙏\n\nHello! I\'m Yatra Sahayak, your AI travel companion. 🙏\n\nPlease select a category below or ask me anything about traveling in India!' }
+    { id: 0, role: 'model', text: 'नमस्ते! मैं सारथी हूँ, आपका AI यात्रा साथी। 🙏\n\nHello! I\'m Sarthi, your AI travel companion. 🙏\n\nPlease select a category below or ask me anything about traveling in India!' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -279,7 +279,7 @@ const Assistant: React.FC = () => {
           <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Bot size={40} className="text-orange-600" />
           </div>
-          <h2 className="text-3xl font-serif font-bold text-stone-800 mb-2">Yatra Sahayak</h2>
+          <h2 className="text-3xl font-serif font-bold text-stone-800 mb-2">Sarthi</h2>
           <div className="w-12 h-1 bg-orange-500 mx-auto rounded-full mb-4"></div>
           <p className="text-stone-600 mb-8 text-base">{t('Please login to use the chatbot.')}</p>
           <button
@@ -303,7 +303,7 @@ const Assistant: React.FC = () => {
               <Bot size={28} />
             </div>
             <div>
-              <h2 className="font-bold text-lg">{t('Yatra Sahayak')}</h2>
+              <h2 className="font-bold text-lg">{t('Sarthi')}</h2>
               <p className="text-xs text-teal-100">{t('Your Travel Companion')}</p>
             </div>
           </div>

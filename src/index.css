@@ -65,6 +65,15 @@ body {
   color: var(--text-color);
 }
 
+/* Hard-reset any stray global pseudo overlays (fixes random circles overlaying pages) */
+body::before,
+body::after,
+#root::before,
+#root::after {
+  content: none !important;
+  background: none !important;
+}
+
 /* Links */
 a {
   color: var(--accent);

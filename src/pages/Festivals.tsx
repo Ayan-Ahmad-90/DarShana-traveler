@@ -1012,6 +1012,7 @@ const Festivals = () => {
   const [showHelpline, setShowHelpline] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // For the unified button dropdown
   const mapRef = useRef<L.Map>(null);
+  const cardsSectionRef = useRef<HTMLDivElement | null>(null);
 
   // Create cards for all types
   const allCards: CardType[] = [
@@ -1023,7 +1024,7 @@ const Festivals = () => {
   // --- SEARCH & FILTER HOOK ---
   const filteredCards = useMemo(() => {
     let cards = allCards;
-    
+
     // 1. Type Filter
     if (filterType !== 'all') cards = cards.filter(card => card.cardType === filterType);
     
@@ -1058,6 +1059,16 @@ const Festivals = () => {
     : [21, 78]) as [number, number];
 
   useEffect(() => { setSelectedCard(null); setHoveredCardId(null); }, [showMap, filterType]);
+
+  const focusFestivals = () => {
+    setFilterType('festival');
+    setShowMap(false);
+    setShowMore(true);
+    setIsFilterOpen(false);
+    requestAnimationFrame(() => {
+      cardsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   // --- MAP SNAPSHOT ---
   function handleDownloadMap() {
@@ -1123,9 +1134,31 @@ const Festivals = () => {
 
       <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
         <NextMonthHighlight festivalsData={festivalsData} />
-        
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white shadow-sm border border-stone-200 rounded-2xl p-5"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-orange-50 rounded-xl text-orange-600">
+              <Calendar size={20} />
+            </div>
+            <p className="text-stone-800 text-base leading-relaxed">
+              Get recommendations for <span className="font-semibold">festivals/events</span> happening during your visit and the best places to experience them.
+            </p>
+          </div>
+          <button
+            onClick={focusFestivals}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow hover:shadow-md transition"
+          >
+            Focus on festivals
+            <ChevronRight size={16} className="opacity-90" />
+          </button>
+        </motion.div>
+
         {/* CONTROLS BAR */}
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-10">
+        <div ref={cardsSectionRef} className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-10">
           
           <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
             {/* UNIFIED FILTER BUTTON */}
