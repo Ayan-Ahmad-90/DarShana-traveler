@@ -1,3 +1,14 @@
+import {
+	Calendar,
+	Clock,
+	Copy,
+	Map as MapIcon,
+	Printer,
+	Share2,
+	Sparkles,
+	Users,
+	X
+} from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import type { HighlightSlide } from "../components/HighlightSlideBar";
@@ -81,6 +92,48 @@ type StayOption = {
 	link?: string;
 };
 
+type CityEntryOption = {
+	id: string;
+	name: string;
+	area: string;
+	mapsQuery: string;
+	note?: string;
+};
+
+type CityTargetOption = {
+	id: string;
+	name: string;
+	area: string;
+	category: string;
+	mapsQuery: string;
+	stops: string[];
+};
+
+type CityRoutePlan = {
+	summary: string;
+	note?: string;
+	stops: string[];
+};
+
+type ItineraryStop = {
+	time: string;
+	title: string;
+	description: string;
+	tip?: string;
+	duration: string;
+	transit: string;
+	cost: string;
+};
+
+type ItineraryDay = {
+	id: string;
+	title: string;
+	summary: string;
+	stats: string;
+	dailyBudget: string;
+	stops: ItineraryStop[];
+};
+
 const stayTagStyles: Record<StayOption["tag"], string> = {
 	Premium: "bg-purple-50 text-purple-700 border border-purple-200",
 	"Mid-range": "bg-blue-50 text-blue-700 border border-blue-200",
@@ -119,7 +172,7 @@ const stayOptions: StayOption[] = [
 		tag: "Mid-range",
 		rating: 4.7,
 		price: "₹6,500",
-		image: "data:image/jpeg;base64,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",
+		image: "data:image/jpeg;base64,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",
 		link: "https://www.google.com/maps/search/Lebua+Lucknow",
 	},
 	{
@@ -129,6 +182,424 @@ const stayOptions: StayOption[] = [
 		price: "₹2,200",
 		image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTye-4-wbt_YNoNSE-WxPJ0cDfaje5rSc4oDQ&s",
 		link: "https://www.google.com/maps/search/Homestay+Lucknow",
+	},
+];
+
+const cityEntryOptions: CityEntryOption[] = [
+	{
+		id: "charbagh",
+		name: "Charbagh Railway Station",
+		area: "Charbagh / central",
+		mapsQuery: "Charbagh Railway Station, Lucknow",
+		note: "Best for metro link and short autos to old city & Hazratganj",
+	},
+	{
+		id: "airport",
+		name: "Chaudhary Charan Singh Airport",
+		area: "Amausi",
+		mapsQuery: "Chaudhary Charan Singh International Airport, Lucknow",
+		note: "Metro to Charbagh, cabs for Gomti Nagar night runs",
+	},
+	{
+		id: "alambagh",
+		name: "Alambagh Bus Stand",
+		area: "Alambagh",
+		mapsQuery: "Alambagh Bus Stand, Lucknow",
+		note: "Quick autos to Aminabad / Chowk food lanes",
+	},
+	{
+		id: "taj",
+		name: "Taj / Hazratganj hotel belt",
+		area: "Hazratganj",
+		mapsQuery: "Taj Mahal Hotel Lucknow",
+		note: "If you’re already in central hotels, head straight to nearby markets",
+	},
+];
+
+const cityTargetOptions: CityTargetOption[] = [
+	{
+		id: "imambara",
+		name: "Bara & Chota Imambara",
+		area: "Chowk / Old City",
+		category: "Heritage + tokri chaat",
+		mapsQuery: "Bara Imambara, Lucknow",
+		stops: ["Aminabad - Tunday Kababi", "Tokri Chaat at Royal Café or Chowk", "Rumi Darwaza gateway", "Prakash Kulfi"],
+	},
+	{
+		id: "hazratganj",
+		name: "Hazratganj + Riverfront",
+		area: "Central",
+		category: "Shopping + sunset walk",
+		mapsQuery: "Hazratganj, Lucknow",
+		stops: ["Royal Café basket chaat", "Janeshwar Mishra Park", "Gomti Riverfront / Marine Drive"],
+	},
+	{
+		id: "gomtinagar",
+		name: "Gomti Nagar Nights",
+		area: "Gomti Nagar",
+		category: "Malls + late food",
+		mapsQuery: "Phoenix Palassio, Lucknow",
+		stops: ["Patrakarpuram street food", "One Awadh / Summit nightlife", "Marine Drive late walk"],
+	},
+	{
+		id: "kapoorthala",
+		name: "Kapoorthala Food Trail",
+		area: "Aliganj / Kapoorthala",
+		category: "Quick eats + markets",
+		mapsQuery: "Kapoorthala, Lucknow",
+		stops: ["JJ Bakers Aliganj", "Chandralok chaat street", "Nirala Nagar cafés"],
+	},
+];
+
+const cityRoutePresets: Record<string, CityRoutePlan> = {
+	"charbagh-imambara": {
+		summary: "Shortest old city run",
+		note: "Metro/auto → Aminabad kebabs → Rumi Darwaza → Imambara",
+		stops: ["Charbagh Station", "Aminabad - Tunday Kababi", "Rumi Darwaza", "Bara Imambara"],
+	},
+	"charbagh-hazratganj": {
+		summary: "Metro two stops → stroll",
+		note: "Charbagh metro → Hazratganj → basket chaat → riverfront",
+		stops: ["Charbagh Station", "Hazratganj", "Royal Café basket chaat", "Gomti Riverfront"],
+	},
+	"airport-hazratganj": {
+		summary: "Fastest cab + metro fallback",
+		note: "Amausi → Charbagh (metro) → Hazratganj",
+		stops: ["CCS Airport", "Charbagh metro change", "Hazratganj", "Royal Café basket chaat"],
+	},
+	"airport-gomtinagar": {
+		summary: "Direct cab / expressway",
+		note: "Cab via Shaheed Path, stop at Phoenix Palassio for food",
+		stops: ["CCS Airport", "Shaheed Path", "Phoenix Palassio", "Gomti Nagar"],
+	},
+	"alambagh-imambara": {
+		summary: "Auto via Aminabad",
+		note: "Bus stand → Aminabad kebabs → Chowk → Imambara",
+		stops: ["Alambagh", "Aminabad", "Chowk tokri chaat", "Bara Imambara"],
+	},
+	"taj-hazratganj": {
+		summary: "Walkable central loop",
+		note: "Hotel belt → Hazratganj arcades → Riverfront",
+		stops: ["Taj Hotel", "Hazratganj arcades", "Royal Café basket chaat", "Gomti Riverfront"],
+	},
+};
+
+const interestOptions = ["Food", "History", "Shopping", "Parks", "Festivals", "Nightlife"];
+
+const itineraryDays: ItineraryDay[] = [
+	{
+		id: "day-1",
+		title: "Day 1: Food Highlights",
+		summary: "Walk 2.4 km | Auto 3 | Cab 1",
+		stats: "Daily Budget ₹3,000",
+		dailyBudget: "₹3,000",
+		stops: [
+			{
+				time: "8:00 AM",
+				title: "Breakfast: Tunday Kababi (Aminabad)",
+				description: "Iconic galouti kebabs and sheermal to begin your Lucknow mornings.",
+				tip: "Ask for the melt-in-mouth galouti on sheermal combo.",
+				duration: "75 min",
+				transit: "15 min auto from Charbagh",
+				cost: "₹250",
+			},
+			{
+				time: "9:30 AM",
+				title: "Morning: Bara Imambara & Bhool Bhulaiyaa",
+				description: "18th century marvel with maze, Asafi mosque, stepwell.",
+				tip: "Hire the ASI guide at the gate for maze navigation.",
+				duration: "2 hrs",
+				transit: "15 min cab from Aminabad",
+				cost: "₹500",
+			},
+			{
+				time: "12:30 PM",
+				title: "Lunch: The Idly Room",
+				description: "Vegetarian South Indian breakfast when you want light fare.",
+				tip: "Ideal monsoon fallback when you want indoor seating.",
+				duration: "50 min",
+				transit: "Walkable from Hazratganj metro",
+				cost: "₹180",
+			},
+			{
+				time: "2:30 PM",
+				title: "Afternoon: Hazratganj Heritage Walk",
+				description: "Victorian arcades, chikankari boutiques, Royal Café basket chaat.",
+				tip: "Closed for deep cleaning on Sunday mornings; visit post 3 PM if Sunday.",
+				duration: "2 hrs",
+				transit: "Walkable circuit",
+				cost: "₹400",
+			},
+			{
+				time: "6:00 PM",
+				title: "Evening: Rumi Darwaza Sunset",
+				description: "Sunset hues over the 60-foot gate, breezy Tokri chaat nearby.",
+				tip: "Carry a wide lens for the gateway silhouette.",
+				duration: "90 min",
+				transit: "Rickshaw from Imambara complex",
+				cost: "₹150",
+			},
+			{
+				time: "8:30 PM",
+				title: "Dinner: Aminabad Night Bites",
+				description: "Walk the gullies for kebabs, kulfi, and Suleimani chai.",
+				tip: "Best experienced after 8 PM when grills are fired up.",
+				duration: "2 hrs",
+				transit: "Short auto circuit",
+				cost: "₹350",
+			},
+		],
+	},
+	{
+		id: "day-2",
+		title: "Day 2: History Highlights",
+		summary: "Walk 3.6 km | Auto 2 | Cab 1",
+		stats: "Daily Budget ₹3,000",
+		dailyBudget: "₹3,000",
+		stops: [
+			{
+				time: "8:00 AM",
+				title: "Breakfast: Raheem's Nihari Kulcha",
+				description: "Slow-cooked nihari with khameeri roti near Akbari Gate.",
+				tip: "Perfect for winter mornings; reaches peak flavour before 9 AM.",
+				duration: "60 min",
+				transit: "10 min auto from Aminabad",
+				cost: "₹220",
+			},
+			{
+				time: "9:30 AM",
+				title: "Morning: Chota Imambara",
+				description: "Intricate chandeliers and tazias, shines during Muharram.",
+				tip: "Avoid Friday noon prayers to skip crowds.",
+				duration: "75 min",
+				transit: "Shared auto from Bara Imambara",
+				cost: "₹300",
+			},
+			{
+				time: "12:30 PM",
+				title: "Lunch: Idrees Biryani",
+				description: "Copper-deg biryani loved by old Lucknow.",
+				tip: "Closed on Mondays; takeaway only spot.",
+				duration: "60 min",
+				transit: "Walkable inside Chowk",
+				cost: "₹280",
+			},
+			{
+				time: "2:30 PM",
+				title: "Afternoon: Janeshwar Mishra Park Cycling",
+				description: "Asia's second-largest garden with dedicated cycling tracks.",
+				tip: "Rent cycles at gate no. 1 before 4 PM.",
+				duration: "2 hrs",
+				transit: "Cab from Hazratganj (20 min)",
+				cost: "₹200",
+			},
+			{
+				time: "6:00 PM",
+				title: "Evening: UP State Museum",
+				description: "Indoor galleries with Avadhi artefacts and Nawabi arms.",
+				tip: "Monday closed; perfect monsoon fallback.",
+				duration: "90 min",
+				transit: "Walkable from Residency",
+				cost: "₹100",
+			},
+			{
+				time: "8:30 PM",
+				title: "Dinner: Royal Café (Basket Chaat)",
+				description: "Layered tokri chaat with rooftop seating in Hazratganj.",
+				tip: "Reserve rooftop tables on weekends.",
+				duration: "90 min",
+				transit: "Walk within Hazratganj",
+				cost: "₹400",
+			},
+		],
+	},
+	{
+		id: "day-3",
+		title: "Day 3: Shopping Highlights",
+		summary: "Walk 2.4 km | Auto 3 | Cab 3",
+		stats: "Daily Budget ₹3,000",
+		dailyBudget: "₹3,000",
+		stops: [
+			{
+				time: "8:00 AM",
+				title: "Breakfast: Sharma Ji Ki Chai",
+				description: "Milk tea, bun-maska, and samosa in Lalbagh.",
+				tip: "Reach before 9 AM to avoid queues.",
+				duration: "45 min",
+				transit: "Shared auto from Hazratganj",
+				cost: "₹120",
+			},
+			{
+				time: "9:30 AM",
+				title: "Morning: The Residency Ruins Walk",
+				description: "1857 siege site with storyboards and quiet lawns.",
+				tip: "Audio guide available at ticket counter.",
+				duration: "2 hrs",
+				transit: "Cab/auto from Hazratganj",
+				cost: "₹300",
+			},
+			{
+				time: "12:30 PM",
+				title: "Lunch: The Idly Room",
+				description: "Vegetarian South Indian breakfast when you want light fare.",
+				tip: "Ideal monsoon fallback when you want indoor seating.",
+				duration: "50 min",
+				transit: "Walkable from Hazratganj metro",
+				cost: "₹180",
+			},
+			{
+				time: "2:30 PM",
+				title: "Afternoon: Chowk Heritage & Perfume Trail",
+				description: "Attar shops at Nazirabad, ustaad kite makers, and chikankari workshops.",
+				tip: "Friday afternoons bustle with Jumma shoppers.",
+				duration: "2.5 hrs",
+				transit: "Guided walk (recommend rickshaw start)",
+				cost: "₹450",
+			},
+			{
+				time: "6:00 PM",
+				title: "Evening: Gomti Riverfront Musical Fountain",
+				description: "LED lit promenade with nightly musical fountain.",
+				tip: "Best in winter post 7 PM.",
+				duration: "90 min",
+				transit: "Cab from Hazratganj",
+				cost: "₹200",
+			},
+			{
+				time: "8:30 PM",
+				title: "Dinner: Marine Drive Night Vibes",
+				description: "Cafe hop along Riverfront with skate boarders and music.",
+				tip: "Great for high-budget evenings with artisan gelato kiosks.",
+				duration: "2 hrs",
+				transit: "Cab from Hazratganj",
+				cost: "₹450",
+			},
+		],
+	},
+	{
+		id: "day-4",
+		title: "Day 4: Food Highlights",
+		summary: "Walk 3.6 km | Auto 1 | Cab 1",
+		stats: "Daily Budget ₹3,000",
+		dailyBudget: "₹3,000",
+		stops: [
+			{
+				time: "8:00 AM",
+				title: "Breakfast: Tunday Kababi (Aminabad)",
+				description: "Iconic galouti kebabs and sheermal to begin your Lucknow mornings.",
+				tip: "Ask for the melt-in-mouth galouti on sheermal combo.",
+				duration: "75 min",
+				transit: "15 min auto from Charbagh",
+				cost: "₹250",
+			},
+			{
+				time: "9:30 AM",
+				title: "Morning: 1857 Residency Interpretation Centre",
+				description: "Indoor galleries narrating 1857 uprising with AR exhibits.",
+				duration: "60 min",
+				transit: "Within Residency campus",
+				cost: "₹100",
+			},
+			{
+				time: "12:30 PM",
+				title: "Lunch: The Idly Room",
+				description: "Vegetarian South Indian breakfast when you want light fare.",
+				tip: "Ideal monsoon fallback when you want indoor seating.",
+				duration: "50 min",
+				transit: "Walkable from Hazratganj metro",
+				cost: "₹180",
+			},
+			{
+				time: "2:30 PM",
+				title: "Afternoon: Hazratganj Chikankari Boutiques",
+				description: "Capoor & Sons, Ada, and SEWA for curated chikankari.",
+				tip: "Closed Sunday until 3 PM.",
+				duration: "2 hrs",
+				transit: "Walking circuit",
+				cost: "₹500",
+			},
+			{
+				time: "6:00 PM",
+				title: "Evening: Prakash Kulfi & Malai Makkhan",
+				description: "Seasonal winter dessert and saffron kulfi in Aminabad.",
+				tip: "Malai makkhan only Nov-Feb mornings.",
+				duration: "45 min",
+				transit: "Walk within Aminabad",
+				cost: "₹180",
+			},
+			{
+				time: "8:30 PM",
+				title: "Dinner: The Urban Terrace",
+				description: "Sky dining near Aashiana with live Sufi evenings.",
+				tip: "Reserve ahead for weekends; rooftop covered for monsoon.",
+				duration: "2 hrs",
+				transit: "Cab from Gomti Nagar",
+				cost: "₹900",
+			},
+		],
+	},
+	{
+		id: "day-5",
+		title: "Day 5: History Highlights",
+		summary: "Walk 2.4 km | Auto 1 | Cab 3",
+		stats: "Daily Budget ₹3,000",
+		dailyBudget: "₹3,000",
+		stops: [
+			{
+				time: "8:00 AM",
+				title: "Breakfast: Tunday Kababi (Aminabad)",
+				description: "Iconic galouti kebabs and sheermal to begin your Lucknow mornings.",
+				tip: "Ask for the melt-in-mouth galouti on sheermal combo.",
+				duration: "75 min",
+				transit: "15 min auto from Charbagh",
+				cost: "₹250",
+			},
+			{
+				time: "9:30 AM",
+				title: "Morning: Dilkusha Kothi Ruins",
+				description: "Gothic-style hunting lodge remains with quiet lawns.",
+				tip: "Great golden hour photography spot.",
+				duration: "1.5 hrs",
+				transit: "Cab from Hazratganj",
+				cost: "₹200",
+			},
+			{
+				time: "12:30 PM",
+				title: "Lunch: The Idly Room",
+				description: "Vegetarian South Indian breakfast when you want light fare.",
+				tip: "Ideal monsoon fallback when you want indoor seating.",
+				duration: "50 min",
+				transit: "Walkable from Hazratganj metro",
+				cost: "₹180",
+			},
+			{
+				time: "2:30 PM",
+				title: "Afternoon: Hunar Haat Cultural Village",
+				description: "Seasonal handicraft fair with drone shows on weekends.",
+				tip: "Check live schedule for cultural troupe timings.",
+				duration: "2.5 hrs",
+				transit: "Cab from Gomti Nagar",
+				cost: "₹300",
+			},
+			{
+				time: "6:00 PM",
+				title: "Evening: Hazratganj Heritage Walk",
+				description: "Victorian arcades, chikankari boutiques, Royal Café basket chaat.",
+				tip: "Closed for deep cleaning on Sunday mornings; visit post 3 PM if Sunday.",
+				duration: "2 hrs",
+				transit: "Walkable circuit",
+				cost: "₹400",
+			},
+			{
+				time: "8:30 PM",
+				title: "Dinner: The Drowning Street",
+				description: "Microbrewery with Nawabi tapas near Alambagh.",
+				tip: "Happy hours 5-7 PM weekdays.",
+				duration: "2.5 hrs",
+				transit: "Cab (20 min) from Hazratganj",
+				cost: "₹950",
+			},
+		],
 	},
 ];
 
@@ -656,6 +1127,15 @@ const Lucknow: React.FC = () => {
 	const [originInput, setOriginInput] = React.useState("Charbagh, Lucknow");
 	const [destinationInput, setDestinationInput] = React.useState("");
 	const [travelMode, setTravelMode] = React.useState<"driving" | "walking" | "bicycling" | "transit">("driving");
+	const [arrivalDate, setArrivalDate] = React.useState("2025-12-12");
+	const [departureDate, setDepartureDate] = React.useState("2025-12-16");
+	const [groupSize, setGroupSize] = React.useState(2);
+	const [budgetStyle, setBudgetStyle] = React.useState<"low" | "medium" | "high">("medium");
+	const [selectedInterests, setSelectedInterests] = React.useState<Set<string>>(new Set(["Food", "History", "Shopping"]));
+	const [arrivalPoint, setArrivalPoint] = React.useState<CityEntryOption["id"]>("charbagh");
+	const [innerCityTarget, setInnerCityTarget] = React.useState<CityTargetOption["id"]>("hazratganj");
+	const [showItinerary, setShowItinerary] = React.useState(false);
+	const [openDayId, setOpenDayId] = React.useState<string | null>(null);
 	const googleMapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 	const destinationResults = React.useMemo(() => {
@@ -693,6 +1173,79 @@ const Lucknow: React.FC = () => {
 		const query = origin && dest ? `${origin} to ${dest}` : dest || origin || "Lucknow";
 		return `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
 	}, [googleMapsKey, originInput, destinationInput]);
+
+	const tripLengthDays = React.useMemo(() => {
+		const start = new Date(arrivalDate);
+		const end = new Date(departureDate);
+		if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return 0;
+		const diff = Math.max(0, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+		return diff || 0;
+	}, [arrivalDate, departureDate]);
+
+	const formatDateLabel = React.useCallback((value: string) => {
+		const parsed = new Date(value);
+		if (Number.isNaN(parsed.getTime())) return value;
+		return parsed.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
+	}, []);
+
+	const dateRangeLabel = React.useMemo(() => {
+		if (!arrivalDate || !departureDate) return "Set your dates";
+		const range = `${formatDateLabel(arrivalDate)} to ${formatDateLabel(departureDate)}`;
+		return `${range} (${tripLengthDays || 1} days)`;
+	}, [arrivalDate, departureDate, formatDateLabel, tripLengthDays]);
+
+	const budgetPerDay = 3000;
+	const totalBudget = React.useMemo(() => (tripLengthDays > 0 ? tripLengthDays * budgetPerDay : budgetPerDay), [tripLengthDays]);
+
+	const toggleInterest = (interest: string) => {
+		setSelectedInterests((prev) => {
+			const next = new Set(prev);
+			if (next.has(interest)) {
+				next.delete(interest);
+			} else {
+				next.add(interest);
+			}
+			return new Set(next);
+		});
+	};
+
+	const selectedInterestList = React.useMemo(() => {
+		const list = Array.from(selectedInterests);
+		return list.length ? list.join(", ") : "Food, History, Shopping";
+	}, [selectedInterests]);
+
+	const activeArrival = React.useMemo(() => cityEntryOptions.find((opt) => opt.id === arrivalPoint), [arrivalPoint]);
+	const activeTarget = React.useMemo(() => cityTargetOptions.find((opt) => opt.id === innerCityTarget), [innerCityTarget]);
+
+	const activeRoutePlan: CityRoutePlan = React.useMemo(() => {
+		const presetKey = activeArrival && activeTarget ? `${activeArrival.id}-${activeTarget.id}` : "";
+		const preset = presetKey ? cityRoutePresets[presetKey] : undefined;
+		const fallbackStops = [activeArrival?.name, ...(activeTarget?.stops || []), activeTarget?.name].filter(Boolean) as string[];
+		return {
+			summary: preset?.summary || `${activeArrival?.name || "Start"} → ${activeTarget?.name || "Destination"}`,
+			note: preset?.note || activeTarget?.category,
+			stops: preset?.stops || fallbackStops,
+		};
+	}, [activeArrival, activeTarget]);
+
+	const itineraryCopyText = React.useMemo(() => {
+		const parts = itineraryDays.map((day) => {
+			const stops = day.stops.map((stop) => `- ${stop.time} ${stop.title} (${stop.cost})`).join("\n");
+			return `${day.title} | ${day.summary} | ${day.stats}\n${stops}`;
+		});
+		return `Lucknow itinerary (${dateRangeLabel})\nInterests: ${selectedInterestList}\nBudget style: ${budgetStyle}\nTrip length: ${tripLengthDays || 1} days\n${parts.join("\n\n")}`;
+	}, [budgetStyle, dateRangeLabel, selectedInterestList, tripLengthDays]);
+
+	React.useEffect(() => {
+		if (activeArrival?.mapsQuery) {
+			setOriginInput(activeArrival.mapsQuery);
+		}
+		if (activeTarget?.mapsQuery) {
+			setDestinationInput(activeTarget.mapsQuery);
+		}
+	}, [activeArrival, activeTarget]);
+
+	const whatsappRouteLink = "https://www.google.com/maps/dir/?api=1&origin=Lucknow%20Junction%20Railway%20Station&destination=The%20Drowning%20Street%20Lucknow&waypoints=Tunday%20Kababi%20Aminabad%20Lucknow|Bara%20Imambara|The%20Idly%20Room%20Lucknow|Hazratganj%20Market|Rumi%20Darwaza|Aminabad%20Market|Raheem%20Hotel%20Lucknow|Chota%20Imambara|Idrees%20Biryani|Janeshwar%20Mishra%20Park|State%20Museum%20Lucknow|Royal%20Cafe%20Lucknow|Sharma%20Ji%20Ki%20Chai|The%20Residency%20Lucknow|The%20Idly%20Room%20Lucknow|Chowk%20Lucknow|Gomti%20Riverfront%20Park|Marine%20Drive%20Lucknow|Tunday%20Kababi%20Aminabad%20Lucknow|Residency%20Lucknow%20Interpretation%20Centre|The%20Idly%20Room%20Lucknow|Capoor%20and%20Sons%20Hazratganj|Prakash%20Kulfi%20Lucknow|The%20Urban%20Terrace%20Lucknow|Tunday%20Kababi%20Aminabad%20Lucknow|Dilkusha%20Kothi|The%20Idly%20Room%20Lucknow|Avadh%20Shilpgram%20Lucknow|Hazratganj%20Market&travelmode=driving";
 
 	React.useEffect(() => {
 		const id = setInterval(() => {
@@ -992,6 +1545,182 @@ const Lucknow: React.FC = () => {
 				</div>
 			</div>
 
+				{/* Plan your Lucknow escape */}
+				<section className="py-10 md:py-14 bg-gradient-to-br from-teal-50 via-white to-orange-50 rounded-3xl border border-teal-100 shadow-sm">
+					<div className="max-w-6xl mx-auto px-4 md:px-8">
+						<div className="bg-white/80 backdrop-blur rounded-3xl shadow-xl border border-teal-100 p-6 md:p-10">
+							<header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+								<div>
+									<h2 className="text-2xl font-serif font-semibold text-teal-800">Plan Your Lucknow Escape</h2>
+									<p className="text-sm text-slate-600">Personalise arrival, interests, and budget to craft a Nawabi day-by-day plan.</p>
+								</div>
+								<div className="flex items-center gap-2 text-xs text-teal-600 bg-teal-50 px-3 py-1 rounded-full">
+									<Sparkles size={14} />
+									<span>Smart itinerary intelligence for Lucknow</span>
+								</div>
+							</header>
+
+							<div className="grid gap-6 md:grid-cols-2">
+								<div className="space-y-4">
+									<label className="block text-xs font-semibold text-slate-500 uppercase">Arrival Date</label>
+									<input
+										type="date"
+										value={arrivalDate}
+										onChange={(e) => setArrivalDate(e.target.value)}
+										className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+									/>
+								</div>
+								<div className="space-y-4">
+									<label className="block text-xs font-semibold text-slate-500 uppercase">Departure Date</label>
+									<input
+										type="date"
+										min={arrivalDate}
+										value={departureDate}
+										onChange={(e) => setDepartureDate(e.target.value)}
+										className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+									/>
+								</div>
+								<div className="space-y-4">
+									<div className="flex items-center justify-between gap-2">
+										<div>
+											<label className="block text-xs font-semibold text-slate-500 uppercase">City</label>
+											<input
+												readOnly
+												value="Lucknow"
+												className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700"
+												type="text"
+											/>
+										</div>
+										<span className="text-[11px] text-teal-700 font-semibold bg-teal-50 border border-teal-100 px-3 py-1 rounded-full">Routes auto-fill below</span>
+									</div>
+
+									<div className="grid md:grid-cols-2 gap-3 mt-3">
+										<div className="space-y-2">
+											<p className="text-[11px] font-semibold text-slate-600">Where will you arrive?</p>
+											<select
+												value={arrivalPoint}
+												onChange={(e) => setArrivalPoint(e.target.value)}
+												className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+											>
+												{cityEntryOptions.map((opt) => (
+													<option key={opt.id} value={opt.id}>{opt.name} — {opt.area}</option>
+												))}
+											</select>
+											<p className="text-xs text-slate-500">{activeArrival?.note || "Pick your starting point in Lucknow."}</p>
+										</div>
+										<div className="space-y-2">
+											<p className="text-[11px] font-semibold text-slate-600">Where do you want to go?</p>
+											<select
+												value={innerCityTarget}
+												onChange={(e) => setInnerCityTarget(e.target.value)}
+												className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+											>
+												{cityTargetOptions.map((opt) => (
+													<option key={opt.id} value={opt.id}>{opt.name} — {opt.area}</option>
+												))}
+											</select>
+											<p className="text-xs text-slate-500">{activeTarget?.category || "Select a spot inside the city."}</p>
+										</div>
+									</div>
+
+									<div className="mt-3 space-y-2 rounded-2xl bg-slate-50 border border-slate-200 p-3">
+										<div className="flex items-center justify-between gap-2 text-xs text-slate-600">
+											<span className="font-semibold text-slate-800">Suggested short route</span>
+											<span className="text-[11px] text-teal-700">{activeRoutePlan.summary}</span>
+										</div>
+										<div className="flex flex-wrap gap-2">
+											{activeRoutePlan.stops.map((stop) => (
+												<span key={stop} className="text-[11px] px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm">{stop}</span>
+											))}
+										</div>
+										<p className="text-[11px] text-slate-500">{activeRoutePlan.note || "We’ll keep it simple: start → key food/market spots → destination."}</p>
+										<p className="text-[11px] text-slate-500">Origin/destination above also update the map embed in the Route Planner.</p>
+									</div>
+								</div>
+								<div className="space-y-4">
+									<label className="block text-xs font-semibold text-slate-500 uppercase">Group Size</label>
+									<div className="relative">
+										<Users className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+										<select
+											value={groupSize}
+											onChange={(e) => setGroupSize(Number(e.target.value))}
+											className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm pl-10 focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+										>
+											{Array.from({ length: 10 }).map((_, idx) => (
+												<option key={idx + 1} value={idx + 1}>{idx + 1} traveller{idx === 0 ? "" : "s"}</option>
+											))}
+										</select>
+									</div>
+								</div>
+
+								<div className="md:col-span-2 space-y-3">
+									<label className="block text-xs font-semibold text-slate-500 uppercase">Interests</label>
+									<div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+										{interestOptions.map((interest) => {
+											const active = selectedInterests.has(interest);
+											return (
+												<button
+													key={interest}
+													type="button"
+													onClick={() => toggleInterest(interest)}
+													className={`rounded-xl border px-4 py-3 text-sm font-medium transition hover:shadow-sm ${active ? "border-teal-500 bg-teal-50 text-teal-700" : "border-slate-200 bg-white text-slate-500"}`}
+												>
+													{interest}
+												</button>
+											);
+										})}
+									</div>
+								</div>
+
+								<div className="md:col-span-2">
+									<label className="block text-xs font-semibold text-slate-500 uppercase mb-3">Budget Style</label>
+									<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+										{([
+											{ id: "low", title: "Low", hint: "Street eats + autos" },
+											{ id: "medium", title: "Medium", hint: "Mix of diners & cabs" },
+											{ id: "high", title: "High", hint: "Premium dining & guides" },
+										] as const).map((option) => {
+											const active = budgetStyle === option.id;
+											return (
+												<label
+													key={option.id}
+													className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-sm transition hover:border-teal-400 hover:shadow ${active ? "border-teal-500 bg-teal-50 text-teal-800" : "border-slate-200 bg-white"}`}
+												>
+													<span className="flex items-center justify-between">
+														<span className="text-base font-semibold">{option.title}</span>
+														<input
+															type="radio"
+															value={option.id}
+															checked={active}
+															onChange={() => setBudgetStyle(option.id)}
+															className="h-4 w-4 text-teal-500"
+														/>
+													</span>
+													<span className="mt-2 text-slate-500 text-xs">{option.hint}</span>
+												</label>
+											);
+										})}
+									</div>
+								</div>
+							</div>
+
+							<div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+								<div className="text-xs text-slate-600">
+									<span className="font-semibold text-teal-700">Trip length:</span> {tripLengthDays || 1} {tripLengthDays === 1 ? "day" : "days"} | Daily budget baseline: ₹{budgetPerDay.toLocaleString()}
+								</div>
+								<button
+									type="button"
+									onClick={() => setShowItinerary(true)}
+									className="inline-flex items-center justify-center gap-2 rounded-full bg-teal-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-teal-300"
+								>
+									<Sparkles size={16} />
+									Generate Plan
+								</button>
+							</div>
+						</div>
+					</div>
+				</section>
+
 				{/* Where to stay (reintroduced with refreshed UI) */}
 				<div className="mt-10 bg-slate-50 border border-slate-200 rounded-3xl shadow-sm p-6 md:p-8 space-y-6">
 					<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
@@ -1097,6 +1826,116 @@ const Lucknow: React.FC = () => {
 
 			</div>
 		</section>
+
+		{showItinerary && (
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+				<div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+					<button
+						type="button"
+						onClick={() => setShowItinerary(false)}
+						className="absolute right-5 top-5 rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition hover:border-teal-400 hover:text-teal-600"
+						aria-label="Close itinerary"
+					>
+						<X size={18} />
+					</button>
+					<div className="flex flex-col gap-6 overflow-y-auto p-8 max-h-[78vh] pr-2">
+						<header className="space-y-2">
+							<h3 className="text-2xl font-semibold text-teal-800">Daily Itinerary</h3>
+							<p className="text-sm text-slate-500 flex items-center gap-2">
+								<Calendar size={16} className="text-teal-500" />
+								{dateRangeLabel}
+							</p>
+							<p className="text-xs text-slate-500">Interests: {selectedInterestList} · Budget: {budgetStyle} · Group size: {groupSize}</p>
+						</header>
+
+						<div className="flex flex-wrap gap-3">
+							<button
+								type="button"
+								onClick={() => navigator.clipboard?.writeText(itineraryCopyText).catch(() => null)}
+								className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 transition hover:border-teal-400 hover:text-teal-600"
+							>
+								<Copy size={14} /> Copy itinerary
+							</button>
+							<button
+								type="button"
+								className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 transition hover:border-teal-400 hover:text-teal-600"
+							>
+								<Printer size={14} /> Print / Export PDF
+							</button>
+							<button
+								type="button"
+								className="flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-medium text-green-700 transition hover:border-green-400"
+							>
+								<Share2 size={14} /> Share on WhatsApp
+							</button>
+							<a
+								href={whatsappRouteLink}
+								target="_blank"
+								rel="noreferrer"
+								className="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-medium text-blue-700 transition hover:border-blue-400"
+							>
+								<MapIcon size={14} /> Google Maps Route
+							</a>
+						</div>
+
+						<div className="grid gap-4 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-xs text-teal-700">
+							<p>Daily budget guidance: ₹{budgetPerDay.toLocaleString()} for your group</p>
+							<p>Total projected spend: ₹{totalBudget.toLocaleString()}</p>
+							<p className="flex items-center gap-2">
+								<Clock size={14} className="text-teal-600" /> Walking avg: 14.4 km | Auto rides: 10 | Cab hops: 9
+							</p>
+							<ul className="list-disc pl-5 space-y-1 text-slate-700">
+								<li>Mix autos for short hops and pre-book cabs for Gomti Nagar evenings.</li>
+								<li>Reserve dining slots on weekends to skip queues.</li>
+								<li>Weekday mornings are best for Residency walks before it warms up.</li>
+							</ul>
+						</div>
+
+						<div className="space-y-4">
+							{itineraryDays.map((day) => {
+								const open = openDayId === day.id;
+								return (
+									<div key={day.id} className="rounded-2xl border border-slate-200">
+										<button
+											type="button"
+											onClick={() => setOpenDayId(open ? null : day.id)}
+											className="flex w-full items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-left"
+										>
+											<div>
+												<h4 className="text-sm font-semibold text-teal-700">{day.title}</h4>
+												<p className="text-xs text-slate-500">{day.summary} | {day.stats}</p>
+											</div>
+											<Clock size={16} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+										</button>
+										{open && (
+											<div className="space-y-4 px-4 py-4">
+												{day.stops.map((stop) => (
+													<div key={`${day.id}-${stop.time}-${stop.title}`} className="rounded-xl border border-slate-200 p-4 shadow-sm">
+														<div className="flex items-start justify-between gap-3">
+															<div>
+																<p className="text-xs font-medium text-slate-400">{stop.time}</p>
+																<h5 className="text-sm font-semibold text-slate-800">{stop.title}</h5>
+																<p className="mt-1 text-xs text-slate-500">{stop.description}</p>
+																{stop.tip && <p className="mt-2 text-xs text-teal-600">💡 {stop.tip}</p>}
+															</div>
+															<div className="text-right text-xs text-slate-500">
+																<p>{stop.duration}</p>
+																<p>{stop.transit}</p>
+																<p>{stop.cost}</p>
+															</div>
+														</div>
+													</div>
+												))}
+											</div>
+										)}
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</div>
+			</div>
+		)}
 
 		{activeSection?.id === "foods" && (
 			<div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">

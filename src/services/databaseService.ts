@@ -59,14 +59,22 @@ const defaultQuestions = Object.entries(fallbackQuestions).flatMap(([category, q
 
 export async function fetchQuestionsFromDB(category?: string) {
   try {
-    const url = category 
-      ? `${API_BASE_URL}/questions/category/${category}` 
+    const url = category
+      ? `${API_BASE_URL}/questions/category/${category}`
       : `${API_BASE_URL}/questions`;
-    const response = await fetch(url);
+
+    // Short timeout to avoid noisy console errors when backend is down
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+
     if (!response.ok) throw new Error('Failed to fetch questions');
     return await response.json();
   } catch (error) {
-    console.warn('Using fallback questions, fetch failed:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.info('[questions] Using fallback; backend unavailable:', message);
     if (category) {
       return fallbackQuestions[category]?.map(question => ({ category, question })) || [];
     }

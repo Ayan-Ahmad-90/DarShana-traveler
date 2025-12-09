@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { bookingApi } from '../services/api';
+import { createRazorpayOrder } from '../services/razorpay.ts';
 
 declare global {
   interface Window {

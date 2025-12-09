@@ -1,6 +1,7 @@
+import type { Content } from "@google/generative-ai";
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 
-// Gemini API key comes from Vite environment variable
+// 👉 Your Gemini API Key yaha daalo
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 // Debug: Check if API key exists
@@ -11,25 +12,8 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // --- MODEL CONFIG ---
-// Allow override via env; default to a stable, GA-supported model for v1beta.
-const DEFAULT_MODEL = "gemini-1.5-flash";
-const MODEL_NAME = (import.meta.env.VITE_GEMINI_MODEL as string | undefined)?.trim() || DEFAULT_MODEL;
-
-// Keep replies direct, concise, and travel-focused.
-const systemInstruction = {
-  role: "system",
-  parts: [
-    {
-      text:
-        "You are Yatra Sahayak, an Indian travel assistant. Answer the user's question directly and succinctly in the language they used (English or Hindi). Provide clear, actionable travel guidance and avoid long introductions.",
-    },
-  ],
-};
-
-console.info(`[Gemini] Using model: ${MODEL_NAME}`);
 const model = genAI.getGenerativeModel({
-  model: MODEL_NAME,
-  systemInstruction,
+  model: "gemini-1.5-flash",  
 });
 
 // --- SAFETY SETTINGS (optional but recommended) ---
@@ -53,18 +37,25 @@ const safetySettings = [
 // ----------------------------------------------
 export async function getChatResponse(history: any[], userInput: string) {
   try {
-    if (!API_KEY) {
-      return "Gemini API key is missing. Please add VITE_GEMINI_API_KEY to your environment.";
-    }
+    // Gemini requires the history to start with a user turn and every entry must provide `parts`
+    const formattedHistory = history.reduce<Content[]>(
+      (acc, msg) => {
+        const text = typeof msg.text === "string" ? msg.text.trim() : "";
+        if (!text) {
+          return acc;
+        }
 
-    const formattedHistory = history
-      .filter(msg => Boolean(msg?.text))
-      .map(msg => ({
-        role: msg.role === "model" ? "model" : "user",
-        parts: [{ text: msg.text }],
-      }));
+        acc.push({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text }],
+        });
 
-    if (formattedHistory[0]?.role === "model") {
+        return acc;
+      },
+      [],
+    );
+
+    while (formattedHistory.length > 0 && formattedHistory[0]?.role !== "user") {
       formattedHistory.shift();
     }
 
@@ -73,15 +64,11 @@ export async function getChatResponse(history: any[], userInput: string) {
       history: formattedHistory,
     });
 
-    const result = await chatSession.sendMessage(userInput || "");
+    const result = await chatSession.sendMessage(userInput);
     return result.response.text();
 
   } catch (error) {
     console.error("Gemini chat error:", error);
-    const message = (error as any)?.message || "";
-    if (message.includes("404") || message.includes("not found")) {
-      return "Gemini model unavailable. Please verify the model name and try again.";
-    }
     return "Sorry, I couldn't process that. Please try again.";
   }
 }
@@ -123,4 +110,3 @@ export async function getSustainableRouteOptions(from: string, to: string) {
     return "Sorry, unable to fetch sustainable route options.";
   }
 }
-
