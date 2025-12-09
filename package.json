@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "prebuild": "node check-uncommitted-changes.cjs",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check-changes": "node check-uncommitted-changes.cjs"
   },
   "dependencies": {
     "@emailjs/browser": "^3.12.1",
