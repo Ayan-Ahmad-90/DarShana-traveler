@@ -1,4 +1,4 @@
-import { MapPin, CloudSun, Star } from 'lucide-react';
+import { CloudSun, MapPin, Star } from 'lucide-react';
 
 type DestinationCard = {
   id: string;
@@ -6,7 +6,6 @@ type DestinationCard = {
   region: string;
   description: string;
   image: string;
-  temperature: string;
   weather: string;
   mapLink: string;
   rating: number;
@@ -20,7 +19,6 @@ const popularDestinations: DestinationCard[] = [
     region: 'Trans-Himalaya',
     description: 'Confluence drives, high passes, and night skies over Pangong Tso.',
     image: 'https://travelmykashmir.com/wp-content/uploads/2024/05/Pangong-Lake-Near-the-Mountains-Under-the-Blue-Sky-and-White-Clouds-Kashmir-leh-ladakh-tour-packages.webp',
-    temperature: '12°C',
     weather: 'Clear Skies',
     mapLink: 'https://maps.app.goo.gl/sxkRXVRwVP3sa3mL7',
     rating: 4.95,
@@ -32,7 +30,6 @@ const popularDestinations: DestinationCard[] = [
     region: 'Western Ghats',
     description: 'Coffee estate stays, rainforest hikes, and Kodava culinary tours.',
     image: 'https://static.toiimg.com/photo/58374190.cms',
-    temperature: '22°C',
     weather: 'Misty',
     mapLink: 'https://maps.app.goo.gl/7TXHyxQ7EZbnBo8b7',
     rating: 4.85,
@@ -44,7 +41,6 @@ const popularDestinations: DestinationCard[] = [
     region: 'Northeast India',
     description: 'Living root bridges, waterfalls, and clean village walks in the clouds.',
     image: 'https://d34vm3j4h7f97z.cloudfront.net/optimized/4X/4/5/4/454db32ff82609d46db45be4e4f441038cad6789_2_690x428.jpeg',
-    temperature: '18°C',
     weather: 'Partly Cloudy',
     mapLink: 'https://maps.app.goo.gl/6nX8pVJx8Wx9pddY8',
     rating: 4.9,
@@ -72,7 +68,7 @@ const DestinationsSection = () => {
                 <MapPin size={14} /> {destination.region}
               </div>
               <div className="absolute bottom-4 left-4 rounded-2xl bg-black/60 text-white px-3 py-2 flex items-center gap-2 text-sm">
-                <CloudSun size={16} /> {destination.temperature} · {destination.weather}
+                <CloudSun size={16} /> {destination.weather}
               </div>
             </div>
             <div className="p-6 flex flex-col flex-1">

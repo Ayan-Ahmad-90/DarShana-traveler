@@ -30,8 +30,19 @@ export const getBackendUrl = (): string => {
 
 export const API_BASE_URL = getBackendUrl();
 
+// Dev helpers: try both 3001 (default) and 3000 (used in some scripts)
+const devBackends = Array.from(new Set([
+  API_BASE_URL,
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+].filter(Boolean)));
+
 export const API_ENDPOINTS = {
   ROUTES: `${API_BASE_URL}/api/routes`,
   ROUTE_HISTORY: `${API_BASE_URL}/api/routes`,
   HEALTH: `${API_BASE_URL}/health`,
 };
+
+export const ROUTE_ENDPOINTS = devBackends.map((base) => `${base}/api/routes`);

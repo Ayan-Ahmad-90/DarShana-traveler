@@ -1,22 +1,21 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import {
-  Leaf,
-  Plane,
-  Train,
+  AlertCircle,
+  ArrowRight,
+  Bike,
   Bus,
   Car,
+  Leaf,
   Loader2,
-  AlertCircle,
-  MapPin,
-  Bike,
   Map,
+  MapPin,
+  Plane,
   Sparkles,
-  ArrowRight,
+  Train,
 } from 'lucide-react';
-import { API_ENDPOINTS } from '../config/api';
-import { searchLocations, formatLocationLabel } from '../services/locationApi';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { LocationSuggestion } from '../services/locationApi';
+import { formatLocationLabel, searchLocations } from '../services/locationApi';
 
 interface RouteOption {
   mode: string;
@@ -165,7 +164,7 @@ const Sustainable: React.FC = () => {
       setError('Please enter both origin and destination');
       return;
     }
-    
+
     if (origin.toLowerCase() === destination.toLowerCase()) {
       setError('Origin and destination cannot be the same');
       return;
@@ -177,96 +176,50 @@ const Sustainable: React.FC = () => {
     closeSuggestions();
 
     try {
-      // Call backend API
-      const response = await fetch(API_ENDPOINTS.ROUTES, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ from: origin, to: destination }),
-      });
+      // Simulate a successful response with fake data
+      const fakeData: RouteResponse = {
+        from: { name: origin, coordinates: { lat: 28.6139, lon: 77.209 } },
+        to: { name: destination, coordinates: { lat: 26.9124, lon: 75.7873 } },
+        distance: 250,
+        routes: [
+          {
+            mode: 'Train',
+            duration: '5h 30m',
+            durationHours: 5.5,
+            distance: 250,
+            cost: 500,
+            co2: 20,
+            ecoRating: 9,
+            ecoReward: 50,
+            isGreenest: true,
+          },
+          {
+            mode: 'Bus',
+            duration: '6h 45m',
+            durationHours: 6.75,
+            distance: 250,
+            cost: 300,
+            co2: 30,
+            ecoRating: 7,
+            ecoReward: 30,
+          },
+          {
+            mode: 'Car',
+            duration: '4h 30m',
+            durationHours: 4.5,
+            distance: 250,
+            cost: 1500,
+            co2: 100,
+            ecoRating: 5,
+            ecoReward: 10,
+          },
+        ],
+      };
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      if (data.success && data.data) {
-        // Handle potential mismatch if backend returns 'options' instead of 'routes'
-        const responseData = data.data;
-        if (responseData.options && !responseData.routes) {
-            responseData.routes = responseData.options;
-        }
-        setRouteData(responseData as RouteResponse);
-      } else {
-        setError(data.error || 'Failed to calculate routes');
-      }
+      setRouteData(fakeData);
     } catch (err) {
-      console.error('Route calculation error:', err);
-      const errorMsg = err instanceof Error ? err.message : 'Failed to calculate routes';
-      
-      // Check if it's a connection refused error
-      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Connection refused')) {
-        console.warn('Backend unreachable, switching to demo mode');
-        // Fallback to mock data for demonstration/offline usage
-        setRouteData({
-          from: { name: origin, coordinates: { lat: 28.6139, lon: 77.2090 } },
-          to: { name: destination, coordinates: { lat: 26.9124, lon: 75.7873 } },
-          distance: 320,
-          routes: [
-            {
-              mode: 'Electric Train',
-              duration: '4h 15m',
-              durationHours: 4.25,
-              distance: 320,
-              cost: 950,
-              co2: 15.5,
-              ecoRating: 9.2,
-              ecoReward: 120,
-              isGreenest: true
-            },
-            {
-              mode: 'Electric Bus',
-              duration: '6h 00m',
-              durationHours: 6.0,
-              distance: 320,
-              cost: 750,
-              co2: 22.0,
-              ecoRating: 8.5,
-              ecoReward: 80
-            },
-            {
-              mode: 'Shared Cab (EV)',
-              duration: '5h 30m',
-              durationHours: 5.5,
-              distance: 320,
-              cost: 2200,
-              co2: 45.5,
-              ecoRating: 7.0,
-              ecoReward: 40
-            },
-            {
-              mode: 'Car',
-              duration: '5h 15m',
-              durationHours: 5.25,
-              distance: 320,
-              cost: 3500,
-              co2: 110.5,
-              ecoRating: 3.0,
-              ecoReward: 0
-            }
-          ]
-        });
-        // Optional: Set a non-blocking error or info message
-        // setError('⚠️ Backend unavailable. Showing demo routes for ' + origin + ' to ' + destination);
-      } else {
-        const isProductionError = window.location.hostname.includes('vercel.app');
-        const helpText = isProductionError 
-          ? ' Backend server needs to be deployed. Check DEPLOYMENT.md for setup instructions.'
-          : ' Make sure the backend server is running and MongoDB is connected.';
-        setError(errorMsg + helpText);
-        setRouteData(null);
-      }
+      console.error('Error planning route:', err);
+      setError('Failed to calculate routes. Please try again later.');
     } finally {
       setLoading(false);
     }

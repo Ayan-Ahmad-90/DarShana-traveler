@@ -13,8 +13,10 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { languageApi } from '../services/api';
 
 type RightSidebarProps = {
   isOpen: boolean;
@@ -29,11 +31,18 @@ const quickActions = [
   { label: 'Guide Portal', icon: Users, path: '/guide-dashboard' },
 ];
 
-const menuItems = [
+type MenuItem = {
+  label: string;
+  icon: any;
+  path?: string;
+  color: string;
+  onClick?: () => void;
+};
+
+const menuItems: MenuItem[] = [
   { label: 'Home', icon: Sparkles, path: '/', color: 'text-amber-300' },
   { label: 'My Profile', icon: User, path: '/profile', color: 'text-slate-500' },
   { label: 'Guide Portal', icon: Users, path: '/guide-dashboard', color: 'text-blue-400' },
-  { label: 'Language', icon: Globe, path: '/language', color: 'text-cyan-400' },
   { label: 'Festival Alerts', icon: Sparkles, path: '/festival-alerts', color: 'text-amber-400' },
   { label: 'Travel Hub', icon: Globe, path: '/travelhub', color: 'text-cyan-300' },
   { label: 'Essentials', icon: Luggage, path: '/travel-essentials', color: 'text-emerald-300' },
@@ -44,12 +53,45 @@ const menuItems = [
 
 const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, logout, deleteAccount } = useAuth();
+  const { isAuthenticated, user, logout, deleteAccount, updateUser } = useAuth();
+  const { i18n } = useTranslation();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleNavigate = (path: string) => {
+  const handleLanguageToggle = async () => {
+    const nextLanguage = i18n.language === 'hi' ? 'en' : 'hi';
+    i18n.changeLanguage(nextLanguage);
+    localStorage.setItem('language', nextLanguage);
+    if (isAuthenticated) {
+      try {
+        await languageApi.updateUserLanguage(nextLanguage);
+        updateUser({ preferredLanguage: nextLanguage });
+      } catch (err) {
+        console.error('Failed to persist language preference', err);
+      }
+    }
+    // Close the sidebar to reflect the change immediately in UI context
+    onClose();
+  };
+
+  const fullMenu: MenuItem[] = [
+    ...menuItems.slice(0, 3),
+    { label: 'Language', icon: Globe, color: 'text-cyan-400', onClick: handleLanguageToggle },
+    ...menuItems.slice(3),
+  ];
+
+  const handlePathNavigation = (path: string) => {
     navigate(path);
     onClose();
+  };
+
+  const handleNavigate = (item: MenuItem) => {
+    if (item.onClick) {
+      item.onClick();
+      return;
+    }
+    if (item.path) {
+      handlePathNavigation(item.path);
+    }
   };
 
   const handleLogout = () => {
@@ -114,7 +156,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
             <button
-              onClick={() => handleNavigate('/profile')}
+              onClick={() => handlePathNavigation('/profile')}
               className="mt-3 w-full px-3 py-2 bg-slate-900 text-white hover:bg-slate-800 border border-slate-900/10 text-xs font-semibold rounded-lg transition"
             >
               Edit Profile
@@ -124,7 +166,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
           <div className="px-5 py-4 bg-white border-b border-slate-200">
             <p className="text-xs text-slate-600 mb-2">Sign in to sync trips, rewards, and alerts.</p>
             <button
-              onClick={() => handleNavigate('/login')}
+              onClick={() => handlePathNavigation('/login')}
               className="w-full px-3 py-2 bg-gradient-to-r from-amber-500 to-pink-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-amber-500/20"
             >
               Sign In
@@ -139,7 +181,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
             return (
               <button
                 key={action.label}
-                onClick={() => handleNavigate(action.path)}
+                onClick={() => handlePathNavigation(action.path)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-left text-xs font-semibold transition text-slate-800"
               >
                 <Icon className="w-4 h-4 text-amber-500" />
@@ -153,12 +195,13 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
         <div className="p-5 space-y-2">
           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Navigate</p>
           <div className="space-y-1.5">
-            {menuItems.map((item) => {
+            {fullMenu.map((item) => {
               const Icon = item.icon;
+              const subtitle = item.onClick ? 'Tap to toggle' : 'Tap to open';
               return (
                 <button
                   key={item.label}
-                  onClick={() => handleNavigate(item.path)}
+                  onClick={() => handleNavigate(item)}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-slate-200 hover:border-amber-300 hover:bg-amber-50/60 transition group text-slate-800"
                 >
                   <span className="p-2 rounded-lg bg-slate-100 group-hover:bg-amber-100 transition">
@@ -166,7 +209,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
                   </span>
                   <div className="flex flex-col items-start">
                     <span className="text-sm font-semibold text-slate-900">{item.label}</span>
-                    <span className="text-[11px] text-slate-500">Tap to open</span>
+                    <span className="text-[11px] text-slate-500">{subtitle}</span>
                   </div>
                 </button>
               );
@@ -202,6 +245,31 @@ const RightSidebar: React.FC<RightSidebarProps> = ({ isOpen, onClose }) => {
             <Shield className="w-4 h-4" />
             Secure
           </span>
+        </div>
+
+        {/* Mobile quick actions bar */}
+        <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+          <button
+            onClick={() => handlePathNavigation('/')}
+            className="flex-1 flex flex-col items-center gap-1 text-xs font-semibold text-slate-800"
+          >
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            <span>Home</span>
+          </button>
+          <button
+            onClick={() => handlePathNavigation('/assistant')}
+            className="flex-1 flex flex-col items-center gap-1 text-xs font-semibold text-slate-800"
+          >
+            <Bot className="w-5 h-5 text-cyan-500" />
+            <span>Assistant</span>
+          </button>
+          <button
+            onClick={handleLanguageToggle}
+            className="flex-1 flex flex-col items-center gap-1 text-xs font-semibold text-slate-800"
+          >
+            <Globe className="w-5 h-5 text-blue-500" />
+            <span>{i18n.language === 'hi' ? 'हिन्दी' : 'English'}</span>
+          </button>
         </div>
       </div>
     </>

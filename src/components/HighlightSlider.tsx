@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { Calendar, CloudSun, MapPin, Mountain, Sparkles, Wind } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, MapPin, Calendar, Wind, Mountain, CloudSun } from 'lucide-react';
 
 export interface HighlightItem {
   id: string;
@@ -10,7 +10,7 @@ export interface HighlightItem {
   badge?: string;
   type: 'destination' | 'festival' | 'season' | 'experience';
   link?: string;
-  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light' | 'green';
+  color?: 'blue' | 'slate' | 'neutral' | 'accent' | 'light' | 'red' | 'green' | 'orange';
   lat?: number;
   lon?: number;
 }
@@ -22,6 +22,54 @@ interface HighlightSliderProps {
 
 // Default travel & tourism highlight data
 const DEFAULT_ITEMS: HighlightItem[] = [
+  {
+    id: 'lucknow-mahotsav',
+    title: 'Lucknow Mahotsav',
+    description: 'Culture, crafts, and performances',
+    badge: 'Nov–Dec',
+    icon: <Calendar size={16} />,
+    type: 'festival',
+    link: '/festivals?search=Lucknow Mahotsav',
+    color: 'green',
+    lat: 26.86,
+    lon: 80.9425
+  },
+  {
+    id: 'kathak-evening',
+    title: 'Kathak & Ghazal Evening',
+    description: 'Classical dance and live ghazals',
+    badge: 'Culture',
+    icon: <Sparkles size={16} />,
+    type: 'experience',
+    link: '/travelhub?search=Lucknow',
+    color: 'red',
+    lat: 26.8464,
+    lon: 80.946
+  },
+  {
+    id: 'goa',
+    title: 'Goa',
+    description: 'Beach escape',
+    badge: 'Relaxation',
+    icon: <Wind size={16} />,
+    type: 'destination',
+    link: '/travelhub?search=Goa',
+    color: 'slate',
+    lat: 15.4909,
+    lon: 73.8278
+  },
+  {
+    id: 'hubli-dharwad',
+    title: 'Hubli–Dharwad',
+    description: 'Gateway to North Karnataka',
+    badge: 'New',
+    icon: <MapPin size={16} />,
+    type: 'destination',
+    link: '/travelhub?search=Hubli',
+    color: 'neutral',
+    lat: 15.3647,
+    lon: 75.1239
+  },
   {
     id: 'jaipur',
     title: 'Jaipur',
@@ -201,6 +249,9 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     neutral: 'linear-gradient(135deg, #1E293B 0%, #334155 100%)',
     accent: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
     light: 'linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%)',
+    red: 'linear-gradient(135deg, #B91C1C 0%, #EF4444 100%)',
+    green: 'linear-gradient(135deg, #15803D 0%, #22C55E 100%)',
+    orange: 'linear-gradient(135deg, #EA580C 0%, #F97316 100%)',
   };
 
   const colorShadows: Record<string, string> = {
@@ -209,6 +260,9 @@ const HighlightSlider: React.FC<HighlightSliderProps> = ({
     neutral: 'rgba(30, 41, 59, 0.3)',
     accent: 'rgba(15, 23, 42, 0.3)',
     light: 'rgba(241, 245, 249, 0.3)',
+    red: 'rgba(185, 28, 28, 0.3)',
+    green: 'rgba(21, 128, 61, 0.3)',
+    orange: 'rgba(234, 88, 12, 0.3)',
   };
 
   // Duplicate items for infinite scroll

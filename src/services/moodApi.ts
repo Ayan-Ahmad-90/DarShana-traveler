@@ -77,32 +77,51 @@ async function postMoodAnalysis(payload: { imageData?: string; imageUrl?: string
 // Local fallback simulation
 function getFallbackMoodAnalysis(): MoodAnalyzeResponse {
   const moods = [
-    { name: 'Happy & Excited', energy: 8, social: 9, adventure: 7, keys: ['Nightlife', 'Street Food', 'Beach'] },
-    { name: 'Calm & Peaceful', energy: 3, social: 2, adventure: 2, keys: ['Yoga', 'Temples', 'Nature'] },
-    { name: 'Adventurous', energy: 9, social: 6, adventure: 10, keys: ['Trekking', 'Paragliding', 'Snow'] },
-    { name: 'Romantic', energy: 5, social: 4, adventure: 3, keys: ['Houseboat', 'Palaces', 'Lakes'] },
-    { name: 'Cultural', energy: 4, social: 7, adventure: 4, keys: ['History', 'Architecture', 'Festivals'] }
+    {
+      name: 'Happy',
+      energy: 7,
+      social: 7,
+      adventure: 6,
+      keys: ['Beach', 'Street Food', 'City Walks'],
+      emotions: { happy: 0.85, sad: 0.05, angry: 0.0, surprised: 0.05, neutral: 0.1, fear: 0.0, disgust: 0.0 },
+    },
+    {
+      name: 'Excited',
+      energy: 9,
+      social: 8,
+      adventure: 8,
+      keys: ['Nightlife', 'Theme Parks', 'Road Trips'],
+      emotions: { happy: 0.75, sad: 0.02, angry: 0.0, surprised: 0.18, neutral: 0.05, fear: 0.0, disgust: 0.0 },
+    },
+    {
+      name: 'Sad',
+      energy: 3,
+      social: 2,
+      adventure: 2,
+      keys: ['Nature', 'Quiet Stays', 'Wellness'],
+      emotions: { happy: 0.05, sad: 0.8, angry: 0.0, surprised: 0.0, neutral: 0.15, fear: 0.0, disgust: 0.0 },
+    },
+    {
+      name: 'Calm',
+      energy: 4,
+      social: 3,
+      adventure: 3,
+      keys: ['Lakes', 'Temples', 'Spa'],
+      emotions: { happy: 0.15, sad: 0.05, angry: 0.0, surprised: 0.05, neutral: 0.7, fear: 0.0, disgust: 0.0 },
+    },
   ];
 
   const randomMood = moods[Math.floor(Math.random() * moods.length)];
 
   return {
     detectedMood: randomMood.name,
-    confidence: 0.85 + Math.random() * 0.1,
-    emotions: {
-      happy: randomMood.name.includes('Happy') ? 0.8 : 0.1,
-      sad: 0.05,
-      angry: 0.0,
-      surprised: randomMood.name.includes('Adventurous') ? 0.6 : 0.1,
-      neutral: randomMood.name.includes('Calm') ? 0.8 : 0.1,
-      fear: 0.0,
-      disgust: 0.0
-    },
+    confidence: 0.9 + Math.random() * 0.05,
+    emotions: randomMood.emotions,
     energyLevel: randomMood.energy,
     socialScore: randomMood.social,
     adventureScore: randomMood.adventure,
     reasoning: `Detected facial expressions matching '${randomMood.name}'. Recommended for ${randomMood.keys.join(', ')} experiences.`,
-    recommendedKeys: randomMood.keys
+    recommendedKeys: randomMood.keys,
   };
 }
 

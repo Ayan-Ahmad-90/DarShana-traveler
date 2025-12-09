@@ -1,12 +1,51 @@
-import React from 'react';
-import { ArrowRight, Star, ShieldCheck, CreditCard, Train, Anchor, Mountain,Home as HomeIcon, Camera } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import 'leaflet/dist/leaflet.css';
+import {
+  Anchor,
+  ArrowRight,
+  Camera,
+  CreditCard,
+  Home as HomeIcon,
+  Mountain,
+  ShieldCheck,
+  Star,
+  Train,
+} from 'lucide-react';
+import React from 'react';
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
+import { Link } from 'react-router-dom';
+
+import FamousFood from '../components/FamousFood';
+import GovernmentInitiatives from '../components/GovernmentInitiatives';
 import HeroSection from '../components/HeroSection';
 import HighlightSlider from '../components/HighlightSlider';
 import KathakaliAssistant from "../components/KathakaliAssistant";
-import GovernmentInitiatives from '../components/GovernmentInitiatives';
-import FamousFood from '../components/FamousFood';
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+const indiaPins: { city: string; note: string; position: [number, number] }[] = [
+  { city: 'Delhi', note: 'Capital · Heritage walks', position: [28.6139, 77.209] },
+  { city: 'Lucknow', note: 'Kebabs · Tehzeeb', position: [26.8467, 80.9462] },
+  { city: 'Varanasi', note: 'Ghats · Aarti', position: [25.3176, 82.9739] },
+  { city: 'Ayodhya', note: 'Ram Janmabhoomi', position: [26.7999, 82.2043] },
+  { city: 'Mumbai', note: 'Sea link · Film city', position: [19.076, 72.8777] },
+  { city: 'Goa', note: 'Beaches · Cafés', position: [15.2993, 74.124] },
+  { city: 'Hyderabad', note: 'Biryani · Charminar', position: [17.385, 78.4867] },
+  { city: 'Bengaluru', note: 'Tech · Coffee', position: [12.9716, 77.5946] },
+  { city: 'Kochi', note: 'Backwaters · Fort', position: [9.9312, 76.2673] },
+  { city: 'Kolkata', note: 'Trams · Mishti', position: [22.5726, 88.3639] },
+  { city: 'Chhattisgarh', note: 'Waterfalls · Forests', position: [21.2787, 81.8661] },
+  { city: 'Jaipur', note: 'Palaces · Bazaars', position: [26.9124, 75.7873] },
+  { city: 'Leh', note: 'Mountains · Monasteries', position: [34.1526, 77.577] },
+];
 
 const destinations = [
   {
@@ -59,14 +98,14 @@ const quotes = [
 const Home: React.FC = () => {
   return (
     <div className="flex flex-col">
-     
-
       {/* Highlight Slider */}
       <HighlightSlider />
 
       {/* Hero Section */}
       <HeroSection />
      
+      
+
       {/* Inspirational Quotes Section - Auto Flow */}
       <section className="bg-slate-900 text-white py-10 border-y border-slate-800 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 mb-6">
@@ -75,6 +114,7 @@ const Home: React.FC = () => {
              <h2 className="text-2xl font-serif font-bold text-slate-100">Traveler's Wisdom</h2>
           </div>
         </div>
+
           
         {/* Auto Scroll Container */}
         <div className="flex relative w-full">
@@ -107,6 +147,55 @@ const Home: React.FC = () => {
                     </div>
                 ))}
             </motion.div>
+        </div>
+      </section>
+
+
+      {/* India Map with Leaflet */}
+      <section className="relative py-16 bg-white text-slate-900 overflow-hidden">
+        <div className="absolute -left-20 -top-32 h-64 w-64 bg-orange-200/30 rounded-full blur-3xl" aria-hidden />
+        <div className="absolute -right-24 bottom-0 h-72 w-72 bg-emerald-200/30 rounded-full blur-3xl" aria-hidden />
+
+        <div className="max-w-6xl mx-auto px-4 relative">
+          <div className="flex items-start justify-between flex-col md:flex-row md:items-center gap-4 mb-10">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-500">India at a glance</p>
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900">India’s unmissable stops</h2>
+              <p className="text-slate-600 mt-2 text-sm md:text-base">Explore live map markers for heritage, food, and beach hubs.</p>
+            </div>
+            <Link
+              to="/travelhub"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800"
+            >
+              Explore map <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_25px_50px_-25px_rgba(0,0,0,0.25)] p-3" style={{ perspective: '1400px' }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-emerald-50 pointer-events-none" aria-hidden />
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-xl transform-gpu" style={{ height: '520px' }}>
+              <MapContainer
+                center={[22.9734, 78.6569]}
+                zoom={5}
+                scrollWheelZoom={false}
+                className="w-full h-full leaflet-map"
+                style={{ backgroundColor: '#ffffff' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {indiaPins.map((pin) => (
+                  <Marker key={pin.city} position={pin.position} opacity={0.9}>
+                    <Popup>
+                      <div className="text-sm font-semibold text-slate-800">{pin.city}</div>
+                      <div className="text-xs text-slate-600">{pin.note}</div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
+          </div>
         </div>
       </section>
 

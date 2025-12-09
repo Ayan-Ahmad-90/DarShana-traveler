@@ -1,11 +1,10 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { Calendar, MapPin, Grid, Map as MapIcon, X, TrendingUp, Download, Share2, Phone, MessageCircle, Info, ChevronRight, Search, ChevronDown, Clock } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 import domtoimage from 'dom-to-image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Calendar, ChevronDown, ChevronRight, Clock, Download, Grid, Map as MapIcon, MapPin, Search, Share2, TrendingUp, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 
 // --- Leaflet marker icon fix ---
 const DefaultIcon = new L.Icon({
@@ -183,6 +182,193 @@ const festivalsData = [
         lat: 24.5,
         lng: 79.0
     },
+    {
+      id: 16,
+      name: "Ugadi (उगादी)",
+      type: "New Year (Hindu)",
+      month: "March/April",
+      location: "Andhra Pradesh, Telangana, Karnataka",
+      desc: "Telugu and Kannada New Year, celebrated with special dishes symbolizing different tastes of life and community rituals.",
+      img: "https://data1.ibtimes.co.in/en/full/640477/ugadi-festival.jpg?h=450&l=50&t=40",
+      lat: 17.385,
+      lng: 78.4867
+    },
+    {
+      id: 17,
+      name: "Vishu (विशु)",
+      type: "New Year (Hindu)",
+      month: "April",
+      location: "Kerala",
+      desc: "Kerala New Year with Vishukkani (first sight), fireworks, feasts, and giving Vishukkaineetam (token gifts).",
+      img: "https://pin.it/6cq4UDSjV",
+      lat: 10.8505,
+      lng: 76.2711
+    },
+    {
+      id: 18,
+      name: "Thaipusam",
+      type: "Religious (Hindu)",
+      month: "January/February",
+      location: "Tamil Nadu",
+      desc: "Devotion to Lord Murugan with kavadi processions and acts of penance including body piercings.",
+      img: "https://pin.it/CYpQXlsPl",
+      lat: 11.1271,
+      lng: 78.6569
+    },
+    {
+      id: 19,
+      name: "Makara Sankranti",
+      type: "Harvest (Hindu)",
+      month: "January",
+      location: "Karnataka, Andhra Pradesh",
+      desc: "Harvest festival marking the sun's northward journey; kite flying, sesame sweets, and sharing ellu-bella.",
+      img: "https://pin.it/5X9OCoaUk",
+      lat: 15.3173,
+      lng: 75.7139
+    },
+    {
+      id: 20,
+      name: "Navratri (South India)",
+      type: "Religious (Hindu)",
+      month: "September/October",
+      location: "Tamil Nadu, Karnataka",
+      desc: "Nine nights of worship for Goddess Durga; marked by Golu doll displays and vibrant community celebrations.",
+      img: "https://pin.it/22fqk5O25",
+      lat: 23.0225,
+      lng: 72.5714
+    },
+    {
+      id: 21,
+      name: "Karaga Festival",
+      type: "Cultural (Folk)",
+      month: "April/May",
+      location: "Bangalore, Karnataka",
+      desc: "Ancient Draupadi procession featuring the priest carrying the decorated Karaga on his head through the city at night.",
+      img: "https://pin.it/2qAFwxRxJ",
+      lat: 12.9716,
+      lng: 77.5946
+    },
+    {
+      id: 22,
+      name: "Thrissur Pooram",
+      type: "Religious (Hindu)",
+      month: "April/May",
+      location: "Thrissur, Kerala",
+      desc: "Kerala's grand temple festival famed for caparisoned elephants, percussion ensembles, and fireworks.",
+      img: "https://pin.it/1PCHfCvO2",
+      lat: 10.5276,
+      lng: 76.2144
+    },
+    {
+      id: 23,
+      name: "Kollam Pooram",
+      type: "Religious (Hindu)",
+      month: "April/May",
+      location: "Kollam, Kerala",
+      desc: "Colorful annual temple festival with elephant processions and traditional music.",
+      img: "https://pin.it/3CidcJsyb",
+      lat: 8.8932,
+      lng: 76.6141
+    },
+    {
+      id: 24,
+      name: "Makaravilakku",
+      type: "Religious (Hindu)",
+      month: "January",
+      location: "Sabarimala, Kerala",
+      desc: "Pilgrimage climax marked by witnessing the sacred light at Sabarimala hill shrine.",
+      img: "https://pin.it/boQOIOTeE",
+      lat: 9.2971,
+      lng: 77.0259
+    },
+    {
+        id: 10,
+        name: "Lucknow Mahotsav",
+        type: "Cultural",
+        month: "November/December",
+        location: "Lucknow, Uttar Pradesh",
+        desc: "A vibrant festival showcasing the art, culture, and cuisine of Lucknow, including traditional dance and music performances.",
+        img: "https://resize.indiatvnews.com/en/resize/newbucket/1200_-/2020/11/lucknow-mahotsav4-copy-1604480553.jpg",
+        lat: 26.8467,
+        lng: 80.9462
+    },
+    {
+        id: 11,
+        name: "Chowk Ki Holi",
+        type: "Cultural/Religious",
+        month: "March",
+        location: "Lucknow, Uttar Pradesh",
+        desc: "A unique celebration of Holi in the historic Chowk area, featuring traditional music, dance, and colors.",
+        img: "https://images.bhaskarassets.com/thumb/1200x900/web2images/521/2022/03/17/e07aa245-8241-4fc2-9f75-d59ae8aba46a1647518477613_1647519084.jpg",
+        lat: 26.8467,
+        lng: 80.9462
+    },
+    {
+        id: 12,
+        name: "Bada Mangal",
+        type: "Religious",
+        month: "May/June",
+        location: "Lucknow, Uttar Pradesh",
+        desc: "A grand celebration dedicated to Lord Hanuman, marked by free food distribution (bhandaras) and devotional songs.",
+        img: "https://www.hindustantimes.com/ht-img/img/2023/05/09/1600x900/Devotees-at-a-bhandara-in-Lucknow-on-Tuesday---HT-_1683658804405.jpg",
+        lat: 26.8467,
+        lng: 80.9462
+    },
+    {
+        id: 13,
+        name: "Lucknow Literature Festival",
+        type: "Cultural",
+        month: "January",
+        location: "Lucknow, Uttar Pradesh",
+        desc: "A gathering of literary enthusiasts, featuring book launches, panel discussions, and cultural performances.",
+        img: "https://upload.wikimedia.org/wikipedia/en/d/d8/Lucknow_literary_festival_logo.png",
+        lat: 26.8467,
+        lng: 80.9462
+    },
+    {
+        id: 14,
+        name: "Awadh Carnival",
+        type: "Cultural",
+        month: "February",
+        location: "Lucknow, Uttar Pradesh",
+        desc: "A celebration of the Awadhi heritage with food stalls, craft exhibitions, and cultural programs.",
+        img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAx3sirZ2053hTlRIlSmpTZEuHIV8hNaq_ZQ&s",
+        lat: 26.8467,
+        lng: 80.9462
+    },
+];
+
+const historicalPlaces = [
+    {
+        id: 1,
+        name: "Bara Imambara",
+        desc: "A grand historical monument built by Asaf-ud-Daula in 1784, known for its central hall and the Bhool Bhulaiya (labyrinth).",
+        img: "https://static.toiimg.com/photo/103890972.cms",
+    },
+    {
+        id: 2,
+        name: "Chota Imambara",
+        desc: "An exquisite monument built by Muhammad Ali Shah, featuring chandeliers and intricate decorations.",
+        img: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Chhota_imambara_Lucknow.jpg",
+    },
+    {
+        id: 3,
+        name: "Rumi Darwaza",
+        desc: "An iconic gateway in Lucknow, often referred to as the Turkish Gate, showcasing Awadhi architecture.",
+        img: "https://s7ap1.scene7.com/is/image/incredibleindia/2-rumi-darwaza-lucknow-uttar-pradesh-attr-hero?qlt=82&ts=1742170244420",
+    },
+    {
+        id: 4,
+        name: "Hazratganj Market",
+        desc: "A historic shopping area in Lucknow, blending colonial and modern architecture, and a hub for cultural activities.",
+        img: "https://yometro.com/images/places/hazratganj-market.jpg",
+    },
+    {
+        id: 5,
+        name: "Residency",
+        desc: "A group of historical buildings that served as a refuge during the 1857 uprising, now a preserved archaeological site.",
+        img: "https://example.com/residency.jpg"
+    }
 ];
 
 // ----------------------------------------------------------------------------------
@@ -269,388 +455,77 @@ const culturalHighlights = [
     lat: 26.9124,
     lng: 75.7873
   },
-];
-
-const historicalPlaces = [
   {
-        id: 1,
-        name: "Group of Monuments at Hampi",
-        era: "Vijayanagara Empire",
-        location: "Hampi, Karnataka",
-        description: "Ruins of the capital city featuring temples and stone chariots.",
-        img: "https://pin.it/4RqJyIPsK",
-        lat: 15.335,
-        lng: 76.4629
-    },
-    {
-        id: 2,
-        name: "Meenakshi Amman Temple",
-        era: "Pandyan/Nayak Dynasties",
-        location: "Madurai, Tamil Nadu",
-        description: "Historic temple known for its 14 gopurams covered with mythological figures.",
-        img: "https://pin.it/Lb8z4LMY3",
-        lat: 9.9195,
-        lng: 78.1191
-    },
-    {
-        id: 3,
-        name: "Shore Temple",
-        era: "Pallava Dynasty",
-        location: "Mahabalipuram, Tamil Nadu",
-        description: "Granite temple complex overlooking the Bay of Bengal.",
-        img: "https://pin.it/7lJ5HHDmL",
-        lat: 12.6176,
-        lng: 80.1994
-    },
-    {
-        id: 4,
-        name: "Golconda Fort",
-        era: "Kakatiya/Qutb Shahi Dynasties",
-        location: "Hyderabad, Telangana",
-        description: "Famous fort known for its acoustics and diamonds like Koh-i-Noor.",
-        img: "https://pin.it/2B7YL2O47",
-        lat: 17.3833,
-        lng: 78.4011
-    },
-    {
-        id: 5,
-        name: "Charminar",
-        era: "Qutb Shahi Dynasty",
-        location: "Hyderabad, Telangana",
-        description: "Iconic monument and mosque built in 1591, symbol of Hyderabad.",
-        img: "https://pin.it/YwJhHdoTi",
-        lat: 17.3616,
-        lng: 78.4747
-    },
-    {
-        id: 6,
-        name: "Brihadeeswarar Temple",
-        era: "Chola Empire",
-        location: "Thanjavur, Tamil Nadu",
-        description: "Massive temple dedicated to Lord Shiva, a UNESCO World Heritage Site.",
-        img: "https://pin.it/ElBy0CN4Q",
-        lat: 10.7867,
-        lng: 79.1311
-    },
-    {
-        id: 7,
-        name: "Mysore Palace",
-        era: "Wodeyar Dynasty",
-        location: "Mysore, Karnataka",
-        description: "Royal residence known for its grand durbar hall and intricate architecture.",
-        img: "https://pin.it/A8uDrWmfQ",
-        lat: 12.2958,
-        lng: 76.6394
-    },
-    {
-        id: 8,
-        name: "Belur and Halebidu Temples",
-        era: "Hoysala Empire",
-        location: "Karnataka",
-        description: "Famed for exquisite stone carvings and architecture.",
-        img: "https://pin.it/1pi94QyU3",
-        lat: 12.9735,
-        lng: 75.6019
-    },
-    {
-        id: 9,
-        name: "Srirangam Temple",
-        era: "Medieval Period",
-        location: "Tamil Nadu",
-        description: "Largest functioning Hindu temple in the world, dedicated to Lord Ranganatha.",
-        img: "https://pin.it/4tKKrUSl9",
-        lat: 10.8737,
-        lng: 78.6937
-    },
-    {
-        id: 10,
-        name: "Sravanabelagola",
-        era: "Medieval Jain",
-        location: "Karnataka",
-        description: "Famous for the 57 feet tall monolithic statue of Gommateshwara Bahubali.",
-        img: "https://pin.it/N8c7qBFjd",
-        lat: 12.8583,
-        lng: 76.4723
-    },
-    {
-        id: 11,
-        name: "Lepakshi Temple",
-        era: "Vijayanagara Empire",
-        location: "Andhra Pradesh",
-        description: "Known for its hanging pillar and exquisite murals.",
-        img: "https://pin.it/7HnOMI2Vj",
-        lat: 14.5087,
-        lng: 77.6980
-    },
-    {
-        id: 12,
-        name: "Warangal Fort",
-        era: "Kakatiya Dynasty",
-        location: "Telangana",
-        description: "Historic fort ruins known for impressive stone gateways (Kakatiya Kala Thoranam).",
-        img: "https://pin.it/7QUakYyWm",
-        lat: 18.0063,
-        lng: 79.5832
-    },
-    {
-        id: 13,
-        name: "Nandi Hills",
-        era: "Medieval",
-        location: "Karnataka",
-        description: "Historic fort and hill station, popular for sunrise views and trekking.",
-        img: "https://pin.it/372zCWvpl",
-        lat: 13.3718,
-        lng: 77.6831
-    },
-    {
-        id: 14,
-        name: "Badami Caves",
-        era: "Chalukya Dynasty",
-        location: "Karnataka",
-        description: "Rock-cut cave temples famous for frescoes and sculptures.",
-        img: "https://pin.it/3YOAVM4oo",
-        lat: 15.9145,
-        lng: 75.6761
-    },
-    {
-        id: 15,
-        name: "Thanjavur Maratha Palace",
-        era: "Maratha Dynasty",
-        location: "Thanjavur, Tamil Nadu",
-        description: "Royal palace complex featuring museums and art galleries.",
-        img: "https://pin.it/6H1sW8iqk",
-        lat: 10.7867,
-        lng: 79.1311
-    },
-    {
-        id: 16,
-        name: "Udayagiri Caves",
-        era: "Pallava Dynasty",
-        location: "Andhra Pradesh",
-        description: "Ancient rock-cut cave temples with sculptures and inscriptions.",
-        img: "https://pin.it/6RpRlx7C5",
-        lat: 14.6437,
-        lng: 79.5776
-    },
-  {
-    id: 1,
-    name: "Taj Mahal",
-    era: "Mughal Empire",
-    location: "Agra, Uttar Pradesh",
-    description: "An iconic white marble mausoleum commissioned by Emperor Shah Jahan in memory of his wife Mumtaz Mahal (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/1603650/pexels-photo-1603650.jpeg",
-    lat: 27.1751,
-    lng: 78.0421
+    name: "Bharatanatyam",
+    aspect: "Classical Dance",
+    description: "Temple dance tradition from Tamil Nadu noted for expressive abhinaya, precise footwork, and storytelling.",
+    img: "https://images.pexels.com/photos/30481580/pexels-photo-30481580.jpeg",
+    lat: 13.0802,
+    lng: 80.2838
   },
   {
-    id: 2,
-    name: "Red Fort (लाल किला)",
-    era: "Mughal Empire",
-    location: "Delhi",
-    description: "A historic fort in Old Delhi that served as the main residence of the Mughal Emperors for nearly 200 years. The Prime Minister addresses the nation here on Independence Day (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/33597243/pexels-photo-33597243.jpeg",
-    lat: 28.6562,
-    lng: 77.241
+    name: "Kathakali",
+    aspect: "Classical Dance",
+    description: "Kerala's dramatic dance-theatre with elaborate makeup, face masks, and vigorous mudras narrating epics.",
+    img: "https://images.pexels.com/photos/8610533/pexels-photo-8610533.jpeg",
+    lat: 10.8505,
+    lng: 76.2711
   },
   {
-    id: 3,
-    name: "Qutub Minar",
-    era: "Delhi Sultanate",
-    location: "Delhi",
-    description: "A 73-meter tall minaret and complex, the tallest brick minaret in the world, started by Qutub-ud-din Aibak (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/30254905/pexels-photo-30254905.jpeg",
-    lat: 28.5244,
-    lng: 77.1855
+    name: "Carnatic Music",
+    aspect: "Classical Music",
+    description: "South Indian classical tradition focused on kritis, ragam-tanam-pallavi, and rich improvisation.",
+    img: "https://images.pexels.com/photos/10491556/pexels-photo-10491556.jpeg",
+    lat: 12.9716,
+    lng: 77.5946
   },
   {
-    id: 4,
-    name: "Humayun's Tomb",
-    era: "Mughal Empire",
-    location: "Delhi",
-    description: "The tomb of the Mughal Emperor Humayun, often considered the first garden-tomb on the Indian subcontinent (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/11750406/pexels-photo-11750406.jpeg",
-    lat: 28.5933,
-    lng: 77.2507
+    name: "Kuchipudi",
+    aspect: "Classical Dance",
+    description: "Dance-drama from Andhra Pradesh blending quick footwork, abhinaya, and character-driven storytelling.",
+    img: "https://images.pexels.com/photos/18240707/pexels-photo-18240707.jpeg",
+    lat: 16.5062,
+    lng: 80.648
   },
   {
-    id: 5,
-    name: "Fatehpur Sikri",
-    era: "Mughal Empire",
-    location: "Near Agra, Uttar Pradesh",
-    description: "A city founded by Mughal Emperor Akbar, which served as the capital from 1571 to 1585, now perfectly preserved in red sandstone (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/6176676/pexels-photo-6176676.jpeg",
-    lat: 27.0936,
-    lng: 77.6611
+    name: "Mohiniyattam",
+    aspect: "Classical Dance",
+    description: "Graceful solo dance from Kerala emphasizing lasya (soft movements) and lyrical expression.",
+    img: "https://images.pexels.com/photos/30444651/pexels-photo-30444651.jpeg",
+    lat: 10.8505,
+    lng: 76.2711
   },
   {
-    id: 6,
-    name: "Agra Fort",
-    era: "Mughal Empire",
-    location: "Agra, Uttar Pradesh",
-    description: "The primary residence of the emperors of the Mughal Dynasty until 1638. A massive red sandstone fortress (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/19195952/pexels-photo-19195952.jpeg",
-    lat: 27.1795,
-    lng: 78.0211
+    name: "Yoga and Ayurveda",
+    aspect: "Wellness",
+    description: "Ancient body-mind practices and holistic medicine systems rooted in South Indian tradition and ashrams.",
+    img: "https://i0.wp.com/powercutonline.com/wp-content/uploads/2025/07/Jnana-Yoga-Basics-optimized.webp?w=1280&ssl=1",
+    lat: 30.3165,
+    lng: 78.0322
   },
   {
-    id: 7,
-    name: "Group of Monuments at Hampi",
-    era: "Vijayanagara Empire",
-    location: "Hampi, Karnataka",
-    description: "The ruins of the magnificent capital city of the Vijayanagara Empire, featuring stunning temples and stone chariots (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/30830312/pexels-photo-30830312.jpeg",
-    lat: 15.335,
-    lng: 76.4629
+    name: "Tanjore Painting",
+    aspect: "Visual Art",
+    description: "Gold-foil embellished devotional art from Thanjavur featuring rich colors and relief work.",
+    img: "https://poompuhar.com/wp-content/uploads/2024/09/DSC05347-1.png",
+    lat: 10.7905,
+    lng: 79.1372
   },
   {
-    id: 8,
-    name: "Khajuraho Group of Monuments",
-    era: "Chandela Dynasty",
-    location: "Khajuraho, Madhya Pradesh",
-    description: "A group of Hindu and Jain temples famous for their intricate and erotic sculptures (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/20545471/pexels-photo-20545471.jpeg",
-    lat: 24.8318,
-    lng: 79.9386
+    name: "Mysore Painting",
+    aspect: "Visual Art",
+    description: "Karnataka style noted for delicate lines, muted palettes, and gesso relief halos in mythological themes.",
+    img: "https://poompuhar.com/wp-content/uploads/2024/09/DSC05347-1.png",
+    lat: 12.2958,
+    lng: 76.6394
   },
   {
-    id: 9,
-    name: "Ajanta Caves",
-    era: "Satavahana & Vakataka Dynasties",
-    location: "Maharashtra",
-    description: "Rock-cut Buddhist cave monuments featuring beautifully preserved paintings and sculptures depicting the Jataka tales (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/4882665/pexels-photo-4882665.jpeg",
-    lat: 20.5534,
-    lng: 75.7033
-  },
-  {
-    id: 10,
-    name: "Ellora Caves",
-    era: "Rashtrakuta Dynasty",
-    location: "Maharashtra",
-    description: "One of the largest rock-cut monastery-temple cave complexes in the world, featuring Buddhist, Hindu, and Jain monuments (UNESCO World Heritage Site).",
-    img: "https://media.gettyimages.com/id/1337887772/photo/ajanta-and-ellora.jpg?s=612x612&w=0&k=20&c=31ffxf39PZ-DZQazVGfs08PjUztJBrQa0zwsOhrnwJ8=",
-    lat: 20.0268,
-    lng: 75.1786
-  },
-  {
-    id: 11,
-    name: "Sanchi Stupa",
-    era: "Mauryan Empire",
-    location: "Sanchi, Madhya Pradesh",
-    description: "The oldest stone structure in India, commissioned by Emperor Ashoka, famous for its grand stupa and ornamental gateways (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/33266890/pexels-photo-33266890.jpeg",
-    lat: 23.4793,
-    lng: 77.7391
-  },
-  {
-    id: 12,
-    name: "Konark Sun Temple",
-    era: "Eastern Ganga Dynasty",
-    location: "Konark, Odisha",
-    description: "Dedicated to the Sun God Surya, this temple is designed as a colossal chariot with twelve pairs of intricately carved stone wheels (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/6040175/pexels-photo-6040175.jpeg",
-    lat: 19.8876,
-    lng: 86.0945
-  },
-  {
-    id: 13,
-    name: "Meenakshi Amman Temple",
-    era: "Pandyan/Nayak Dynasties",
-    location: "Madurai, Tamil Nadu",
-    description: "A historic Hindu temple with 14 magnificent Gopurams (gate towers) covered with thousands of mythological figures.",
-    img: "https://images.pexels.com/photos/23914402/pexels-photo-23914402.jpeg",
-    lat: 9.9195,
-    lng: 78.1191
-  },
-  {
-    id: 14,
-    name: "Victoria Memorial",
-    era: "British Raj",
-    location: "Kolkata, West Bengal",
-    description: "A large marble building constructed between 1906 and 1921, dedicated to the memory of Queen Victoria.",
-    img: "https://images.pexels.com/photos/16565204/pexels-photo-16565204.jpeg",
-    lat: 22.5448,
-    lng: 88.3426
-  },
-  {
-    id: 15,
-    name: "Gateway of India",
-    era: "British Raj",
-    location: "Mumbai, Maharashtra",
-    description: "An iconic arch monument built to commemorate the landing of King-Emperor George V and Queen-Empress Mary at Apollo Bunder in 1911.",
-    img: "https://images.pexels.com/photos/15528027/pexels-photo-15528027.jpeg",
-    lat: 18.9217,
-    lng: 72.8347
-  },
-  {
-    id: 16,
-    name: "Jallianwala Bagh",
-    era: "Modern History",
-    location: "Amritsar, Punjab",
-    description: "A garden of national importance marking the site of the 1919 massacre by British forces.",
-    img: "https://s7ap1.scene7.com/is/image/incredibleindia/jallianwala-bagh-amritsar-punjab-1-attr-hero?qlt=82&ts=1726662275638",
-    lat: 31.6202,
-    lng: 74.8797
-  },
-  {
-    id: 17,
-    name: "Charminar",
-    era: "Qutb Shahi Dynasty",
-    location: "Hyderabad, Telangana",
-    description: "A monument and mosque built in 1591, known as the 'Arc de Triomphe of the East', and the city's global icon.",
-    img: "https://images.pexels.com/photos/5615112/pexels-photo-5615112.jpeg",
-    lat: 17.3616,
-    lng: 78.4747
-  },
-  {
-    id: 18,
-    name: "Golconda Fort",
-    era: "Kakatiya/Qutb Shahi Dynasties",
-    location: "Hyderabad, Telangana",
-    description: "A magnificent fort, originally a mud fort, famous for its acoustics and being the source of world-renowned diamonds like the Koh-i-Noor.",
-    img: "https://images.pexels.com/photos/29221923/pexels-photo-29221923.jpeg",
-    lat: 17.3833,
-    lng: 78.4011
-  },
-  {
-    id: 19,
-    name: "Amer Fort (आमेर का किला)",
-    era: "Kachhwaha Dynasty",
-    location: "Jaipur, Rajasthan",
-    description: "A beautiful fort built of red sandstone and marble, known for its artistic Hindu style elements (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/33106473/pexels-photo-33106473.jpeg",
-    lat: 26.9855,
-    lng: 75.8507
-  },
-  {
-    id: 20,
-    name: "Chittorgarh Fort",
-    era: "Mewar Kingdom",
-    location: "Chittorgarh, Rajasthan",
-    description: "The largest fort in India and a UNESCO World Heritage Site, famed for its association with Rajput history, courage, and sacrifice.",
-    img: "https://images.pexels.com/photos/32760057/pexels-photo-32760057.jpeg",
-    lat: 24.8896,
-    lng: 74.6472
-  },
-  {
-    id: 21,
-    name: "Nalanda University Ruins",
-    era: "Gupta/Pala Empires",
-    location: "Bihar",
-    description: "The ruins of an ancient Buddhist monastic university, a major center of learning from the 5th to 13th centuries (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/10818318/pexels-photo-10818318.jpeg",
-    lat: 25.1357,
-    lng: 85.443
-  },
-  {
-    id: 22,
-    name: "Shore Temple",
-    era: "Pallava Dynasty",
-    location: "Mahabalipuram, Tamil Nadu",
-    description: "A structural temple complex built with blocks of granite, overlooking the Bay of Bengal (UNESCO World Heritage Site).",
-    img: "https://images.pexels.com/photos/32399048/pexels-photo-32399048.jpeg",
-    lat: 12.6176,
-    lng: 80.1994
+    name: "Traditional Textiles",
+    aspect: "Craft",
+    description: "Handloom heritage like Kanjivaram, Ilkal, and Pochampally weaving, showcasing South Indian textile mastery.",
+    img: "https://images.pexels.com/photos/34996132/pexels-photo-34996132.jpeg",
+    lat: 26.9124,
+    lng: 75.7873
   },
 ];
 
@@ -672,7 +547,7 @@ const getNextMonthName = () => {
 
 type FestivalDataType = typeof festivalsData;
 type CultureType = typeof culturalHighlights[0] & { id: number; cardType: "culture" };
-type HistoricalType = typeof historicalPlaces[0] & { cardType: "historical" };
+type HistoricalType = typeof historicalPlaces[0] & { cardType: "historical"; lat?: number; lng?: number; location?: string; description?: string; era?: string };
 type CardType = (typeof festivalsData[0] & { cardType: "festival" }) | CultureType | HistoricalType;
 
 // --- Map FlyTo function ---
@@ -754,79 +629,6 @@ function LiveLocationMarker() {
   );
 }
 
-// --- HELPLINE MODAL COMPONENT ---
-const HelplineModal = ({ onClose }: { onClose: () => void }) => {
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="bg-gradient-to-r from-orange-500 to-pink-600 p-6 text-white relative">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Info className="w-6 h-6" /> Cultural Helpline
-          </h2>
-          <p className="text-white/90 text-sm mt-1">Get assistance with your cultural journey</p>
-          <button 
-            onClick={onClose}
-            className="absolute top-4 right-4 p-1 bg-white/20 rounded-full hover:bg-white/30 transition"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        
-        <div className="p-6 space-y-4">
-          <Link to="/assistant" className="flex items-center gap-4 p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition group">
-            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 group-hover:bg-white transition">
-              <MessageCircle size={24} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-indigo-900">Ask AI Cultural Guide</h3>
-              <p className="text-xs text-indigo-700">Get instant history & tips</p>
-            </div>
-            <ChevronRight className="text-indigo-400" />
-          </Link>
-
-          <a href="tel:1363" className="flex items-center gap-4 p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition group">
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 group-hover:bg-white transition">
-              <Phone size={24} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-orange-900">Tourist Helpline</h3>
-              <p className="text-xs text-orange-700">Call 1363 (24/7 Support)</p>
-            </div>
-            <ChevronRight className="text-orange-400" />
-          </a>
-
-          <a href="tel:112" className="flex items-center gap-4 p-4 bg-red-50 rounded-xl hover:bg-red-100 transition group">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600 group-hover:bg-white transition">
-              <Phone size={24} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-red-900">Emergency</h3>
-              <p className="text-xs text-red-700">Call 112 for immediate help</p>
-            </div>
-            <ChevronRight className="text-red-400" />
-          </a>
-        </div>
-        
-        <div className="p-4 bg-gray-50 text-center text-xs text-gray-500 border-t">
-          DarShana Travel • Connecting you to India's Heritage
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-};
-
 // --- MAIN COMPONENT ---
 const Festivals = () => {
   const [searchText, setSearchText] = useState('');
@@ -838,9 +640,9 @@ const Festivals = () => {
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
   const [showLiveLocation, setShowLiveLocation] = useState(false);
-  const [showHelpline, setShowHelpline] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // For the unified button dropdown
   const mapRef = useRef<L.Map>(null);
+  const cardsSectionRef = useRef<HTMLDivElement | null>(null);
 
   // Create cards for all types
   const allCards: CardType[] = [
@@ -852,7 +654,7 @@ const Festivals = () => {
   // --- SEARCH & FILTER HOOK ---
   const filteredCards = useMemo(() => {
     let cards = allCards;
-    
+
     // 1. Type Filter
     if (filterType !== 'all') cards = cards.filter(card => card.cardType === filterType);
     
@@ -887,6 +689,16 @@ const Festivals = () => {
     : [21, 78]) as [number, number];
 
   useEffect(() => { setSelectedCard(null); setHoveredCardId(null); }, [showMap, filterType]);
+
+  const focusFestivals = () => {
+    setFilterType('festival');
+    setShowMap(false);
+    setShowMore(true);
+    setIsFilterOpen(false);
+    requestAnimationFrame(() => {
+      cardsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   // --- MAP SNAPSHOT ---
   function handleDownloadMap() {
@@ -952,9 +764,31 @@ const Festivals = () => {
 
       <div className="max-w-7xl mx-auto px-4 -mt-10 relative z-20">
         <NextMonthHighlight festivalsData={festivalsData} />
-        
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white shadow-sm border border-stone-200 rounded-2xl p-5"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-orange-50 rounded-xl text-orange-600">
+              <Calendar size={20} />
+            </div>
+            <p className="text-stone-800 text-base leading-relaxed">
+              Get recommendations for <span className="font-semibold">festivals/events</span> happening during your visit and the best places to experience them.
+            </p>
+          </div>
+          <button
+            onClick={focusFestivals}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow hover:shadow-md transition"
+          >
+            Focus on festivals
+            <ChevronRight size={16} className="opacity-90" />
+          </button>
+        </motion.div>
+
         {/* CONTROLS BAR */}
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-10">
+        <div ref={cardsSectionRef} className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-10">
           
           <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
             {/* UNIFIED FILTER BUTTON */}
@@ -1166,11 +1000,11 @@ const Festivals = () => {
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
               />
               {filteredCards
-                .filter(card => card.lat && card.lng)
+                .filter(card => card.lat !== undefined && card.lng !== undefined)
                 .map(card => (
                   <Marker
                     key={card.id}
-                    position={[card.lat, card.lng]}
+                    position={[card.lat!, card.lng!]}
                     opacity={hoveredCardId === card.id ? 1.0 : 0.8}
                     eventHandlers={{
                       mouseover: () => card.id && setHoveredCardId(card.id),
@@ -1197,7 +1031,7 @@ const Festivals = () => {
                   </Marker>
                 ))}
               {/* Only fly to on SELECT, not hover */}
-              {selectedCard && selectedCard.lat && selectedCard.lng && (
+              {selectedCard && 'lat' in selectedCard && 'lng' in selectedCard && selectedCard.lat && selectedCard.lng && (
                 <FlyToLocation position={[selectedCard.lat, selectedCard.lng]} />
               )}
               {showLiveLocation && <LiveLocationMarker />}
@@ -1211,26 +1045,6 @@ const Festivals = () => {
           </motion.div>
         )}
       </div>
-
-      {/* HELPLINE FLOATING BUTTON */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowHelpline(true)}
-        className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-orange-500 to-pink-600 text-white p-4 rounded-full shadow-2xl shadow-orange-500/40 flex items-center gap-2 group"
-      >
-        <Phone className="w-6 h-6" />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap font-bold">
-          Helpline & Info
-        </span>
-      </motion.button>
-
-      {/* HELPLINE MODAL */}
-      <AnimatePresence>
-        {showHelpline && <HelplineModal onClose={() => setShowHelpline(false)} />}
-      </AnimatePresence>
 
       {/* CARD DETAIL MODAL */}
       <AnimatePresence>

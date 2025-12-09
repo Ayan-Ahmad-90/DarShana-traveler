@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import Login from '../../pages/Login';   // ✅ FIXED (correct lowercase)
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import Login from '../../pages/Login'; // ✅ FIXED (correct lowercase)
 
 const LoginOverlay: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -15,10 +15,11 @@ const LoginOverlay: React.FC = () => {
       return;
     }
 
-    // If user is already on login/register page → don't show modal
+    // If user is on login/register or guide flows → don't show modal
     if (
       location.pathname.toLowerCase() === '/login' ||
-      location.pathname.toLowerCase() === '/register'
+      location.pathname.toLowerCase() === '/register' ||
+      location.pathname.toLowerCase().includes('guide')
     ) {
       setShowModal(false);
       return;

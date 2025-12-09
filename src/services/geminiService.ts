@@ -1,4 +1,5 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import type { Content } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 
 // 👉 Your Gemini API Key yaha daalo
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -36,11 +37,27 @@ const safetySettings = [
 // ----------------------------------------------
 export async function getChatResponse(history: any[], userInput: string) {
   try {
-    // Gemini format convert
-    const formattedHistory = history.map(msg => ({
-      role: msg.role === "model" ? "model" : "user",
-      parts: msg.parts,
-    }));
+    // Gemini requires the history to start with a user turn and every entry must provide `parts`
+    const formattedHistory = history.reduce<Content[]>(
+      (acc, msg) => {
+        const text = typeof msg.text === "string" ? msg.text.trim() : "";
+        if (!text) {
+          return acc;
+        }
+
+        acc.push({
+          role: msg.role === "user" ? "user" : "model",
+          parts: [{ text }],
+        });
+
+        return acc;
+      },
+      [],
+    );
+
+    while (formattedHistory.length > 0 && formattedHistory[0]?.role !== "user") {
+      formattedHistory.shift();
+    }
 
     const chatSession = model.startChat({
       safetySettings,
@@ -93,4 +110,3 @@ export async function getSustainableRouteOptions(from: string, to: string) {
     return "Sorry, unable to fetch sustainable route options.";
   }
 }
-

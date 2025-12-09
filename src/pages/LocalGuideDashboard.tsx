@@ -1,7 +1,6 @@
 import { AlertCircle, CheckCircle, DollarSign, Loader, Mail, MapPin, MessageSquare, Phone, Save } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { getBackendUrl } from '../config/api';
-import { useAuth } from '../context/AuthContext';
 
 interface GuideProfile {
   _id: string;
@@ -37,7 +36,6 @@ interface GuideInteraction {
 }
 
 const LocalGuideDashboard = () => {
-  const { isAuthenticated } = useAuth();
   const [guideProfile, setGuideProfile] = useState<GuideProfile | null>(null);
   const [interactions, setInteractions] = useState<GuideInteraction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,18 +62,20 @@ const LocalGuideDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchGuideProfile();
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchGuideProfile(token);
+    } else {
+      setShowRegistration(true);
+      setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
-  const fetchGuideProfile = async () => {
+  const fetchGuideProfile = async (token?: string) => {
     try {
       const baseUrl = resolveBackendUrl();
       const response = await fetch(`${baseUrl}/api/guides/my-profile`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       const data = await response.json();
       if (data.success && data.guide) {
@@ -89,7 +89,7 @@ const LocalGuideDashboard = () => {
           pricePerDay: data.guide.pricePerDay,
           availability: data.guide.availability
         });
-        fetchInteractions();
+        fetchInteractions(token);
       } else {
         setShowRegistration(true);
       }
@@ -100,13 +100,11 @@ const LocalGuideDashboard = () => {
     }
   };
 
-  const fetchInteractions = async () => {
+  const fetchInteractions = async (token?: string) => {
     try {
       const baseUrl = resolveBackendUrl();
       const response = await fetch(`${baseUrl}/api/guides/my-interactions`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
       const data = await response.json();
       if (data.success) {
@@ -121,14 +119,94 @@ const LocalGuideDashboard = () => {
     e.preventDefault();
     try {
       const baseUrl = resolveBackendUrl();
+      const token = localStorage.getItem('token');
       const response = await fetch(`${baseUrl}/api/guides/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(formData)
       });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
       const data = await response.json();
       if (data.success) {
         setGuideProfile(data.guide);
@@ -194,10 +272,6 @@ const LocalGuideDashboard = () => {
       }
     }));
   };
-
-  if (!isAuthenticated) {
-    return <div className="text-center py-12">Please login to access guide dashboard</div>;
-  }
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen"><Loader className="animate-spin" /></div>;
@@ -525,5 +599,3 @@ const LocalGuideDashboard = () => {
 };
 
 export default LocalGuideDashboard;
-
-

@@ -16,6 +16,7 @@ import BecomeGuide from "./components/Guide/BecomeGuide";
 import SafetyModal from "./components/SafetyModal";
 import YatraShayak from "./components/YatraShayak";
 import AdminDashboard from "./pages/AdminDashboard";
+import AllCities from "./pages/AllCities";
 import Assistant from "./pages/Assistant";
 import Booking from "./pages/Booking";
 import EcoRewardsDashboard from "./pages/EcoRewardsDashboard";
@@ -28,6 +29,7 @@ import Home from "./pages/Home";
 import LanguageSelector from "./pages/LanguageSelector";
 import LocalGuideDashboard from "./pages/LocalGuideDashboard";
 import Login from "./pages/Login";
+import Lucknow from "./pages/Lucknow";
 import MoodAnalyzer from "./pages/MoodAnalyzer";
 import MyTrips from "./pages/MyTrips";
 import NotAuthorized from "./pages/NotAuthorized";
@@ -76,6 +78,8 @@ const App: React.FC = () => {
             <Route path="/home" element={<Home />} />
             <Route path="/mood" element={<MoodAnalyzer />} />
             <Route path="/travelhub" element={<TravelHub />} />
+            <Route path="/cities" element={<AllCities />} />
+            <Route path="/city/lucknow" element={<Lucknow />} />
             <Route path="/festivals" element={<Festivals />} />
             <Route path="/sustainable" element={<Sustainable />} />
             <Route path="/green-route-planner" element={<GreenRoutePlanner />} />
@@ -97,11 +101,11 @@ const App: React.FC = () => {
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             <Route path="/my-trips" element={<RequireAuth><MyTrips /></RequireAuth>} />
             <Route path="/rewards" element={<RequireAuth><EcoRewardsDashboard /></RequireAuth>} />
-            <Route path="/become-guide" element={<RequireAuth><BecomeGuide /></RequireAuth>} />
+            <Route path="/become-guide" element={<BecomeGuide />} />
             <Route path="/guide-dashboard" element={<LocalGuideDashboard />} />
             <Route path="/booking" element={<Booking />} />
             
-            {/* Admin Only Routes */}
+            {/* Admin Dashboard (public for now) */}
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </main>

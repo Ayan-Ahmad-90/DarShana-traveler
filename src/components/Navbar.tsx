@@ -13,7 +13,8 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Mood AI", path: "/mood", icon: Smile },
-    { name: "Travel Hub", path: "/travelhub", icon: Plane },  // ✔️ FIXED ROUTE
+    { name: "Travel Hub", path: "/travelhub", icon: Plane }, // ✔️ FIXED ROUTE
+    { name: "All Cities", path: "/cities", icon: Plane },
     { name: "Essentials", path: "/travel-essentials", icon: Backpack },
     // { name: "Safety", path: "/safety-guide", icon: Shield },
     { name: "Cultural Odyssey", path: "/festivals", icon: Calendar },
@@ -54,14 +55,14 @@ const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden md:flex items-center space-x-1 md:ml-6 lg:ml-10 text-xs">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`px-3 py-2 rounded-full text-sm flex items-center gap-1.5 font-medium transition-all duration-300 transform hover:scale-105 ${
+                  className={`px-2.5 py-1.5 rounded-full text-xs flex items-center gap-1.5 font-medium transition-all duration-300 transform hover:scale-105 ${
                     isActive(link.path)
                       ? "text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-md"
                       : "text-slate-600 hover:text-orange-600 hover:bg-orange-50"
@@ -77,7 +78,7 @@ const Navbar: React.FC = () => {
             <div className="ml-4 flex items-center gap-3">
               <Link
                 to="/booking"
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform"
+                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform"
               >
                 Book Trip
               </Link>

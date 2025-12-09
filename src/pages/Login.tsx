@@ -1,9 +1,11 @@
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { ArrowRight, Lock, Mail, User, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { auth } from "../firebase.config.ts";
 import loginImage from "../images/image-login-desh.jpg";
-import { authApi } from "../services/api";
+import { sendSignupEmail } from "../services/emailService";
 
 interface LoginProps {
   onClose?: () => void;
@@ -13,16 +15,13 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setAuth, login } = useAuth();
+  const { login, register, setAuth } = useAuth();
 
   const [isLoginView, setIsLoginView] = useState(true);
-  const [loginStep, setLoginStep] = useState<1 | 2 | 3>(1);
+  const [loginStep, setLoginStep] = useState(1);
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpMessage, setOtpMessage] = useState("");
-  const [resendTimer, setResendTimer] = useState(0);
 
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -46,12 +45,6 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     }
   }, [location.pathname, location.state]);
 
-  useEffect(() => {
-    if (resendTimer <= 0) return;
-    const t = setTimeout(() => setResendTimer((v) => v - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendTimer]);
-
   const handleLoginStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail) {
@@ -62,71 +55,39 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     setLoginStep(2);
   };
 
-  const handleLoginStep2 = async (e: React.FormEvent) => {
+  const handleLoginFinal = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginPassword) {
-      setError("Enter your password");
-      return;
-    }
     setError("");
     setIsLoading(true);
-    setOtpMessage("");
 
     try {
-      // Admin login bypasses OTP
+      await login(loginEmail, loginPassword);
+
       if (loginEmail === 'admin@darshana.com') {
-        await login(loginEmail, loginPassword);
+        navigate('/admin');
         if (onClose) onClose();
-        else navigate('/admin');
-        return;
+      } else {
+        if (onClose) onClose(); // Close modal
+        else navigate("/travelhub");
       }
-
-      const res = await authApi.requestOtp(loginEmail, loginPassword);
-      if (!res.success) throw new Error(res.error || "Failed to send OTP");
-      setOtpMessage("OTP sent to your email/SMS.");
-      setLoginStep(3);
-      setResendTimer(45);
     } catch (err: any) {
-      setError(err?.message || "Failed to send OTP");
-    } finally {
-      setIsLoading(false);
+      setError(err.message || "Invalid credentials");
     }
-  };
 
-  const handleOtpVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otp || otp.length < 4) {
-      setError("Enter the OTP sent to you");
-      return;
-    }
-    setError("");
-    setIsLoading(true);
-    try {
-      const res = await authApi.verifyOtp(loginEmail, otp);
-      if (!res.success || !res.data) throw new Error(res.error || "Invalid OTP");
-      const payload: any = res.data;
-      const token = payload.token || payload.accessToken;
-      const user = payload.user;
-      if (token && user) {
-        setAuth(token, user);
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-      if (onClose) onClose();
-      else navigate("/profile");
-    } catch (err: any) {
-      setError(err?.message || "OTP verification failed");
-    } finally {
-      setIsLoading(false);
-    }
+    setIsLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!signupName || !signupEmail || !signupPassword) {
-      setError("All fields are required");
+    if (!signupName.trim() || !signupEmail.trim() || !signupPassword.trim()) {
+      setError("Name, email, and password are required");
+      return;
+    }
+
+    if (!signupEmail.includes("@")) {
+      setError("Please enter a valid email");
       return;
     }
 
@@ -138,27 +99,13 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     setIsLoading(true);
 
     try {
-      const res = await authApi.register({
-        fullName: signupName,
-        email: signupEmail,
-        phone: signupEmail,
-        password: signupPassword,
-        confirmPassword: signupConfirmPassword,
-      });
+      await register(signupName, signupEmail, signupEmail, signupPassword);
 
-      if (!res.success || !res.data) throw new Error(res.error || "Signup failed");
-
-      const payload: any = res.data;
-      const token = payload.token || payload.accessToken;
-      const user = payload.user;
-      if (token && user) {
-        setAuth(token, user);
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-      }
+      // Fire-and-forget welcome email; do not block UI on failure
+      void sendSignupEmail({ name: signupName, email: signupEmail });
 
       if (onClose) onClose();
-      else navigate("/profile");
+      else navigate("/travelhub");
     } catch (err: any) {
       setError(err.message || "Signup failed");
     }
@@ -166,8 +113,30 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     setIsLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google Login");
+  const handleGoogleLogin = async () => {
+    setError("");
+    setIsLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+
+      const googleUser = {
+        id: result.user.uid,
+        name: result.user.displayName || "Traveler",
+        email: result.user.email || "",
+        profileImage: result.user.photoURL || "",
+        role: 'user' as const,
+      };
+
+      setAuth(idToken, googleUser);
+      if (onClose) onClose();
+      else navigate("/travelhub");
+    } catch (err: any) {
+      setError(err?.message || "Google sign-in failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -185,7 +154,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
     >
       <div
         className={`bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-500 relative
-        ${isLoginView ? "w-[760px] h-[520px] md:flex-row" : "max-w-[430px]"}`}
+        ${isLoginView ? "w-[600px] h-[400px] md:flex-row" : "max-w-[380px]"}`}
       >
         {/* Close Button */}
         <button
@@ -224,23 +193,23 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
         {/* Right Section */}
         <div
           className={`flex flex-col justify-center transition-all duration-500 ${
-            isLoginView ? "w-full md:w-1/2 p-8" : "w-full p-8"
+            isLoginView ? "w-full md:w-1/2 p-6" : "w-full p-6"
           }`}
         >
           <div className="max-w-md mx-auto w-full">
             {/* Header */}
             <div className="text-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800 font-serif mb-1">
+              <h2 className="text-xl font-bold text-gray-800 font-serif mb-1">
                 {isLoginView ? "Welcome Back" : "Create an Account"}
               </h2>
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-500 text-[10px]">
                 {isLoginView ? "Login to continue" : "Start exploring India"}
               </p>
             </div>
 
             {/* Toggle */}
             {isLoginView && (
-              <div className="flex bg-gray-100 p-1.5 rounded-full mb-6 relative">
+              <div className="flex bg-gray-100 p-1 rounded-full mb-4 relative">
                 <div
                   className={`absolute w-1/2 h-full rounded-full bg-white shadow-sm transition-all ${
                     isLoginView ? "left-0" : "left-1/2"
@@ -253,7 +222,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                     setLoginStep(1);
                     setError("");
                   }}
-                  className={`flex-1 py-3 text-sm font-medium z-10 ${
+                  className={`flex-1 py-2.5 text-sm font-medium z-10 ${
                     isLoginView ? "text-orange-600" : "text-gray-500"
                   }`}
                 >
@@ -265,7 +234,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                     setIsLoginView(false);
                     setError("");
                   }}
-                  className={`flex-1 py-3 text-sm font-medium z-10 ${
+                  className={`flex-1 py-2.5 text-sm font-medium z-10 ${
                     !isLoginView ? "text-orange-600" : "text-gray-500"
                   }`}
                 >
@@ -276,7 +245,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
 
             {/* Error */}
             {error && (
-              <div className="mb-5 p-3 bg-red-50 text-red-600 text-sm rounded-lg">
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-lg">
                 {error}
               </div>
             )}
@@ -284,10 +253,10 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
             {/* LOGIN FORM */}
             {isLoginView && (
               <div className="space-y-4">
-                {loginStep === 1 && (
+                {loginStep === 1 ? (
                   <form onSubmit={handleLoginStep1} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         Email / Mobile Number
                       </label>
                       <div className="relative">
@@ -297,7 +266,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                         />
                         <input
                           type="text"
-                          className="w-full pl-12 pr-3 py-3 border rounded-xl outline-none text-base"
+                          className="w-full pl-10 pr-3 py-2 border rounded-lg outline-none text-sm"
                           placeholder="Enter Email or Mobile"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
@@ -306,63 +275,23 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                       </div>
                     </div>
 
-                    <button
-                      disabled={isLoading}
-                      className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2 text-base"
-                    >
-                      {isLoading ? "Checking..." : "Continue"} <ArrowRight size={16} />
+                    <button className="w-full bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition-all flex items-center justify-center gap-2 text-sm">
+                      Continue <ArrowRight size={16} />
                     </button>
                   </form>
-                )}
-
-                {loginStep === 2 && (
-                  <form onSubmit={handleLoginStep2} className="space-y-4">
-                    <div className="flex justify-between mb-1">
-                      <label className="text-sm font-medium text-gray-700">Enter Password</label>
-                      <button
-                        type="button"
-                        onClick={() => { setLoginStep(1); setError(""); }}
-                        className="text-xs text-orange-600"
-                      >
-                        Change Email
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <Lock
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        size={16}
-                      />
-                      <input
-                        type="password"
-                        className="w-full pl-12 pr-3 py-3 border rounded-xl outline-none text-base"
-                        placeholder="Password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        autoFocus
-                      />
-                    </div>
-                    <button
-                      disabled={isLoading}
-                      className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2 text-base"
-                    >
-                      {isLoading ? "Sending OTP..." : "Verify & Send OTP"} <ArrowRight size={16} />
-                    </button>
-                  </form>
-                )}
-
-                {loginStep === 3 && (
-                  <form onSubmit={handleOtpVerify} className="space-y-4">
+                ) : (
+                  <form onSubmit={handleLoginFinal} className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-1">
-                        <label className="text-sm font-medium text-gray-700">
-                          Enter OTP
+                        <label className="text-xs font-medium text-gray-700">
+                          Password
                         </label>
                         <button
                           type="button"
-                          onClick={() => { setLoginStep(2); setOtp(""); setOtpMessage(""); }}
-                          className="text-xs text-orange-600"
+                          onClick={() => setLoginStep(1)}
+                          className="text-[10px] text-orange-600"
                         >
-                          Change Password
+                          Change Email
                         </button>
                       </div>
 
@@ -372,35 +301,21 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                           size={16}
                         />
                         <input
-                          type="text"
-                          className="w-full pl-12 pr-3 py-3 border rounded-xl outline-none text-base tracking-[0.3em]"
-                          placeholder="123456"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          maxLength={6}
+                          type="password"
+                          className="w-full pl-10 pr-3 py-2 border rounded-lg outline-none text-sm"
+                          placeholder="Password"
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
                           autoFocus
                         />
                       </div>
-                      {otpMessage && <p className="mt-2 text-sm text-green-600">{otpMessage}</p>}
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-gray-600">
-                      <button
-                        type="button"
-                        disabled={resendTimer > 0 || isLoading}
-                        className={`underline ${resendTimer > 0 ? "opacity-50" : "text-orange-600"}`}
-                        onClick={handleLoginStep2}
-                      >
-                        {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
-                      </button>
-                      <span className="text-gray-500">Secure verification</span>
                     </div>
 
                     <button
                       disabled={isLoading}
-                      className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-all text-base"
+                      className="w-full bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition-all text-sm"
                     >
-                      {isLoading ? "Verifying..." : "Verify & Login"}
+                      {isLoading ? "Verifying..." : "Login"}
                     </button>
                   </form>
                 )}
@@ -410,7 +325,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-gray-200" />
                   </div>
-                  <div className="relative flex justify-center text-xs">
+                  <div className="relative flex justify-center text-[10px]">
                     <span className="px-2 bg-white text-gray-500">OR</span>
                   </div>
                 </div>
@@ -419,7 +334,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full bg-white border border-gray-200 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-50 text-base"
+                  className="w-full bg-white border border-gray-200 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 text-sm"
                 >
                   <img
                     src="https://www.svgrepo.com/show/475656/google-color.svg"
@@ -428,7 +343,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   Sign in with Google
                 </button>
 
-                <p className="text-center text-xs mt-3">
+                <p className="text-center text-[10px] mt-2">
                   Don’t have an account?{" "}
                   <button
                     onClick={() => setIsLoginView(false)}
@@ -442,7 +357,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
 
             {/* SIGNUP FORM */}
             {!isLoginView && (
-              <form onSubmit={handleSignUp} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-3">
                 <div className="relative">
                   <User
                     className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -450,7 +365,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   />
                   <input
                     type="text"
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
+                    className="w-full pl-10 pr-4 py-2.5 border rounded-full text-sm"
                     placeholder="Full Name"
                     value={signupName}
                     onChange={(e) => setSignupName(e.target.value)}
@@ -464,7 +379,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   />
                   <input
                     type="text"
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
+                    className="w-full pl-10 pr-4 py-2.5 border rounded-full text-sm"
                     placeholder="Email / Phone"
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
@@ -478,7 +393,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   />
                   <input
                     type="password"
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
+                    className="w-full pl-10 pr-4 py-2.5 border rounded-full text-sm"
                     placeholder="Password"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
@@ -492,7 +407,7 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                   />
                   <input
                     type="password"
-                    className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
+                    className="w-full pl-10 pr-4 py-2.5 border rounded-full text-sm"
                     placeholder="Confirm Password"
                     value={signupConfirmPassword}
                     onChange={(e) => setSignupConfirmPassword(e.target.value)}
@@ -502,12 +417,12 @@ const Login: React.FC<LoginProps> = ({ onClose, isModal = false }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-orange-500 text-white py-3.5 rounded-full font-bold hover:bg-orange-600 transition text-base"
+                  className="w-full bg-orange-500 text-white py-3 rounded-full font-bold hover:bg-orange-600 transition"
                 >
                   {isLoading ? "Creating..." : "Sign Up"}
                 </button>
 
-                <p className="text-center text-sm mt-2">
+                <p className="text-center text-xs mt-1">
                   Already have an account?{" "}
                   <button
                     onClick={() => setIsLoginView(true)}

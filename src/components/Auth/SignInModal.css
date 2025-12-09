@@ -17,6 +17,7 @@
     position: fixed;
     inset: 0; /* Covers top, right, bottom, left */
     background-color: var(--overlay-bg);
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;

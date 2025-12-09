@@ -1,4 +1,4 @@
-import { Heart, Users, Mountain, Compass, Umbrella, Globe2 } from 'lucide-react';
+import { Compass, Globe2, Heart, Mountain, Umbrella, Users } from 'lucide-react';
 
 const categories = [
   { id: 'wellness', label: 'Wellness & Ayurveda', icon: Heart, description: 'Kerala retreats, Himalayan yoga domes, Ayurveda doctors on-call.' },
@@ -20,7 +20,7 @@ const TravelCategoriesSection = () => {
   return (
     <section id="categories" className="pt-16">
       <div className="text-center space-y-3">
-        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Choose your vibe</p>
+        <p className="text-base uppercase tracking-[0.28em] text-slate-600 font-semibold">Choose your vibe</p>
         <h2 className="text-3xl font-semibold text-[#0f172a]">Browse by travel categories</h2>
       </div>
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Globe, AlertCircle, Loader, Check } from 'lucide-react';
+import { AlertCircle, Check, Globe, Loader } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { languageApi } from '../services/api';
 
@@ -11,49 +11,78 @@ interface Language {
 
 const LanguageSelector: React.FC = () => {
   const { isAuthenticated, user, updateUser } = useAuth();
-  const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    user?.preferredLanguage || localStorage.getItem('language') || 'en'
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
+    i18n.changeLanguage(selectedLanguage);
+    localStorage.setItem('language', selectedLanguage);
+  }, [selectedLanguage, i18n]);
 
+  useEffect(() => {
     const fetchLanguages = async () => {
       setIsLoading(true);
-      const response = await languageApi.getAvailableLanguages();
-      if (response.success && response.data) {
-        const data = response.data as any;
-        setLanguages(data.languages || []);
-      } else {
-        setError((response as any).error || 'Failed to fetch languages');
-      }
+      try {
+        const response = await languageApi.getAvailableLanguages();
+        if (response.success && response.data) {
+          const data = response.data as any;
+          setLanguages(data.languages || []);
+        } else {
+          setError((response as any).error || 'Failed to fetch languages');
+        }
 
-      // Get user's current language
-      if (user?.preferredLanguage) {
-        setSelectedLanguage(user.preferredLanguage);
+        // If authenticated, refresh the language from the backend profile
+        if (isAuthenticated) {
+          const langRes = await languageApi.getUserLanguage();
+          if (langRes.success && langRes.data) {
+            const data = langRes.data as any;
+            if (data.language) {
+              setSelectedLanguage(data.language);
+              updateUser({ preferredLanguage: data.language });
+            }
+          }
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to fetch languages');
+      } finally {
+        if (user?.preferredLanguage) {
+          setSelectedLanguage(user.preferredLanguage);
+        } else {
+          const stored = localStorage.getItem('language');
+          if (stored) {
+            setSelectedLanguage(stored);
+          }
+        }
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     fetchLanguages();
-  }, [isAuthenticated, navigate, user?.preferredLanguage]);
+  }, [user?.preferredLanguage]);
 
   const handleLanguageChange = async (languageCode: string) => {
     setIsSaving(true);
-    const response = await languageApi.updateUserLanguage(languageCode);
-    if (response.success) {
-      setSelectedLanguage(languageCode);
-      updateUser({ preferredLanguage: languageCode });
-    } else {
-      setError((response as any).error || 'Failed to update language');
+    setError('');
+
+    // Change the UI language immediately
+    setSelectedLanguage(languageCode);
+
+    // Persist to backend only if the user is logged in; otherwise keep local change
+    if (isAuthenticated) {
+      const response = await languageApi.updateUserLanguage(languageCode);
+      if (response.success) {
+        updateUser({ preferredLanguage: languageCode });
+      } else {
+        setError((response as any).error || 'Failed to update language');
+      }
     }
+
     setIsSaving(false);
   };
 

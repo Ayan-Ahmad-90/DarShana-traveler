@@ -8,6 +8,16 @@ export interface LocationSuggestion {
 
 const DATA_URL = '/data/india-locations.json';
 
+// Minimal offline fallback so UI keeps working if the dataset is unreachable.
+const FALLBACK_LOCATIONS: LocationSuggestion[] = [
+  { id: 'delhi', name: 'New Delhi', state: 'Delhi', type: 'city', value: 'New Delhi, Delhi' },
+  { id: 'mumbai', name: 'Mumbai', state: 'Maharashtra', type: 'city', value: 'Mumbai, Maharashtra' },
+  { id: 'jaipur', name: 'Jaipur', state: 'Rajasthan', type: 'city', value: 'Jaipur, Rajasthan' },
+  { id: 'bengaluru', name: 'Bengaluru', state: 'Karnataka', type: 'city', value: 'Bengaluru, Karnataka' },
+  { id: 'kolkata', name: 'Kolkata', state: 'West Bengal', type: 'city', value: 'Kolkata, West Bengal' },
+  { id: 'goa', name: 'Goa', state: 'Goa', type: 'state', value: 'Goa' },
+];
+
 let cache: LocationSuggestion[] | null = null;
 let inflightRequest: Promise<LocationSuggestion[]> | null = null;
 
@@ -32,9 +42,9 @@ const loadLocations = async (): Promise<LocationSuggestion[]> => {
       return data;
     })
     .catch((error) => {
-      console.error('Failed to fetch location dataset:', error);
-      cache = [];
-      throw error;
+      console.error('Failed to fetch location dataset, using fallback:', error);
+      cache = FALLBACK_LOCATIONS;
+      return FALLBACK_LOCATIONS;
     })
     .finally(() => {
       inflightRequest = null;

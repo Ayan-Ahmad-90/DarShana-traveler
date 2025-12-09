@@ -1,6 +1,7 @@
+import { Loader2, MessageCircle, Send, Shield, X } from 'lucide-react';
 import { useState } from 'react';
-import { MessageCircle, X, Send, Loader2, Shield } from 'lucide-react';
 import { yatraShayakApi } from '../services/api';
+import { StyledCard } from './StyledCard';
 
 interface YatraShayakProps {
   onSafetyClick?: () => void;
@@ -10,7 +11,7 @@ const YatraShayak = ({ onSafetyClick }: YatraShayakProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [history, setHistory] = useState<{ type: 'user' | 'bot'; text: string }[]>([
-    { type: 'bot', text: 'Namaste! I am Yatra Shayak. How can I help you?' },
+    { type: 'bot', text: 'Namaste! I am Sarthi. How can I help you?' },
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -36,96 +37,105 @@ const YatraShayak = ({ onSafetyClick }: YatraShayakProps) => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-6">
-      {/* Chatbot Group (Hint + Button) */}
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
       {!isOpen && (
         <div className="flex flex-col items-end animate-float">
-          {/* Popup Hint */}
-          <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-primary-100 origin-bottom-right mb-2 relative mr-2">
-            <p className="text-sm font-medium text-primary-800">Need help? Ask me! 👋</p>
-            <div className="absolute -bottom-1 right-6 w-3 h-3 bg-white border-b border-r border-primary-100 transform rotate-45"></div>
-          </div>
+          <StyledCard
+            variant="glass"
+            className="py-3 px-4 text-sm border-white/15 mb-3 shadow-lg backdrop-blur-xl"
+          >
+            <p className="font-semibold text-white">Need help? Ask Sarthi 👋</p>
+            <p className="text-xs text-white/80">Routes, safety, bookings, culture</p>
+          </StyledCard>
 
-          {/* Chatbot Button */}
           <button
             onClick={() => setIsOpen(true)}
-            className="bg-primary-500 text-white p-4 rounded-full shadow-lg hover:bg-primary-600 transition transform hover:scale-110"
-            aria-label="Open AI Assistant"
-            title="Yatra Sahayak AI"
+            className="bg-gradient-to-r from-orange-500 to-amber-400 text-slate-900 p-4 rounded-full shadow-[0_12px_30px_-10px_rgba(255,140,0,0.8)] hover:translate-y-[-2px] transition-transform"
+            aria-label="Open Yatra Sahayak"
+            title="Sarthi AI"
           >
             <MessageCircle size={28} />
           </button>
         </div>
       )}
 
-      {/* Safety SOS Button */}
       {!isOpen && onSafetyClick && (
         <button
           onClick={onSafetyClick}
-          className="bg-red-600 hover:bg-red-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 flex items-center justify-center group animate-pulse"
+          className="bg-gradient-to-r from-red-500 to-rose-500 text-white p-4 rounded-full shadow-lg transition-transform hover:-translate-y-1 flex items-center justify-center group"
           title="Emergency Safety Dashboard"
         >
-          <Shield className="w-7 h-7" />
-          <span className="absolute right-full mr-3 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+          <Shield className="w-6 h-6" />
+          <span className="absolute right-full mr-3 bg-slate-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
             Safety SOS
           </span>
         </button>
       )}
 
       {isOpen && (
-        <div className="bg-neutral-50 rounded-2xl shadow-2xl w-80 sm:w-96 flex flex-col h-[500px] border border-neutral-200 mb-20 sm:mb-0">
-          <div className="bg-primary-500 text-white p-4 rounded-t-2xl flex justify-between items-center">
-            <div className="font-bold flex items-center gap-2">
-              <span>👨‍✈️</span> Saarthi
-            </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-primary-600 p-1 rounded">
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50">
-            {history.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] p-3 rounded-xl text-sm ${
-                    msg.type === 'user'
-                      ? 'bg-primary-500 text-white rounded-br-none'
-                      : 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-none shadow-sm'
-                  }`}
-                >
-                  {msg.text}
+        <div className="bg-gradient-to-b from-[#0d141f] via-[#0f1c28] to-[#0d141f] p-[1px] rounded-3xl shadow-2xl w-80 sm:w-96 h-[520px] border border-white/10 mb-20 sm:mb-0">
+          <div className="h-full bg-white/5 backdrop-blur-xl rounded-[28px] overflow-hidden flex flex-col border border-white/10">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-400 text-slate-900 p-4 flex justify-between items-center shadow-lg">
+              <div className="font-semibold flex items-center gap-2">
+                <span className="h-9 w-9 rounded-2xl bg-white text-orange-600 flex items-center justify-center shadow-sm">👨‍✈️</span>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-orange-900/80">Yatra Sahayak</p>
+                  <p className="text-sm">Sarthi • Travel help</p>
                 </div>
               </div>
-            ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-white border border-neutral-200 p-3 rounded-xl rounded-bl-none shadow-sm">
-                  <Loader2 className="animate-spin text-primary-500" size={16} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="p-3 border-t border-neutral-200 bg-white rounded-b-2xl">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder="Ask about safety, bookings..."
-                className="flex-1 border border-neutral-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500"
-              />
               <button
-                onClick={sendMessage}
-                disabled={loading}
-                className="bg-primary-500 text-white p-2 rounded-lg hover:bg-primary-600 disabled:opacity-50"
+                onClick={() => setIsOpen(false)}
+                className="hover:bg-white/30 p-1.5 rounded-lg"
+                aria-label="Close Sarthi chat"
               >
-                <Send size={18} />
+                <X size={18} />
               </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 text-white/90 bg-gradient-to-b from-white/5 via-white/0 to-white/5">
+              {history.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className={`max-w-[82%] px-4 py-3 rounded-2xl text-sm shadow ${
+                      msg.type === 'user'
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-400 text-slate-900 rounded-tr-none'
+                        : 'bg-white/10 border border-white/15 text-white rounded-tl-none backdrop-blur'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/10 border border-white/15 px-4 py-3 rounded-2xl rounded-tl-none shadow text-white flex items-center gap-2">
+                    <Loader2 className="animate-spin text-amber-200" size={16} />
+                    <span className="text-sm">Thinking...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-white/10 border-t border-white/10">
+              <div className="flex gap-2 bg-white/5 border border-white/15 rounded-2xl px-3 py-2 items-center focus-within:ring-2 focus-within:ring-orange-400/70 transition">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="Ask about safety, bookings..."
+                  className="flex-1 bg-transparent text-sm text-white placeholder:text-white/70 focus:outline-none"
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={loading}
+                  className="px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-400 text-slate-900 font-semibold shadow disabled:opacity-60 disabled:cursor-not-allowed"
+                  aria-label="Send message"
+                  title="Send message"
+                >
+                  <Send size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>

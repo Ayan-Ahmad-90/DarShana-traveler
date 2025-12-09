@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Calendar, Sparkles, Compass, Mountain, ArrowRight, Landmark } from 'lucide-react';
+import { ArrowRight, Calendar, Compass, Landmark, MapPin, Mountain, Sparkles } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const slides = [
   {
-    id: 1,
+    id: 0,
     title: "Explore India",
     subtitle: "Discover the timeless beauty and heritage of the subcontinent.",
     image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=2071&auto=format&fit=crop", // Taj Mahal
@@ -15,7 +15,7 @@ const slides = [
     color: "from-orange-500 to-amber-500"
   },
   {
-    id: 0,
+    id: 1,
     title: "Experience India Beyond Destinations",
     subtitle: "Proudly supporting Dekho Apna Desh & Digital India missions.",
     image: "https://images.unsplash.com/photo-1532375810709-75b1da00537c?q=80&w=2076&auto=format&fit=crop",
@@ -25,7 +25,18 @@ const slides = [
     color: "from-orange-600 to-green-600"
   },
   {
-    id: 2,
+  id: 2,
+  title: "Welcome to Lucknow – The City of Nawabs",
+  subtitle: "Experience Tehzeeb, timeless heritage, and the soul of Awadh.",
+  image:
+  "https://media.istockphoto.com/id/2167395972/photo/lucknow-uttar-pradesh-india-19-june-2022-rumi-darwaza-gate-in-islamic-architecture-built-by.jpg?s=612x612&w=0&k=20&c=AfV0BcNrODmU4uyd63gp_kQfYB66QOUkASN9YXvzufE=",
+  ctaLink: "#government-initiatives",
+  ctaText: "Explore Initiatives",
+  icon: Landmark,
+  color: "from-orange-600 to-green-600",
+  },
+  {
+    id: 3,
     title: "Festivals of India",
     subtitle: "Experience the vibrant colors, lights, and traditions.",
     image: "https://images.unsplash.com/photo-1514222134-b57cbb8ce073?q=80&w=1974&auto=format&fit=crop", // Holi/Colors
@@ -35,7 +46,7 @@ const slides = [
     color: "from-pink-500 to-rose-500"
   },
   {
-    id: 3,
+    id: 4,
     title: "Spiritual Journeys",
     subtitle: "Find inner peace in sacred spaces and ancient temples.",
     image: "https://tripcosmos.co/wp-content/uploads/2025/06/v5-1024x605.jpg.webp", // Varanasi
@@ -45,7 +56,7 @@ const slides = [
     color: "from-purple-500 to-indigo-500"
   },
   {
-    id: 4,
+    id: 5,
     title: "Travel Inspiration",
     subtitle: "Curated itineraries for your next unforgettable adventure.",
     image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?q=80&w=2070&auto=format&fit=crop", // Scenic
@@ -55,7 +66,7 @@ const slides = [
     color: "from-blue-500 to-cyan-500"
   },
   {
-    id: 5,
+    id: 6,
     title: "Nature & Adventure",
     subtitle: "From the majestic Himalayas to the serene backwaters.",
     image: "https://images.unsplash.com/photo-1506461883276-594a12b11cf3?q=80&w=2070&auto=format&fit=crop", // Nature
